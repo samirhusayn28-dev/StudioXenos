@@ -2,7 +2,7 @@ import React from "react";
 import Navbar from "./Navbar";
 import heroBg from "../assets/mountain.jpg";
 
-export default function Hero() {
+function Hero() {
   return (
     <section
       className="relative min-h-screen overflow-hidden flex items-center"
@@ -25,18 +25,23 @@ export default function Hero() {
             letterSpacing: "-0.025em"
           }}
         >
-          Unleash The Growth<br />Potential Of Your<br />Business
+          Unleash The Growth
+          <br />
+          Potential Of Your
+          <br />
+          Business
         </h1>
 
         <p
           className="text-blue-100 text-base leading-relaxed max-w-sm mb-9"
           style={{ fontFamily: "DM Sans, sans-serif" }}
         >
-          Unlock your business potential with bespoke Designs, Mobile Apps, and Websites crafted for growth.
+          Unlock your business potential with bespoke Designs, Mobile Apps,
+          and Websites crafted for growth.
         </p>
 
         <button
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-3.5 rounded-lg border-none cursor-pointer transition-all duration-200"
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-3.5 rounded-lg cursor-pointer transition-all duration-200"
           style={{
             fontFamily: "DM Sans, sans-serif",
             boxShadow: "0 0 32px rgba(59,130,246,0.45)"
@@ -48,3 +53,5 @@ export default function Hero() {
     </section>
   );
 }
+
+export default Hero;
