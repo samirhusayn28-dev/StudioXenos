@@ -1,6 +1,6 @@
 import React from "react";
 import Navbar from "./Navbar";
-import heroBg from "../assets/mountain.jpg";
+import heroBg from "../components/assets/mountain.jpg";
 
 function Hero() {
   return (
