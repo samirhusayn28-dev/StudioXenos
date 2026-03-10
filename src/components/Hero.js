@@ -7,7 +7,7 @@ function Hero() {
     <section
       className="relative min-h-screen overflow-hidden flex items-center"
       style={{
-        backgroundImage: "url(" + heroBg + ")",
+       backgroundImage: `url(${heroBg})`,
         backgroundSize: "cover",
         backgroundPosition: "center"
       }}
