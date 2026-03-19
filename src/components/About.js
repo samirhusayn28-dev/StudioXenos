@@ -19,7 +19,7 @@ export default function AboutUs() {
 
         <div>
           <h2
-            className="text-slate-900 font-extrabold text-4xl md:text-5xl mb-8"
+            className="text-slate-900 font-extrabold text-3xl sm:text-4xl md:text-5xl mb-8"
             style={{ fontFamily: "'Syne', sans-serif" }}
           >
             About Us
@@ -27,7 +27,7 @@ export default function AboutUs() {
           {paragraphs.map((text, i) => (
             <p
               key={i}
-              className="text-slate-700 text-base leading-7 mb-4 last:mb-0"
+              className="text-slate-700 text-sm sm:text-base leading-7 mb-4 last:mb-0"
               style={{ fontFamily: "'DM Sans', sans-serif" }}
             >
               {text}
@@ -35,20 +35,20 @@ export default function AboutUs() {
           ))}
         </div>
 
-        <div className="relative h-96 md:h-auto">
-  <img
-    src={leftImg}
-    alt="About 1"
-    className="rounded-2xl shadow-xl w-1/2 h-74 object-cover"
-    style={{ paddingRight: '8px' }}
-  />
-  <img
-    src={rightImg}
-    alt="About 2"
-    className="rounded-2xl shadow-xl w-1/2 h-74 object-cover absolute top-0 right-0 -translate-y-8"
-    style={{ paddingLeft: '8px' }}
-  />
-</div>
+        <div className="relative h-64 sm:h-80 md:h-96 mt-8 md:mt-0">
+          <img
+            src={leftImg}
+            alt="About 1"
+            className="rounded-2xl shadow-xl object-cover absolute left-0"
+            style={{ paddingRight: '8px', width: '48%', height: '85%' }}
+          />
+          <img
+            src={rightImg}
+            alt="About 2"
+            className="rounded-2xl shadow-xl object-cover absolute top-0 right-0 -translate-y-4 md:-translate-y-8"
+            style={{ paddingLeft: '8px', width: '48%', height: '85%' }}
+          />
+        </div>
 
       </div>
     </section>

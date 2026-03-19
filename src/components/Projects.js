@@ -29,28 +29,28 @@ export default function ProjectShowcase() {
   const next = () => setCurrent(current === projects.length - 1 ? 0 : current + 1);
 
   return (
-    <section className="py-20 px-6 md:px-16" style={{ background: '#6b7280' }}>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto items-center">
+    <section className="py-14 md:py-20 px-6 md:px-16" style={{ background: '#6b7280' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 max-w-5xl mx-auto items-center">
 
         <div className="rounded-2xl overflow-hidden shadow-2xl">
-          <img src={projects[current].img} alt={projects[current].title} className="w-full h-full object-cover" />
+          <img src={projects[current].img} alt={projects[current].title} className="w-full h-56 sm:h-72 md:h-full object-cover" />
         </div>
 
         <div className="text-center md:text-right">
           <h3
-            className="text-white text-3xl md:text-4xl mb-6"
+            className="text-white text-2xl sm:text-3xl md:text-4xl mb-4 md:mb-6"
             style={{ fontFamily: "'Dancing Script', cursive" }}
           >
             {projects[current].title}
           </h3>
           <p
-            className="text-white/80 text-base leading-7 mb-8"
+            className="text-white/80 text-sm sm:text-base leading-7 mb-6 md:mb-8"
             style={{ fontFamily: "'DM Sans', sans-serif" }}
           >
             {projects[current].desc}
           </p>
 
-          <div className="flex justify-center md:justify-end gap-3 mb-6">
+          <div className="flex justify-center md:justify-end gap-3 mb-5 md:mb-6">
             <button
               onClick={prev}
               className="w-9 h-9 rounded-full border border-white/40 text-white bg-transparent cursor-pointer hover:bg-white/20 transition-colors duration-200"
@@ -72,7 +72,7 @@ export default function ProjectShowcase() {
             Visit Site
           </button>
 
-          <div className="flex justify-center md:justify-end mt-20">
+          <div className="flex justify-center md:justify-end mt-10 md:mt-20">
             <GithubButton href="https://github.com/samirhusayn28-dev/StudioXenos" />
           </div>
         </div>

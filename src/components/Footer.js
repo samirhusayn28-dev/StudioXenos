@@ -17,21 +17,19 @@ export default function Footer() {
   return (
     <footer className="bg-neutral-900 pt-14 pb-7 px-6 md:px-16">
 
-      <div className="grid gap-10 max-w-6xl mx-auto mb-10" style={{ gridTemplateColumns: '1.8fr 1fr 1fr 1fr 0.9fr' }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 max-w-6xl mx-auto mb-10">
 
-        <div>
+        <div className="sm:col-span-2 md:col-span-1">
           <div className="mb-6">
             <img src={xLogo} alt="X Logo" className="w-8 h-8 object-contain" />
           </div>
 
           <div className="flex items-center gap-3 mb-3">
             <MailButton href="/" />
-          
           </div>
 
           <div className="flex items-center gap-3 mb-6">
             <WhatsAppButton href="/" />
-            
           </div>
 
           <p className="text-white font-bold text-sm mb-3" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -61,8 +59,8 @@ export default function Footer() {
           </div>
         ))}
 
-        <div className="flex items-center justify-center">
-          <img src={robot} alt="Robot" className="w-36 h-36 object-contain" />
+        <div className="flex items-center justify-center sm:justify-start md:justify-center">
+          <img src={robot} alt="Robot" className="w-28 h-28 md:w-36 md:h-36 object-contain" />
         </div>
 
       </div>

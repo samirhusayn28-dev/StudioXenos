@@ -12,13 +12,13 @@ const images = [img1, img2, img3, img4, img5, img6, img7, img8];
 
 export default function ArtGallery() {
   return (
-    <section style={{ background: 'linear-gradient(160deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' }} className="py-24 px-6 md:px-16">
+    <section style={{ background: 'linear-gradient(160deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' }} className="py-16 md:py-24 px-6 md:px-16">
 
-      <div className="text-center mb-12">
-        <h2 className="text-white font-extrabold text-4xl md:text-5xl mb-4" style={{ fontFamily: "'Syne', sans-serif" }}>
+      <div className="text-center mb-10 md:mb-12">
+        <h2 className="text-white font-extrabold text-3xl sm:text-4xl md:text-5xl mb-4" style={{ fontFamily: "'Syne', sans-serif" }}>
           Discover the World<br />of Art Around You !
         </h2>
-        <p className="text-blue-200 text-base max-w-md mx-auto mb-8" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+        <p className="text-blue-200 text-sm sm:text-base max-w-md mx-auto mb-8" style={{ fontFamily: "'DM Sans', sans-serif" }}>
           We specialize in creating custom designed logos, business cards, websites, mobile applications, and social media content.
         </p>
         <button className="bg-blue-500 text-white font-semibold px-7 py-3 rounded-lg border-none cursor-pointer" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -26,9 +26,9 @@ export default function ArtGallery() {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 max-w-4xl mx-auto">
         {images.map((img, i) => (
-          <div key={i} className="rounded-2xl overflow-hidden" style={{ height: '160px' }}>
+          <div key={i} className="rounded-xl md:rounded-2xl overflow-hidden" style={{ height: '120px' }}>
             <img src={img} alt={`Art ${i + 1}`} className="w-full h-full object-cover" />
           </div>
         ))}
