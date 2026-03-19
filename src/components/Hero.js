@@ -1,45 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Navbar from "./Navbar";
-import mountain0 from "../components/assets/mountain.jpg";
-import mountain1 from "../components/assets/mountain1.jpg";
-import mountain2 from "../components/assets/mountain2.jpg";
-
-const images = [mountain0, mountain1, mountain2];
+import bgVideo from "../components/assets/background.mp4";
 
 function Hero() {
-  const [current, setCurrent] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrent(prev => (prev + 1) % images.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <section className="relative min-h-screen overflow-hidden flex items-center">
 
-      <div
-        className="absolute inset-0 flex ease-in-out"
-        style={{
-          transform: `translateX(-${current * 100}%)`,
-          transitionDuration: "2000ms"
-        }}
-      >
-        {images.map((img, i) => (
-          <div
-            key={i}
-            className="min-w-full h-full"
-            style={{
-              backgroundImage: `url(${img})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
-        ))}
-      </div>
+      <video
+        className="absolute inset-0 w-full h-full object-cover"
+        src={bgVideo}
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
 
       <div className="absolute inset-0 bg-black opacity-50" />
+
       <Navbar />
 
       <div className="relative z-10 px-6 sm:px-10 md:px-16 max-w-2xl mt-24 w-full">
@@ -61,6 +38,7 @@ function Hero() {
           Unlock your business potential with bespoke Designs, Mobile Apps,
           and Websites crafted for growth.
         </p>
+
         <button
           className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 sm:px-8 py-3 sm:py-3.5 rounded-lg cursor-pointer transition-all duration-200 text-sm sm:text-base"
           style={{
@@ -70,17 +48,6 @@ function Hero() {
         >
           Request a Quote
         </button>
-        <div className="flex gap-2 mt-8">
-          {images.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrent(i)}
-              className={`h-2 rounded-full transition-all duration-300 border-none cursor-pointer ${
-                i === current ? "bg-white w-6" : "bg-white/40 w-2"
-              }`}
-            />
-          ))}
-        </div>
       </div>
 
     </section>

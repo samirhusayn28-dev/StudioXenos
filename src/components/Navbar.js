@@ -19,10 +19,9 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="absolute top-0 left-0 right-0 z-50 px-6 md:px-16 py-5">
-
+<nav className="fixed top-0 left-0 right-0 z-50 px-6 md:px-16 py-1" style={{ background: '#000000' }}>
       <div className="flex items-center justify-between">
-        <img src={logo} alt="StudioX" className="h-12 md:h-16 w-auto" />
+        <img src={logo} alt="StudioX" className="h-12 md:h-20 w-auto" />
         <ul className="hidden md:flex gap-9 list-none m-0 p-0">
           {navLinks.map(({ label, id }) => (
             <li key={id}>
