@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import logo from '../components/assets/StudioX.png';
 
 const navLinks = [
@@ -9,8 +9,204 @@ const navLinks = [
   { label: 'Contact',     id: 'contact'     },
 ];
 
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+  /* NAV LINKS */
+  .nav-link {
+    position: relative;
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    transition: color 0.25s;
+    font-family: 'DM Sans', sans-serif;
+    border-radius: 999px;
+    z-index: 1;
+  }
+
+  /* Remove ALL underline effects — completely gone */
+  .nav-link::after,
+  .nav-link::before {
+    display: none !important;
+  }
+
+  .nav-link:hover {
+    color: #fff;
+  }
+
+  /* Nav links wrapper — relative so traveling pill lives inside */
+  .nav-links-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 4px 0;
+  }
+
+  /* The traveling glassmorphism pill indicator */
+  .nav-pill-indicator {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: calc(100% - 4px);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+    pointer-events: none;
+    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.25s ease;
+    z-index: 0;
+  }
+
+  /* PILL BUTTON — glassmorphism */
+  .book-btn {
+    font-family: 'Poppins', sans-serif;
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    padding: 10px 26px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.25s ease,
+                box-shadow 0.25s ease,
+                background 0.3s ease,
+                border-color 0.3s ease,
+                color 0.3s ease;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+
+  .book-btn span {
+    position: relative;
+    z-index: 1;
+  }
+
+  .book-btn:hover {
+    transform: scale(1.05);
+    background: rgba(49, 92, 253, 0.55);
+    border-color: rgba(99, 132, 255, 0.55);
+    color: #fff;
+    box-shadow: 0 6px 24px rgba(49, 92, 253, 0.40),
+                inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+
+  .book-btn .txt-default,
+  .book-btn .txt-hover {
+    display: block;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .book-btn .txt-hover {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(100%);
+    opacity: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  .book-btn:hover .txt-default {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  .book-btn:hover .txt-hover {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* PILL NAVBAR WRAPPER */
+  .pill-nav-outer {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    width: calc(100% - 80px);
+    max-width: 1100px;
+    transition: top 0.35s ease;
+  }
+
+  .pill-nav-inner {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    padding: 0 24px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
+    transition: height 0.35s ease, padding 0.35s ease;
+  }
+
+  /* MOBILE MENU */
+  .mobile-menu-pill {
+    margin-top: 10px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
+    padding: 20px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+`;
+
 export default function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen]   = useState(false);
+  const [scrolled, setScrolled]   = useState(false);
+  const [hoveredId, setHoveredId] = useState(null);
+  const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 });
+  const linkRefs   = useRef({});
+  const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Move pill to hovered link
+  useEffect(() => {
+    if (hoveredId && linkRefs.current[hoveredId] && wrapperRef.current) {
+      const linkEl      = linkRefs.current[hoveredId];
+      const wrapperEl   = wrapperRef.current;
+      const linkRect    = linkEl.getBoundingClientRect();
+      const wrapperRect = wrapperEl.getBoundingClientRect();
+      setPillStyle({
+        left:    linkRect.left - wrapperRect.left,
+        width:   linkRect.width,
+        opacity: 1,
+      });
+    } else {
+      setPillStyle(prev => ({ ...prev, opacity: 0 }));
+    }
+  }, [hoveredId]);
 
   const scrollTo = (id) => {
     const el = document.getElementById(id);
@@ -19,61 +215,99 @@ export default function Navbar() {
   };
 
   return (
-<nav className="fixed top-0 left-0 right-0 z-50 px-6 md:px-16 py-1" style={{ background: '#000000' }}>
-      <div className="flex items-center justify-between">
-        <img src={logo} alt="StudioX" className="h-12 md:h-20 w-auto" />
-        <ul className="hidden md:flex gap-9 list-none m-0 p-0">
+    <div className="pill-nav-outer" style={{ top: scrolled ? '12px' : '20px' }}>
+      <style>{styles}</style>
+
+      <div
+        className="pill-nav-inner"
+        style={{ height: scrolled ? '56px' : '68px' }}
+      >
+        {/* Logo */}
+        <img
+          src={logo}
+          alt="StudioX"
+          style={{
+            height: scrolled ? '26px' : '34px',
+            transition: 'height 0.35s ease',
+          }}
+        />
+
+        {/* Desktop Nav Links — centered, with traveling pill */}
+        <ul
+          ref={wrapperRef}
+          className="hidden md:flex nav-links-wrapper"
+          style={{ listStyle: 'none', margin: 0 }}
+          onMouseLeave={() => setHoveredId(null)}
+        >
+          {/* Sliding glassmorphism pill */}
+          <div
+            className="nav-pill-indicator"
+            style={{
+              left:    pillStyle.left,
+              width:   pillStyle.width,
+              opacity: pillStyle.opacity,
+            }}
+          />
+
           {navLinks.map(({ label, id }) => (
-            <li key={id}>
+            <li key={id} style={{ position: 'relative', zIndex: 1 }}>
               <a
+                ref={el => { linkRefs.current[id] = el; }}
                 href={`#${id}`}
                 onClick={(e) => { e.preventDefault(); scrollTo(id); }}
-                className="text-white/70 no-underline text-sm tracking-wide cursor-pointer transition-all duration-200 hover:text-white hover:bg-white/30 hover:border-white px-3 py-1.5 rounded-md border border-transparent"
-                style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                className="nav-link"
+                onMouseEnter={() => setHoveredId(id)}
+              >
                 {label}
               </a>
             </li>
           ))}
         </ul>
 
-        <button
-          onClick={() => scrollTo('contact')}
-          className="hidden md:block bg-blue-500 hover:bg-blue-600 text-white font-semibold text-sm px-6 py-2.5 rounded-lg cursor-pointer transition-all duration-200 hover:-translate-y-px border-none"
-          style={{ fontFamily: "'DM Sans', sans-serif" }} >
-          Book a Call
-        </button>
+        {/* CTA Button — pill + glassmorphism */}
+        <div className="hidden md:flex" style={{ justifySelf: 'end' }}>
+          <button onClick={() => scrollTo('contact')} className="book-btn">
+            <span className="txt-default">Book a Call</span>
+            <span className="txt-hover">GO →</span>
+          </button>
+        </div>
 
+        {/* Mobile Hamburger */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden flex flex-col gap-1.5 bg-transparent border-none cursor-pointer p-1">
-          <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-          <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`} />
-          <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+          className="md:hidden flex flex-col gap-1.5"
+          style={{
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            gridColumn: '3',
+          }}
+        >
+          <span style={{ width: '24px', height: '1.5px', background: '#fff', display: 'block' }} />
+          <span style={{ width: '24px', height: '1.5px', background: '#fff', display: 'block' }} />
+          <span style={{ width: '24px', height: '1.5px', background: '#fff', display: 'block' }} />
         </button>
-
       </div>
+
+      {/* Mobile Dropdown */}
       {menuOpen && (
-        <div className="md:hidden mt-4 bg-black/80 rounded-xl px-6 py-4 flex flex-col gap-4">
+        <div className="md:hidden mobile-menu-pill">
           {navLinks.map(({ label, id }) => (
             <a
               key={id}
               href={`#${id}`}
               onClick={(e) => { e.preventDefault(); scrollTo(id); }}
-              className="text-white/80 hover:text-white no-underline text-sm tracking-wide cursor-pointer transition-colors duration-200"
-              style={{ fontFamily: "'DM Sans', sans-serif" }}
+              className="nav-link"
             >
               {label}
             </a>
           ))}
-          <button
-            onClick={() => scrollTo('contact')}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold text-sm px-6 py-2.5 rounded-lg cursor-pointer transition-all duration-200 border-none w-full"
-            style={{ fontFamily: "'DM Sans', sans-serif" }}
-          >
-            Book a Call
+          <button onClick={() => scrollTo('contact')} className="book-btn">
+            <span className="txt-default">Book a Call</span>
+            <span className="txt-hover">GO →</span>
           </button>
         </div>
       )}
-    </nav>
+    </div>
   );
 }

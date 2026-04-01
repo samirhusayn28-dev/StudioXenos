@@ -1,55 +1,77 @@
-import React, { useState } from "react";
+import React from "react";
 import Navbar from "./Navbar";
-import bgVideo from "../components/assets/background.mp4";
+import Robot3D from "../components/Robot3D";
 
 function Hero() {
   return (
-    <section className="relative min-h-screen overflow-hidden flex items-center">
-
-      <video
-        className="absolute inset-0 w-full h-full object-cover"
-        src={bgVideo}
-        autoPlay
-        loop
-        muted
-        playsInline
-      />
-
-      <div className="absolute inset-0 bg-black opacity-50" />
-
+    <section
+      className="relative min-h-screen flex items-center overflow-visible"
+      style={{
+        background:
+          "linear-gradient(135deg, #c9a882 0%, #e8d5b7 40%, #f5ebe0 70%, #ede0d4 100%)",
+      }}
+    >
       <Navbar />
 
-      <div className="relative z-10 px-6 sm:px-10 md:px-16 max-w-2xl mt-24 w-full">
-        <h1
-          className="text-white font-extrabold leading-tight mb-5 tracking-tight text-3xl sm:text-4xl md:text-5xl lg:text-6xl"
-          style={{ fontFamily: "Syne, sans-serif", letterSpacing: "-0.025em" }}
-        >
-          Unleash The Growth
-          <br />
-          Potential Of Your
-          <br />
-          Business
-        </h1>
+      {/* Background depth */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage:
+            "radial-gradient(ellipse at 70% 50%, rgba(201,168,130,0.25) 0%, transparent 60%)",
+          pointerEvents: "none",
+        }}
+      />
 
-        <p
-          className="text-blue-100 text-sm sm:text-base leading-relaxed max-w-xs sm:max-w-sm mb-9"
-          style={{ fontFamily: "DM Sans, sans-serif" }}
-        >
-          Unlock your business potential with bespoke Designs, Mobile Apps,
-          and Websites crafted for growth.
-        </p>
+      {/* MAIN */}
+      <div className="relative w-full flex items-center justify-between px-6 md:px-16">
+        
+        {/* LEFT TEXT */}
+        <div className="max-w-xl z-10">
+          <h1
+            className="font-extrabold leading-tight mb-5 text-4xl md:text-6xl"
+            style={{ color: "#3b2a1a" }}
+          >
+            Unleash The Growth
+            <br />
+            Potential Of Your
+            <br />
+            Business
+          </h1>
 
-        <button
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 sm:px-8 py-3 sm:py-3.5 rounded-lg cursor-pointer transition-all duration-200 text-sm sm:text-base"
+          <p className="mb-8 max-w-sm" style={{ color: "#6b4c31" }}>
+            Unlock your business potential with bespoke Designs, Mobile Apps,
+            and Websites crafted for growth.
+          </p>
+
+          <button
+            className="px-8 py-3 rounded-lg font-semibold"
+            style={{
+              background: "#3b2a1a",
+              color: "#f5ebe0",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            Request a Quote
+          </button>
+        </div>
+
+        {/* RIGHT ROBOT */}
+        <div
           style={{
-            fontFamily: "DM Sans, sans-serif",
-            boxShadow: "0 0 32px rgba(59,130,246,0.45)",
+            position: "absolute",
+            right: "0",
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: "60%",
+            height: "100vh",
           }}
         >
-          Request a Quote
-        </button>
+          <Robot3D />
+        </div>
       </div>
-
     </section>
   );
 }
