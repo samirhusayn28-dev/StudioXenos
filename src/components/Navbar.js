@@ -12,10 +12,9 @@ const navLinks = [
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
-  /* NAV LINKS */
   .nav-link {
     position: relative;
-    color: rgba(255,255,255,0.6);
+    color: rgb(255, 255, 255);
     text-decoration: none;
     font-size: 0.8rem;
     letter-spacing: 0.08em;
@@ -27,7 +26,6 @@ const styles = `
     z-index: 1;
   }
 
-  /* Remove ALL underline effects — completely gone */
   .nav-link::after,
   .nav-link::before {
     display: none !important;
@@ -37,7 +35,6 @@ const styles = `
     color: #fff;
   }
 
-  /* Nav links wrapper — relative so traveling pill lives inside */
   .nav-links-wrapper {
     position: relative;
     display: flex;
@@ -47,7 +44,6 @@ const styles = `
     padding: 4px 0;
   }
 
-  /* The traveling glassmorphism pill indicator */
   .nav-pill-indicator {
     position: absolute;
     top: 50%;
@@ -66,7 +62,6 @@ const styles = `
     z-index: 0;
   }
 
-  /* PILL BUTTON — glassmorphism */
   .book-btn {
     font-family: 'Poppins', sans-serif;
     position: relative;
@@ -135,10 +130,9 @@ const styles = `
     opacity: 1;
   }
 
-  /* PILL NAVBAR WRAPPER */
   .pill-nav-outer {
     position: fixed;
-    top: 20px;
+    top: 70px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 50;
@@ -161,7 +155,6 @@ const styles = `
     transition: height 0.35s ease, padding 0.35s ease;
   }
 
-  /* MOBILE MENU */
   .mobile-menu-pill {
     margin-top: 10px;
     border-radius: 24px;
@@ -191,7 +184,6 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Move pill to hovered link
   useEffect(() => {
     if (hoveredId && linkRefs.current[hoveredId] && wrapperRef.current) {
       const linkEl      = linkRefs.current[hoveredId];
@@ -215,14 +207,13 @@ export default function Navbar() {
   };
 
   return (
-    <div className="pill-nav-outer" style={{ top: scrolled ? '12px' : '20px' }}>
+    <div className="pill-nav-outer" style={{ top: scrolled ? '45px' : '70px' }}>
       <style>{styles}</style>
 
       <div
         className="pill-nav-inner"
         style={{ height: scrolled ? '56px' : '68px' }}
       >
-        {/* Logo */}
         <img
           src={logo}
           alt="StudioX"
@@ -232,14 +223,12 @@ export default function Navbar() {
           }}
         />
 
-        {/* Desktop Nav Links — centered, with traveling pill */}
         <ul
           ref={wrapperRef}
           className="hidden md:flex nav-links-wrapper"
           style={{ listStyle: 'none', margin: 0 }}
           onMouseLeave={() => setHoveredId(null)}
         >
-          {/* Sliding glassmorphism pill */}
           <div
             className="nav-pill-indicator"
             style={{
@@ -264,15 +253,13 @@ export default function Navbar() {
           ))}
         </ul>
 
-        {/* CTA Button — pill + glassmorphism */}
         <div className="hidden md:flex" style={{ justifySelf: 'end' }}>
           <button onClick={() => scrollTo('contact')} className="book-btn">
             <span className="txt-default">Book a Call</span>
-            <span className="txt-hover">GO →</span>
+            <span className="txt-hover">GO</span>
           </button>
         </div>
 
-        {/* Mobile Hamburger */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden flex flex-col gap-1.5"
@@ -289,7 +276,6 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Dropdown */}
       {menuOpen && (
         <div className="md:hidden mobile-menu-pill">
           {navLinks.map(({ label, id }) => (

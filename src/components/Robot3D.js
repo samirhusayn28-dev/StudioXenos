@@ -16,35 +16,29 @@ function Model({ mouseX, mouseY, shadowRef }) {
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
 
-    smoothX.current = lerp(smoothX.current, mouseX.current, 0.06);
-    smoothY.current = lerp(smoothY.current, mouseY.current, 0.06);
+    smoothX.current = lerp(smoothX.current, mouseX.current, 0.04);
+    smoothY.current = lerp(smoothY.current, mouseY.current, 0.04);
 
-    // 🔥 RIGHT + CLEARLY DOWN
-    groupRef.current.position.x = 0.8 + smoothX.current * 0.8;
+    const floatY = Math.sin(t * 0.9) * 0.18;
 
-    groupRef.current.position.y =
-      Math.sin(t) * 0.1 - 1.1 + smoothY.current * 0.4; // 👈 strong down
+    groupRef.current.position.x = smoothX.current * 0.6;
+    groupRef.current.position.y = floatY - 1.3 + smoothY.current * 0.1;
 
     groupRef.current.rotation.y =
-      Math.sin(t * 0.4) * 0.25 + smoothX.current * 0.3;
-    groupRef.current.rotation.x = smoothY.current * 0.15;
+      Math.sin(t * 0.35) * 0.2 + smoothX.current * 0.35;
+    groupRef.current.rotation.x = smoothY.current * 0.1;
+    groupRef.current.rotation.z = Math.sin(t * 0.5) * 0.03;
 
-    // 🔥 SHADOW
     if (shadowRef.current) {
-      const floatY = Math.sin(t) * 0.1;
-      const totalY = smoothY.current * 0.4 + floatY;
+      const xOffset = smoothX.current * 38;
+      const yOffset = -floatY * 14;
 
-      const xOffset = smoothX.current * 60;
-      const yOffset = totalY * 20;
+      const scale = Math.max(0.55, 1 - (floatY + 0.18) * 0.35);
+      const blur = Math.max(12, 22 + floatY * 14);
+      const opacity = Math.max(0.5, 0.7 - floatY * 0.2);
 
-      const scale = Math.max(0.7, 1 - totalY * 0.3);
-      const blur = Math.max(12, 20 + totalY * 12);
-      const opacity = Math.max(0.2, 0.45 - totalY * 0.05);
-
-      shadowRef.current.style.transform = `
-        translate(calc(-50% + ${xOffset}px), ${yOffset}px)
-      `;
-      shadowRef.current.style.width = `${260 * scale}px`;
+      shadowRef.current.style.transform = `translate(calc(-50% + ${xOffset}px), ${yOffset}px)`;
+      shadowRef.current.style.width = `${320 * scale}px`;
       shadowRef.current.style.filter = `blur(${blur}px)`;
       shadowRef.current.style.opacity = opacity;
     }
@@ -52,7 +46,7 @@ function Model({ mouseX, mouseY, shadowRef }) {
 
   return (
     <group ref={groupRef}>
-      <primitive object={scene} scale={1.8} />
+      <primitive object={scene} scale={1.6} />
     </group>
   );
 }
@@ -66,7 +60,6 @@ export default function Robot3D() {
   useEffect(() => {
     const handleMouseMove = (e) => {
       const rect = containerRef.current.getBoundingClientRect();
-
       mouseX.current = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       mouseY.current = -((e.clientY - rect.top) / rect.height) * 2 + 1;
     };
@@ -77,7 +70,6 @@ export default function Robot3D() {
     };
 
     const el = containerRef.current;
-
     el.addEventListener("mousemove", handleMouseMove);
     el.addEventListener("mouseleave", reset);
 
@@ -90,31 +82,36 @@ export default function Robot3D() {
   return (
     <div
       ref={containerRef}
-      style={{ width: "100%", height: "100%", position: "relative" }}
+      style={{
+        width: "100%",
+        height: "100%",
+        position: "relative",
+        overflow: "hidden", // 🔥 cut issue fix
+      }}
     >
       <Canvas
-        camera={{ position: [0, -1, 10], fov: 40 }} // 👈 camera bhi neeche
+        camera={{ position: [0, 0, 5.5], fov: 52 }}
         style={{ width: "100%", height: "100%" }}
       >
-        <ambientLight intensity={1.2} />
-        <directionalLight position={[5, 5, 5]} intensity={1.8} />
-        <directionalLight position={[-3, 2, -2]} intensity={0.5} />
-
+        <ambientLight intensity={1.3} />
+        <directionalLight position={[5, 8, 5]} intensity={2.0} />
+        <directionalLight position={[-4, 2, -3]} intensity={0.6} />
+        <pointLight position={[0, 4, 4]} intensity={0.4} />
         <Model mouseX={mouseX} mouseY={mouseY} shadowRef={shadowRef} />
       </Canvas>
 
-      {/* 🔥 SHADOW (LOWER + BIGGER) */}
+      {/* Shadow */}
       <div
         ref={shadowRef}
         style={{
           position: "absolute",
-          bottom: "3%", // 👈 ground ke paas
+          bottom: "8%", // 🔥 thora neeche kiya taake robot upar lage
           left: "50%",
           transform: "translateX(-50%)",
-          width: "260px",
-          height: "35px",
+          width: "280px",
+          height: "30px",
           background: "rgba(0, 0, 0, 0.6)",
-          filter: "blur(20px)",
+          filter: "blur(22px)",
           borderRadius: "50%",
           pointerEvents: "none",
         }}
