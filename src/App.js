@@ -1,25 +1,45 @@
-import './App.css';
-import Navbar from './components/Navbar';
+import React, { useState } from 'react';
+import emailjs from '@emailjs/browser';
+import StarBackground from './components/StarBackground';
 import Hero from './components/Hero';
 import Services from './components/services';
-import Art from './components/Art';
-import Projects from './components/Projects';
 import Work from './components/Work';
-import About from './components/About';
+import Projects from './components/Projects';
+import AboutUs from './components/About';
 import Footer from './components/Footer';
+import ChatBot from './components/ChatBot';
+import Loader from './components/Loader';
 
-function App() {
+// EmailJS initialize — app shuru hote hi
+emailjs.init('nBS7HLI2w7Zq5t3gI');
+
+export default function App() {
+  const [loaded, setLoaded] = useState(false);
+
   return (
-    <div>
-      <section id="home"><Hero /></section>
-      <section id="services"><Services /></section>
-      <section id="gallery"><Art /></section>
-      <section id="portfolio"><Projects /></section>
-      <section id="how-we-work"><Work /></section>
-      <section id="about"><About /></section>
-      <section id="contact"><Footer /></section>
-    </div>
+    <>
+      {/* Loader — jab tak loaded false hai tab tak dikhega */}
+      {!loaded && <Loader onComplete={() => setLoaded(true)} />}
+
+      {/* Main website — loader ke peeche render hota rehta hai */}
+      <div style={{
+        opacity: loaded ? 1 : 0,
+        transition: "opacity 0.5s ease",
+      }}>
+        {/* Fixed star/dust background — poore page pe */}
+        <StarBackground />
+
+        {/* All sections — zIndex 1 se upar taaki stars ke upar rahe */}
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <Hero />
+          <Services />
+          <Projects />
+          <Work />
+          <AboutUs />
+          <ChatBot />
+          <Footer />
+        </div>
+      </div>
+    </>
   );
 }
-
-export default App;

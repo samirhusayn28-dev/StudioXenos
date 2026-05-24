@@ -1,5 +1,5 @@
 import { Camera, Mesh, Plane, Program, Renderer, Texture, Transform } from 'ogl';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function debounce(func, wait) {
   let timeout;
@@ -13,101 +13,8 @@ function lerp(p1, p2, t) {
   return p1 + (p2 - p1) * t;
 }
 
-function autoBind(instance) {
-  const proto = Object.getPrototypeOf(instance);
-  Object.getOwnPropertyNames(proto).forEach(key => {
-    if (key !== 'constructor' && typeof instance[key] === 'function') {
-      instance[key] = instance[key].bind(instance);
-    }
-  });
-}
-
-function createTextTexture(gl, text, font = 'bold 30px monospace', color = 'black') {
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-  context.font = font;
-  const metrics = context.measureText(text);
-  const textWidth = Math.ceil(metrics.width);
-  const textHeight = Math.ceil(parseInt(font, 10) * 1.2);
-  canvas.width = textWidth + 20;
-  canvas.height = textHeight + 20;
-  context.font = font;
-  context.fillStyle = color;
-  context.textBaseline = 'middle';
-  context.textAlign = 'center';
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  context.fillText(text, canvas.width / 2, canvas.height / 2);
-  const texture = new Texture(gl, { generateMipmaps: false });
-  texture.image = canvas;
-  return { texture, width: canvas.width, height: canvas.height };
-}
-
-class Title {
-  constructor({ gl, plane, renderer, text, textColor = '#545050', font = '30px sans-serif' }) {
-    autoBind(this);
-    this.gl = gl;
-    this.plane = plane;
-    this.renderer = renderer;
-    this.text = text;
-    this.textColor = textColor;
-    this.font = font;
-    this.createMesh();
-  }
-  createMesh() {
-    const { texture, width, height } = createTextTexture(this.gl, this.text, this.font, this.textColor);
-    const geometry = new Plane(this.gl);
-    const program = new Program(this.gl, {
-      vertex: `
-        attribute vec3 position;
-        attribute vec2 uv;
-        uniform mat4 modelViewMatrix;
-        uniform mat4 projectionMatrix;
-        varying vec2 vUv;
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragment: `
-        precision highp float;
-        uniform sampler2D tMap;
-        varying vec2 vUv;
-        void main() {
-          vec4 color = texture2D(tMap, vUv);
-          if (color.a < 0.1) discard;
-          gl_FragColor = color;
-        }
-      `,
-      uniforms: { tMap: { value: texture } },
-      transparent: true
-    });
-    this.mesh = new Mesh(this.gl, { geometry, program });
-    const aspect = width / height;
-    const textHeight = this.plane.scale.y * 0.15;
-    const textWidth = textHeight * aspect;
-    this.mesh.scale.set(textWidth, textHeight, 1);
-    this.mesh.position.y = -this.plane.scale.y * 0.5 - textHeight * 0.5 - 0.05;
-    this.mesh.setParent(this.plane);
-  }
-}
-
 class Media {
-  constructor({
-    geometry,
-    gl,
-    image,
-    index,
-    length,
-    renderer,
-    scene,
-    screen,
-    text,
-    viewport,
-    bend,
-    textColor,
-    borderRadius = 0,
-    font
-  }) {
+  constructor({ geometry, gl, image, index, length, renderer, scene, screen, viewport, bend, borderRadius = 0 }) {
     this.extra = 0;
     this.geometry = geometry;
     this.gl = gl;
@@ -117,21 +24,15 @@ class Media {
     this.renderer = renderer;
     this.scene = scene;
     this.screen = screen;
-    this.text = text;
     this.viewport = viewport;
     this.bend = bend;
-    this.textColor = textColor;
     this.borderRadius = borderRadius;
-    this.font = font;
     this.createShader();
     this.createMesh();
-    this.createTitle();
     this.onResize();
   }
   createShader() {
-    const texture = new Texture(this.gl, {
-      generateMipmaps: true
-    });
+    const texture = new Texture(this.gl, { generateMipmaps: true });
     this.program = new Program(this.gl, {
       depthTest: false,
       depthWrite: false,
@@ -158,12 +59,10 @@ class Media {
         uniform sampler2D tMap;
         uniform float uBorderRadius;
         varying vec2 vUv;
-        
         float roundedBoxSDF(vec2 p, vec2 b, float r) {
           vec2 d = abs(p) - b;
           return length(max(d, vec2(0.0))) + min(max(d.x, d.y), 0.0) - r;
         }
-        
         void main() {
           vec2 ratio = vec2(
             min((uPlaneSizes.x / uPlaneSizes.y) / (uImageSizes.x / uImageSizes.y), 1.0),
@@ -174,13 +73,8 @@ class Media {
             vUv.y * ratio.y + (1.0 - ratio.y) * 0.5
           );
           vec4 color = texture2D(tMap, uv);
-          
           float d = roundedBoxSDF(vUv - 0.5, vec2(0.5 - uBorderRadius), uBorderRadius);
-          
-          // Smooth antialiasing for edges
-          float edgeSmooth = 0.002;
-          float alpha = 1.0 - smoothstep(-edgeSmooth, edgeSmooth, d);
-          
+          float alpha = 1.0 - smoothstep(-0.002, 0.002, d);
           gl_FragColor = vec4(color.rgb, alpha);
         }
       `,
@@ -203,28 +97,23 @@ class Media {
     };
   }
   createMesh() {
-    this.plane = new Mesh(this.gl, {
-      geometry: this.geometry,
-      program: this.program
-    });
+    this.plane = new Mesh(this.gl, { geometry: this.geometry, program: this.program });
     this.plane.setParent(this.scene);
   }
-  createTitle() {
-    this.title = new Title({
-      gl: this.gl,
-      plane: this.plane,
-      renderer: this.renderer,
-      text: this.text,
-      textColor: this.textColor,
-      fontFamily: this.font
-    });
+  getScreenRect(camera, screen) {
+    const fov = (camera.fov * Math.PI) / 180;
+    const worldH = 2 * Math.tan(fov / 2) * camera.position.z;
+    const worldW = worldH * camera.aspect;
+    const cx = ((this.plane.position.x / (worldW / 2)) * 0.5 + 0.5) * screen.width;
+    const cy = ((-this.plane.position.y / (worldH / 2)) * 0.5 + 0.5) * screen.height;
+    const pw = (this.plane.scale.x / worldW) * screen.width;
+    const ph = (this.plane.scale.y / worldH) * screen.height;
+    return { cx, cy, pw, ph };
   }
   update(scroll, direction) {
     this.plane.position.x = this.x - scroll.current - this.extra;
-
     const x = this.plane.position.x;
     const H = this.viewport.width / 2;
-
     if (this.bend === 0) {
       this.plane.position.y = 0;
       this.plane.rotation.z = 0;
@@ -232,7 +121,6 @@ class Media {
       const B_abs = Math.abs(this.bend);
       const R = (H * H + B_abs * B_abs) / (2 * B_abs);
       const effectiveX = Math.min(Math.abs(x), H);
-
       const arc = R - Math.sqrt(R * R - effectiveX * effectiveX);
       if (this.bend > 0) {
         this.plane.position.y = -arc;
@@ -242,11 +130,9 @@ class Media {
         this.plane.rotation.z = Math.sign(x) * Math.asin(effectiveX / R);
       }
     }
-
     this.speed = scroll.current - scroll.last;
     this.program.uniforms.uTime.value += 0.04;
     this.program.uniforms.uSpeed.value = this.speed;
-
     const planeOffset = this.plane.scale.x / 2;
     const viewportOffset = this.viewport.width / 2;
     this.isBefore = this.plane.position.x + planeOffset < -viewportOffset;
@@ -280,38 +166,23 @@ class Media {
 }
 
 class App {
-  constructor(
-    container,
-    {
-      items,
-      bend,
-      textColor = '#ffffff',
-      borderRadius = 0,
-      font = 'bold 30px Figtree',
-      scrollSpeed = 2,
-      scrollEase = 0.05
-    } = {}
-  ) {
-    document.documentElement.classList.remove('no-js');
+  constructor(container, { items, bend, borderRadius = 0, scrollSpeed = 2, scrollEase = 0.05 } = {}) {
     this.container = container;
     this.scrollSpeed = scrollSpeed;
     this.scroll = { ease: scrollEase, current: 0, target: 0, last: 0 };
     this.onCheckDebounce = debounce(this.onCheck, 200);
+    this.items = items;
     this.createRenderer();
     this.createCamera();
     this.createScene();
     this.onResize();
     this.createGeometry();
-    this.createMedias(items, bend, textColor, borderRadius, font);
+    this.createMedias(items, bend, borderRadius);
     this.update();
     this.addEventListeners();
   }
   createRenderer() {
-    this.renderer = new Renderer({
-      alpha: true,
-      antialias: true,
-      dpr: Math.min(window.devicePixelRatio || 1, 2)
-    });
+    this.renderer = new Renderer({ alpha: true, antialias: true, dpr: Math.min(window.devicePixelRatio || 1, 2) });
     this.gl = this.renderer.gl;
     this.gl.clearColor(0, 0, 0, 0);
     this.container.appendChild(this.gl.canvas);
@@ -325,27 +196,10 @@ class App {
     this.scene = new Transform();
   }
   createGeometry() {
-    this.planeGeometry = new Plane(this.gl, {
-      heightSegments: 50,
-      widthSegments: 100
-    });
+    this.planeGeometry = new Plane(this.gl, { heightSegments: 50, widthSegments: 100 });
   }
-  createMedias(items, bend = 1, textColor, borderRadius, font) {
-    const defaultItems = [
-      { image: `https://picsum.photos/seed/1/800/600?grayscale`, text: 'Bridge' },
-      { image: `https://picsum.photos/seed/2/800/600?grayscale`, text: 'Desk Setup' },
-      { image: `https://picsum.photos/seed/3/800/600?grayscale`, text: 'Waterfall' },
-      { image: `https://picsum.photos/seed/4/800/600?grayscale`, text: 'Strawberries' },
-      { image: `https://picsum.photos/seed/5/800/600?grayscale`, text: 'Deep Diving' },
-      { image: `https://picsum.photos/seed/16/800/600?grayscale`, text: 'Train Track' },
-      { image: `https://picsum.photos/seed/17/800/600?grayscale`, text: 'Santorini' },
-      { image: `https://picsum.photos/seed/8/800/600?grayscale`, text: 'Blurry Lights' },
-      { image: `https://picsum.photos/seed/9/800/600?grayscale`, text: 'New York' },
-      { image: `https://picsum.photos/seed/10/800/600?grayscale`, text: 'Good Boy' },
-      { image: `https://picsum.photos/seed/21/800/600?grayscale`, text: 'Coastline' },
-      { image: `https://picsum.photos/seed/12/800/600?grayscale`, text: 'Palm Trees' }
-    ];
-    const galleryItems = items && items.length ? items : defaultItems;
+  createMedias(items, bend = 1, borderRadius) {
+    const galleryItems = items && items.length ? items : [];
     this.mediasImages = galleryItems.concat(galleryItems);
     this.medias = this.mediasImages.map((data, index) => {
       return new Media({
@@ -357,14 +211,39 @@ class App {
         renderer: this.renderer,
         scene: this.scene,
         screen: this.screen,
-        text: data.text,
         viewport: this.viewport,
         bend,
-        textColor,
         borderRadius,
-        font
       });
     });
+  }
+  getHoveredIndex(clientX, clientY) {
+    if (!this.medias) return -1;
+    const rect = this.container.getBoundingClientRect();
+    const ndcX = ((clientX - rect.left) / rect.width) * 2 - 1;
+    const ndcY = -((clientY - rect.top) / rect.height) * 2 + 1;
+    const fov = (this.camera.fov * Math.PI) / 180;
+    const worldH = 2 * Math.tan(fov / 2) * this.camera.position.z;
+    const worldW = worldH * this.camera.aspect;
+    const worldX = ndcX * (worldW / 2);
+    const worldY = ndcY * (worldH / 2);
+    for (let i = 0; i < this.medias.length; i++) {
+      const m = this.medias[i];
+      const px = m.plane.position.x;
+      const py = m.plane.position.y;
+      const hw = m.plane.scale.x / 2;
+      const hh = m.plane.scale.y / 2;
+      if (worldX >= px - hw && worldX <= px + hw && worldY >= py - hh && worldY <= py + hh) {
+        return i % (this.mediasImages.length / 2);
+      }
+    }
+    return -1;
+  }
+  getCardScreenRect(index) {
+    if (!this.medias) return null;
+    const m = this.medias[index];
+    if (!m) return null;
+    return m.getScreenRect(this.camera, this.screen);
   }
   onTouchDown(e) {
     this.isDown = true;
@@ -394,14 +273,9 @@ class App {
     this.scroll.target = this.scroll.target < 0 ? -item : item;
   }
   onResize() {
-    this.screen = {
-      width: this.container.clientWidth,
-      height: this.container.clientHeight
-    };
+    this.screen = { width: this.container.clientWidth, height: this.container.clientHeight };
     this.renderer.setSize(this.screen.width, this.screen.height);
-    this.camera.perspective({
-      aspect: this.screen.width / this.screen.height
-    });
+    this.camera.perspective({ aspect: this.screen.width / this.screen.height });
     const fov = (this.camera.fov * Math.PI) / 180;
     const height = 2 * Math.tan(fov / 2) * this.camera.position.z;
     const width = height * this.camera.aspect;
@@ -455,19 +329,207 @@ class App {
 
 export default function CircularGallery({
   items,
-  bend = 3,
-  textColor = '#ffffff',
+  bend = 1,
   borderRadius = 0.05,
-  font = 'bold 30px Figtree',
   scrollSpeed = 2,
   scrollEase = 0.05
 }) {
   const containerRef = useRef(null);
-  useEffect(() => {
-    const app = new App(containerRef.current, { items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase });
-    return () => {
-      app.destroy();
+  const appRef = useRef(null);
+  const holdTimerRef = useRef(null);
+  const animFrameRef = useRef(null);
+  const holdStartTimeRef = useRef(null);
+  const [modal, setModal] = useState(null);
+  const [progressState, setProgressState] = useState(null);
+
+  const HOLD_DURATION = 2000;
+
+  const cancelHold = () => {
+    if (holdTimerRef.current) { clearTimeout(holdTimerRef.current); holdTimerRef.current = null; }
+    if (animFrameRef.current) { cancelAnimationFrame(animFrameRef.current); animFrameRef.current = null; }
+    holdStartTimeRef.current = null;
+    setProgressState(null);
+  };
+
+  const startHold = (idx, rect) => {
+    cancelHold();
+    const { cx, cy, pw, ph } = rect;
+    holdStartTimeRef.current = performance.now();
+
+    const animate = (now) => {
+      const elapsed = now - holdStartTimeRef.current;
+      const pct = Math.min(elapsed / HOLD_DURATION, 1);
+      const scaleY = 0.6 + pct * 0.6;
+      const scaleX = 0.88 + pct * 0.12;
+      const glow = 0.2 + pct * 0.7;
+      const glowSize = 4 + pct * 16;
+      setProgressState({ cx, cy, pw, ph, pct, scaleY, scaleX, glow, glowSize });
+      if (pct < 1) {
+        animFrameRef.current = requestAnimationFrame(animate);
+      }
     };
-  }, [items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase]);
-  return <div className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing" ref={containerRef} />;
+    animFrameRef.current = requestAnimationFrame(animate);
+
+    holdTimerRef.current = setTimeout(() => {
+      const realIndex = idx % items.length;
+      setModal(items[realIndex]);
+      cancelHold();
+    }, HOLD_DURATION);
+  };
+
+  useEffect(() => {
+    appRef.current = new App(containerRef.current, {
+      items, bend, borderRadius, scrollSpeed, scrollEase,
+    });
+
+    const el = containerRef.current;
+    let startX = 0;
+
+    const onDown = (e) => {
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      startX = clientX;
+      const idx = appRef.current.getHoveredIndex(clientX, clientY);
+      if (idx !== -1) {
+        const rect = appRef.current.getCardScreenRect(idx);
+        if (rect) startHold(idx, rect);
+      }
+    };
+    const onMove = (e) => {
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      if (Math.abs(clientX - startX) > 6) cancelHold();
+    };
+    const onUp = () => cancelHold();
+
+    el.addEventListener('mousedown', onDown);
+    el.addEventListener('touchstart', onDown);
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchend', onUp);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove);
+
+    return () => {
+      appRef.current?.destroy();
+      cancelHold();
+      el.removeEventListener('mousedown', onDown);
+      el.removeEventListener('touchstart', onDown);
+      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('touchend', onUp);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('touchmove', onMove);
+    };
+  }, [items, bend, borderRadius, scrollSpeed, scrollEase]);
+
+  return (
+    <>
+      <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+        <div className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing" ref={containerRef} />
+
+        {progressState && (
+          <div
+            style={{
+              position: 'absolute',
+              left: progressState.cx - progressState.pw * 0.35,
+              top: progressState.cy + progressState.ph * 0.5 - 14,
+              width: progressState.pw * 0.7,
+              height: '7px',
+              background: 'rgba(255,255,255,0.12)',
+              borderRadius: '999px',
+              pointerEvents: 'none',
+              zIndex: 20,
+              overflow: 'hidden',
+              transform: `scaleY(${progressState.scaleY}) scaleX(${progressState.scaleX})`,
+              transformOrigin: 'center',
+              boxShadow: `0 0 ${progressState.glowSize}px rgba(0,122,255,${progressState.glow})`,
+            }}
+          >
+            <div
+              style={{
+                height: '100%',
+                width: `${progressState.pct * 100}%`,
+                background: 'linear-gradient(90deg, #007AFF 0%, #34AADC 100%)',
+                borderRadius: '999px',
+                boxShadow: `0 0 ${progressState.glowSize + 4}px rgba(0,122,255,${progressState.glow + 0.1})`,
+              }}
+            />
+          </div>
+        )}
+      </div>
+
+      {modal && (
+        <div
+          onClick={() => setModal(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(0,0,0,0.82)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+            animation: 'bgFadeIn 0.35s ease forwards',
+          }}
+        >
+          <style>{`
+            @keyframes bgFadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            @keyframes quickLook {
+              0%   { opacity: 0; transform: scale(0.82) translateY(40px); filter: blur(10px); }
+              45%  { opacity: 1; filter: blur(0px); }
+              70%  { transform: scale(1.03) translateY(-6px); }
+              100% { transform: scale(1) translateY(0); }
+            }
+            @keyframes descSlide {
+              from { opacity: 0; transform: translateY(14px); filter: blur(4px); }
+              to   { opacity: 1; transform: translateY(0); filter: blur(0px); }
+            }
+          `}</style>
+
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}
+          >
+            <img
+              src={modal.image}
+              alt={modal.text}
+              style={{
+                width: 'min(92vw, 920px)',
+                height: 'min(78vh, 680px)',
+                objectFit: 'cover',
+                borderRadius: '18px',
+                boxShadow: '0 48px 120px rgba(0,0,0,0.85), 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)',
+                animation: 'quickLook 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+              }}
+            />
+            <div
+              style={{
+                background: 'rgba(255,255,255,0.07)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: '16px',
+                padding: '16px 28px',
+                width: 'min(92vw, 920px)',
+                color: '#fff',
+                animation: 'descSlide 0.5s ease 0.25s both',
+              }}
+            >
+              <div style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 700, fontSize: '20px', marginBottom: '6px' }}>
+                {modal.text}
+              </div>
+              <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 300, fontSize: '14px', color: 'rgba(255,255,255,0.65)', lineHeight: 1.75 }}>
+                {modal.description}
+              </div>
+            </div>
+            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '12px', color: 'rgba(255,255,255,0.3)', animation: 'descSlide 0.4s ease 0.4s both' }}>
+              Click anywhere to close
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }

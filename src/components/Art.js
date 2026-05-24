@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import img1 from '../components/assets/Artimg1.jpg';
 import img2 from '../components/assets/Artimg2.jpg';
 import img3 from '../components/assets/Artimg3.jpg';
@@ -12,16 +12,20 @@ import CircularGallery from './CircularGallery';
 const artStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Outfit:wght@300;400;500&family=Poppins:wght@600;700;800&display=swap');
 
+  .art-section {
+var(--bg-primary);
+ }
+
   .art-explore-btn {
     font-family: 'Poppins', sans-serif;
     position: relative;
     overflow: hidden;
-    background: rgba(255,255,255,0.08);
+    background: var(--btn-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.20);
+    border: 1px solid var(--btn-border);
     border-radius: 999px;
-    color: rgba(255,255,255,0.85);
+    color: var(--btn-color);
     font-size: 0.82rem;
     font-weight: 600;
     letter-spacing: 0.07em;
@@ -65,21 +69,21 @@ const artStyles = `
 `;
 
 const galleryItems = [
-  { image: img1, text: 'Design' },
-  { image: img2, text: 'Branding' },
-  { image: img3, text: 'Web' },
-  { image: img4, text: 'Mobile' },
-  { image: img5, text: 'UI/UX' },
-  { image: img6, text: 'Motion' },
-  { image: img7, text: 'Identity' },
-  { image: img8, text: 'Creative' },
+  { image: img1, text: 'Design',   description: 'Crafting visual identities that speak louder than words. Every pixel placed with purpose and precision.' },
+  { image: img2, text: 'Branding', description: 'Building brands that leave a lasting impression. From strategy to execution, we shape your story.' },
+  { image: img3, text: 'Web',      description: 'Designing and developing web experiences that are fast, beautiful, and built to convert.' },
+  { image: img4, text: 'Mobile',   description: 'Intuitive mobile interfaces designed for real users. Smooth, accessible, and pixel-perfect.' },
+  { image: img5, text: 'UI/UX',    description: 'User-first design that balances aesthetics with function. We make complexity feel effortless.' },
+  { image: img6, text: 'Motion',   description: 'Bringing designs to life through animation and motion. Every transition tells part of your story.' },
+  { image: img7, text: 'Identity', description: 'Creating cohesive visual systems that define who you are across every touchpoint.' },
+  { image: img8, text: 'Creative', description: 'Bold ideas executed with craft. We push boundaries to make work that stands out in any crowd.' },
 ];
 
 export default function ArtGallery() {
   return (
     <section
+      className="art-section"
       style={{
-        background: 'linear-gradient(180deg, #ede0d4 0%, #c8a882 30%, #8b5e34 70%, #4a2e12 100%)',
         padding: '100px 0 0 0',
         fontFamily: "'Outfit', sans-serif",
         display: 'flex',
@@ -89,48 +93,41 @@ export default function ArtGallery() {
     >
       <style>{artStyles}</style>
 
-      {/* Heading */}
       <div style={{ textAlign: 'center', marginBottom: '72px', padding: '0 5%' }}>
-        <div
-          style={{
-            fontFamily: "'Barlow Condensed', sans-serif",
-            fontSize: 'clamp(52px, 7vw, 96px)',
-            fontWeight: 900,
-            textTransform: 'uppercase',
-            color: '#1a0e04',
-            lineHeight: 0.92,
-            letterSpacing: '-0.01em',
-          }}
-        >
+        <div style={{
+          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 'clamp(52px, 7vw, 96px)',
+          fontWeight: 900,
+          textTransform: 'uppercase',
+          color: 'var(--text-primary)',
+          lineHeight: 0.92,
+          letterSpacing: '-0.01em',
+        }}>
           Discover the World
         </div>
-        <div
-          style={{
-            fontFamily: "'Barlow Condensed', sans-serif",
-            fontSize: 'clamp(52px, 7vw, 96px)',
-            fontWeight: 900,
-            textTransform: 'uppercase',
-            lineHeight: 0.92,
-            letterSpacing: '-0.01em',
-            background: 'linear-gradient(110deg, #fff8f0 0%, #f5d9b0 50%, #e8c088 100%)',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            color: 'transparent',
-          }}
-        >
+        <div style={{
+          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 'clamp(52px, 7vw, 96px)',
+          fontWeight: 900,
+          textTransform: 'uppercase',
+          lineHeight: 0.92,
+          letterSpacing: '-0.01em',
+          background: 'linear-gradient(110deg, #fff8f0 0%, #f5d9b0 50%, #e8c088 100%)',
+          WebkitBackgroundClip: 'text',
+          backgroundClip: 'text',
+          color: 'transparent',
+        }}>
           of Art Around You
         </div>
-        <p
-          style={{
-            fontFamily: "'Outfit', sans-serif",
-            fontSize: '15px',
-            lineHeight: 1.85,
-            color: 'rgba(26,14,4,0.55)',
-            fontWeight: 300,
-            maxWidth: '420px',
-            margin: '28px auto 36px',
-          }}
-        >
+        <p style={{
+          fontFamily: "'Outfit', sans-serif",
+          fontSize: '15px',
+          lineHeight: 1.85,
+          color: 'var(--text-sub)',
+          fontWeight: 300,
+          maxWidth: '420px',
+          margin: '28px auto 36px',
+        }}>
           We specialize in creating custom designed logos, business cards,
           websites, mobile applications, and social media content.
         </p>
@@ -140,18 +137,15 @@ export default function ArtGallery() {
         </button>
       </div>
 
-      {/* CircularGallery */}
-      <div style={{ height: '600px', width: '100%', position: 'relative', }}>
+      <div style={{ height: '600px', width: '100%', position: 'relative' }}>
         <CircularGallery
           items={galleryItems}
           bend={1}
-          textColor="#ffffff"
           borderRadius={0.05}
           scrollSpeed={2}
           scrollEase={0.05}
         />
       </div>
-
     </section>
   );
 }
