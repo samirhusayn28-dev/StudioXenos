@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 import gsap from 'gsap';
 
@@ -53,6 +54,29 @@ const placeNow = (el, slot, skew) =>
     force3D: true,
   });
 
+// Returns scale + card-distance multiplier based on current width
+const getBreakpointConfig = (w) => {
+  if (w <= 480) {
+    return {
+      scale: 0.55,
+      transform: 'translateX(-25%) translateY(25%) scale(0.55)',
+      transformOrigin: 'bottom left',
+    };
+  }
+  if (w <= 768) {
+    return {
+      scale: 0.75,
+      transform: 'translateX(-25%) translateY(25%) scale(0.75)',
+      transformOrigin: 'bottom left',
+    };
+  }
+  return {
+    scale: 1,
+    transform: 'translateX(-5%) translateY(20%)',
+    transformOrigin: 'bottom left',
+  };
+};
+
 const CardSwap = ({
   width = 500,
   height = 400,
@@ -94,6 +118,19 @@ const CardSwap = ({
   const tlRef = useRef(null);
   const intervalRef = useRef();
   const container = useRef(null);
+
+  // Track window width so layout reacts live to resize, not just on mount
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1200
+  );
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const breakpoint = getBreakpointConfig(windowWidth);
 
   useEffect(() => {
     const total = refs.length;
@@ -196,25 +233,6 @@ const CardSwap = ({
       : child
   );
 
-  const getResponsiveStyle = () => {
-    if (typeof window === 'undefined') return {};
-    const w = window.innerWidth;
-    if (w <= 480)
-      return {
-        transform: 'translateX(-25%) translateY(25%) scale(0.55)',
-        transformOrigin: 'bottom left',
-      };
-    if (w <= 768)
-      return {
-        transform: 'translateX(-25%) translateY(25%) scale(0.75)',
-        transformOrigin: 'bottom left',
-      };
-    return {
-      transform: 'translateX(-5%) translateY(20%)',
-      transformOrigin: 'bottom left',
-    };
-  };
-
   return (
     <div
       ref={container}
@@ -226,7 +244,8 @@ const CardSwap = ({
         height,
         perspective: '900px',
         overflow: 'visible',
-        ...getResponsiveStyle(),
+        transform: breakpoint.transform,
+        transformOrigin: breakpoint.transformOrigin,
       }}
     >
       {rendered}

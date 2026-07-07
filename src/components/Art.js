@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import img1 from '../components/assets/Artimg1.jpg';
 import img2 from '../components/assets/Artimg2.jpg';
 import img3 from '../components/assets/Artimg3.jpg';
@@ -13,8 +13,9 @@ const artStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Outfit:wght@300;400;500&family=Poppins:wght@600;700;800&display=swap');
 
   .art-section {
-var(--bg-primary);
- }
+    background: var(--bg-primary);
+    transition: background 0.4s ease;
+  }
 
   .art-explore-btn {
     font-family: 'Poppins', sans-serif;
@@ -66,6 +67,69 @@ var(--bg-primary);
 
   .art-explore-btn:hover .txt-default { transform: translateY(-100%); opacity: 0; }
   .art-explore-btn:hover .txt-hover   { transform: translateY(0); opacity: 1; }
+
+  .art-heading-line {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 0.92;
+    letter-spacing: -0.01em;
+    font-size: clamp(38px, 7vw, 96px);
+  }
+
+  .art-heading-plain {
+    color: var(--text-primary);
+    transition: color 0.4s ease;
+  }
+
+  .art-heading-gold {
+    background: linear-gradient(110deg, #fff8f0 0%, #f5d9b0 50%, #e8c088 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .art-sub {
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    line-height: 1.85;
+    color: var(--text-sub);
+    font-weight: 300;
+    max-width: 420px;
+    margin: 28px auto 36px;
+    transition: color 0.4s ease;
+  }
+
+  .art-gallery-wrap {
+    height: 600px;
+    width: 100%;
+    position: relative;
+  }
+
+  /* Tablet */
+  @media (max-width: 1024px) and (min-width: 768px) {
+    .art-gallery-wrap { height: 480px; }
+    .art-sub { font-size: 14px; max-width: 360px; margin: 22px auto 30px; }
+  }
+
+  /* Mobile */
+  @media (max-width: 767px) {
+    .art-section { padding-top: 64px !important; }
+    .art-heading-line { font-size: clamp(32px, 10vw, 52px); }
+    .art-sub {
+      font-size: 13px;
+      line-height: 1.75;
+      max-width: 280px;
+      margin: 18px auto 24px;
+    }
+    .art-gallery-wrap { height: 320px; }
+    .art-header { margin-bottom: 40px !important; padding: 0 6% !important; }
+  }
+
+  @media (max-width: 380px) {
+    .art-gallery-wrap { height: 260px; }
+    .art-heading-line { font-size: 30px; }
+  }
 `;
 
 const galleryItems = [
@@ -80,11 +144,23 @@ const galleryItems = [
 ];
 
 export default function ArtGallery() {
+  const [bend, setBend] = useState(1);
+
+  useEffect(() => {
+    const updateBend = () => {
+      setBend(window.innerWidth <= 767 ? 0.4 : 1);
+    };
+    updateBend();
+    window.addEventListener('resize', updateBend);
+    return () => window.removeEventListener('resize', updateBend);
+  }, []);
+
   return (
     <section
+      id="art-gallery"
       className="art-section"
       style={{
-        padding: '100px 0 0 0',
+        paddingTop: '100px',
         fontFamily: "'Outfit', sans-serif",
         display: 'flex',
         flexDirection: 'column',
@@ -93,59 +169,40 @@ export default function ArtGallery() {
     >
       <style>{artStyles}</style>
 
-      <div style={{ textAlign: 'center', marginBottom: '72px', padding: '0 5%' }}>
-        <div style={{
-          fontFamily: "'Barlow Condensed', sans-serif",
-          fontSize: 'clamp(52px, 7vw, 96px)',
-          fontWeight: 900,
-          textTransform: 'uppercase',
-          color: 'var(--text-primary)',
-          lineHeight: 0.92,
-          letterSpacing: '-0.01em',
-        }}>
+      {/* Header */}
+      <div
+        className="art-header"
+        style={{ textAlign: 'center', marginBottom: '72px', padding: '0 5%' }}
+      >
+        <div className="art-heading-line art-heading-plain">
           Discover the World
         </div>
-        <div style={{
-          fontFamily: "'Barlow Condensed', sans-serif",
-          fontSize: 'clamp(52px, 7vw, 96px)',
-          fontWeight: 900,
-          textTransform: 'uppercase',
-          lineHeight: 0.92,
-          letterSpacing: '-0.01em',
-          background: 'linear-gradient(110deg, #fff8f0 0%, #f5d9b0 50%, #e8c088 100%)',
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          color: 'transparent',
-        }}>
+        <div className="art-heading-line art-heading-gold">
           of Art Around You
         </div>
-        <p style={{
-          fontFamily: "'Outfit', sans-serif",
-          fontSize: '15px',
-          lineHeight: 1.85,
-          color: 'var(--text-sub)',
-          fontWeight: 300,
-          maxWidth: '420px',
-          margin: '28px auto 36px',
-        }}>
+
+        <p className="art-sub">
           We specialize in creating custom designed logos, business cards,
           websites, mobile applications, and social media content.
         </p>
+
         <button className="art-explore-btn">
           <span className="txt-default">Explore</span>
           <span className="txt-hover">GO</span>
         </button>
       </div>
 
-      <div style={{ height: '600px', width: '100%', position: 'relative' }}>
+      {/* Gallery */}
+      <div className="art-gallery-wrap">
         <CircularGallery
           items={galleryItems}
-          bend={1}
+          bend={bend}
           borderRadius={0.05}
           scrollSpeed={2}
           scrollEase={0.05}
         />
       </div>
+
     </section>
   );
 }

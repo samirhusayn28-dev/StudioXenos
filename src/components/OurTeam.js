@@ -1,20 +1,9 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}
-
 import React, { useState, useEffect } from 'react';
 
 // Swap `team` array data later — layout & role icon are driven by `type` field.
 const team = [
   { name: 'SAMEER HUSSAIN', role: 'Fullstack Developer', type: 'dev',        facebook: '#', github: '#', linkedin: '#' },
-  { name: 'MUKHTAR SHAIKH', role: 'Backend Developer',   type: 'dev',        facebook: '#', github: '#', linkedin: '#' },
+  { name: 'MUKHTAR SHAIKH', role: 'Fullstack Developer',   type: 'dev',        facebook: '#', github: '#', linkedin: '#' },
   { name: 'MUSTAFA SHAIKH', role: 'UI/UX Designer',      type: 'design',     facebook: '#', github: '#', linkedin: '#' },
   { name: 'FURQAN HAIDER',  role: 'Marketing Lead',      type: 'marketing', facebook: '#', github: '#', linkedin: '#' },
 ];
@@ -41,41 +30,99 @@ function useAppTheme() {
   return theme;
 }
 
+// Self-contained palette so the section always looks right, whether or not
+// the host app's global CSS vars are present — values are picked to match
+// this project's existing --text-primary / --glass-bg / --card-shadow tokens.
+const PALETTE = {
+  dark: {
+    textPrimary: '#f0ebe4',
+    textSub: 'rgba(240,235,228,0.55)',
+    glassBg: 'rgba(255,255,255,0.09)',
+    glassBorder: 'rgba(255,255,255,0.20)',
+    cardShadow: 'rgba(0,0,0,0.55)',
+    cardShadowH: 'rgba(0,0,0,0.65)',
+    btnBg: 'rgba(255,255,255,0.07)',
+    btnBorder: 'rgba(255,255,255,0.18)',
+  },
+  light: {
+    textPrimary: '#1a0e04',
+    textSub: 'rgba(26,14,4,0.58)',
+    glassBg: 'rgba(255,253,248,0.65)',
+    glassBorder: 'rgba(255,255,255,0.9)',
+    cardShadow: 'rgba(120,90,50,0.14)',
+    cardShadowH: 'rgba(120,90,50,0.22)',
+    btnBg: 'rgba(12,43,78,0.06)',
+    btnBorder: 'rgba(12,43,78,0.14)',
+  },
+};
+
 const css = `
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=JetBrains+Mono:wght@500;700;800&display=swap');
 
   .ot-section {
-    --ot-accent-dev: #58dcb4;
-    --ot-accent-design: #b48cff;
-    --ot-accent-marketing: #ff965a;
     background: transparent;
     padding: 90px 24px;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
-  [data-theme="light"] .ot-section {
-    --ot-accent-dev: #0e9678;
-    --ot-accent-design: #7c3aed;
-    --ot-accent-marketing: #d9540a;
+  .ot-header {
+    text-align: center;
+    margin-bottom: 56px;
   }
 
-  .ot-heading {
-    text-align: center;
-    color: var(--text-sub, rgba(255,255,255,0.55));
-    font-size: 13px;
-    letter-spacing: 4px;
-    font-weight: 600;
+  .ot-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(196,122,48,0.10);
+    border: 1px solid rgba(196,122,48,0.25);
+    border-radius: 999px;
+    padding: 5px 14px 5px 10px;
+    margin-bottom: 20px;
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: #c47a30;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    margin-bottom: 10px;
+  }
+
+  .ot-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #c47a30;
+    flex-shrink: 0;
   }
 
   .ot-title {
-    text-align: center;
-    color: var(--text-primary, #ffffff);
-    font-size: 34px;
-    font-weight: 700;
-    margin: 0 0 56px 0;
-    letter-spacing: -0.5px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+    margin: 0;
+    font-size: clamp(44px, 6.5vw, 78px);
+  }
+
+  .ot-title-plain {
+    color: var(--ot-text-primary);
+    transition: color 0.4s ease;
+  }
+
+  .ot-title-gold {
+    background: linear-gradient(110deg, #c47a30 0%, #e8a84a 45%, #d4872e 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .ot-divider {
+    width: 48px;
+    height: 2px;
+    background: linear-gradient(90deg, #c47a30, #e8a84a);
+    border-radius: 2px;
+    margin: 20px auto 0;
   }
 
   .ot-wrap {
@@ -94,14 +141,14 @@ const css = `
     height: 300px;
     padding: 28px 20px;
     border-radius: 20px;
-    background: var(--glass-bg, rgba(255,255,255,0.08));
+    background: var(--ot-glass-bg);
     backdrop-filter: blur(34px) saturate(140%);
     -webkit-backdrop-filter: blur(34px) saturate(140%);
-    border: 1px solid var(--glass-border, rgba(255,255,255,0.18));
+    border: 1px solid var(--ot-glass-border);
     box-shadow:
-      0 25px 60px var(--card-shadow, rgba(0,0,0,0.5)),
-      0 10px 25px var(--card-shadow, rgba(0,0,0,0.4)),
-      inset 0 1px 0 rgba(255,255,255,0.15);
+      0 25px 60px var(--ot-card-shadow),
+      0 10px 25px var(--ot-card-shadow),
+      inset 0 1px 0 rgba(255,255,255,0.2);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -125,9 +172,9 @@ const css = `
   .card:hover {
     transform: translateY(-8px);
     box-shadow:
-      0 35px 70px var(--card-shadow-h, rgba(0,0,0,0.6)),
-      0 15px 30px var(--card-shadow-h, rgba(0,0,0,0.5)),
-      inset 0 1px 0 rgba(255,255,255,0.2);
+      0 35px 70px var(--ot-card-shadow-h),
+      0 15px 30px var(--ot-card-shadow-h),
+      inset 0 1px 0 rgba(255,255,255,0.25);
   }
 
   .card:hover::before {
@@ -185,8 +232,8 @@ const css = `
     justify-content: center;
     margin-bottom: 18px;
     flex-shrink: 0;
-    border: 1px solid var(--btn-border, rgba(255,255,255,0.18));
-    background: var(--btn-bg, rgba(255,255,255,0.07));
+    border: 1px solid var(--ot-btn-border);
+    background: var(--ot-btn-bg);
   }
 
   .card-dev .card-icon { color: var(--ot-accent-dev); }
@@ -207,7 +254,7 @@ const css = `
   }
 
   .card-name {
-    color: var(--text-primary, #ffffff);
+    color: var(--ot-text-primary);
     font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, Menlo, monospace;
     font-size: 15px;
     font-weight: 700;
@@ -226,7 +273,7 @@ const css = `
   .card-marketing .card-name { color: var(--ot-accent-marketing); font-size: 16px; font-weight: 800; }
 
   .card-role {
-    color: var(--text-sub, rgba(255,255,255,0.55));
+    color: var(--ot-text-sub);
     font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, Menlo, monospace;
     font-size: 11.5px;
     font-weight: 500;
@@ -237,7 +284,7 @@ const css = `
   .card-divider {
     width: 32px;
     height: 1px;
-    background: var(--glass-border, rgba(255,255,255,0.2));
+    background: var(--ot-glass-border);
     margin-bottom: 18px;
   }
 
@@ -253,7 +300,7 @@ const css = `
     border: none;
     background: transparent;
     cursor: pointer;
-    color: var(--text-primary, #ffffff);
+    color: var(--ot-text-primary);
     opacity: 0.55;
     transition: opacity 0.2s ease, transform 0.2s ease;
   }
@@ -375,12 +422,39 @@ function TeamCard({ member, theme }) {
 
 export default function OurTeam() {
   const theme = useAppTheme();
+  const p = PALETTE[theme] || PALETTE.dark;
+  const accents = ACCENT_COLOR[theme] || ACCENT_COLOR.dark;
+
+  const sectionVars = {
+    '--ot-text-primary': p.textPrimary,
+    '--ot-text-sub': p.textSub,
+    '--ot-glass-bg': p.glassBg,
+    '--ot-glass-border': p.glassBorder,
+    '--ot-card-shadow': p.cardShadow,
+    '--ot-card-shadow-h': p.cardShadowH,
+    '--ot-btn-bg': p.btnBg,
+    '--ot-btn-border': p.btnBorder,
+    '--ot-accent-dev': accents.dev,
+    '--ot-accent-design': accents.design,
+    '--ot-accent-marketing': accents.marketing,
+  };
 
   return (
-    <section id="our-team" className="ot-section">
+    <section id="our-team" className="ot-section" style={sectionVars}>
       <style>{css}</style>
-      <div className="ot-heading">The People</div>
-      <h2 className="ot-title">Our Team</h2>
+
+      <div className="ot-header">
+        <div className="ot-badge">
+          <span className="ot-badge-dot" />
+          The People Behind
+        </div>
+        <h2 className="ot-title">
+          <span className="ot-title-plain">Our </span>
+          <span className="ot-title-gold">Team</span>
+        </h2>
+        <div className="ot-divider" />
+      </div>
+
       <div className="ot-wrap">
         {team.map((member, i) => (
           <TeamCard key={i} member={member} theme={theme} />

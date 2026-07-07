@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hi Warda! 🌸</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  width:100vw; height:100vh;
+  overflow:hidden;
+  background: radial-gradient(ellipse at 30% 40%, #2d0a4e 0%, #120228 50%, #0a0118 100%);
+  font-family: Georgia, serif;
+}
+
+#stars {
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+}
+
+#warda-text {
+  position:fixed; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  z-index:1; pointer-events:none; text-align:center;
+  flex-direction:column; gap:10px;
+}
+
+#warda-text h1 {
+  font-size: clamp(64px, 13vw, 160px);
+  font-weight:900;
+  letter-spacing:0.06em;
+  background: linear-gradient(135deg, #ff79c6, #ffb3e6, #fff0fb, #d6a8ff, #ff79c6);
+  background-size:300% 300%;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation: shimmer 5s ease infinite;
+  filter: drop-shadow(0 0 60px rgba(255,100,200,0.7)) drop-shadow(0 0 120px rgba(180,80,255,0.4));
+}
+
+#warda-text p {
+  font-size: clamp(14px,2vw,22px);
+  color: rgba(255,200,240,0.6);
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  animation: fadeFloat 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%,100% { background-position:0% 50%; }
+  50% { background-position:100% 50%; }
+}
+
+@keyframes fadeFloat {
+  0%,100% { opacity:0.4; transform:translateY(0); }
+  50% { opacity:0.9; transform:translateY(-4px); }
+}
+
+#cats-layer {
+  position:fixed; inset:0; z-index:10; overflow:hidden;
+}
+
+.cat {
+  position:absolute;
+  cursor:pointer;
+  user-select:none;
+  line-height:1;
+  transition: left 0.35s cubic-bezier(0.34,1.56,0.64,1),
+              top  0.35s cubic-bezier(0.34,1.56,0.64,1),
+              transform 0.35s cubic-bezier(0.34,1.56,0.64,1),
+              opacity 0.3s ease;
+  will-change: transform, left, top;
+}
+
+.cat:hover {
+  z-index:9999 !important;
+}
+
+.cat svg {
+  display:block;
+  filter: drop-shadow(1px 3px 6px rgba(0,0,0,0.5));
+  transition: filter 0.2s;
+}
+
+.cat:hover svg {
+  filter: drop-shadow(0 0 14px rgba(255,180,220,0.8)) drop-shadow(1px 3px 6px rgba(0,0,0,0.4));
+}
+
+.cat.removing {
+  animation: flyAway 0.55s cubic-bezier(0.4,0,1,1) forwards !important;
+  pointer-events:none;
+  transition: none !important;
+}
+
+@keyframes flyAway {
+  0%   { transform:scale(1) rotate(0deg); opacity:1; }
+  25%  { transform:scale(1.4) rotate(-20deg); opacity:0.9; }
+  100% { transform:scale(0.1) translateY(-300px) rotate(60deg); opacity:0; }
+}
+
+.cat.spawn {
+  animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes popIn {
+  0%   { transform:scale(0) rotate(-20deg); opacity:0; }
+  100% { transform:scale(1) rotate(0deg);   opacity:1; }
+}
+
+#ui {
+  position:fixed; z-index:200;
+  bottom:20px; left:50%; transform:translateX(-50%);
+  display:flex; align-items:center; gap:12px;
+}
+
+#tip {
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,0.15);
+  padding:8px 20px; border-radius:999px;
+  color:rgba(255,255,255,0.85); font-size:13px;
+  letter-spacing:0.03em; white-space:nowrap;
+  transition:opacity 0.5s;
+}
+
+#reset-btn {
+  background:rgba(255,120,200,0.2);
+  border:1px solid rgba(255,120,200,0.4);
+  color:rgba(255,200,230,0.9);
+  padding:8px 20px; border-radius:999px;
+  cursor:pointer; font-size:13px;
+  transition:background 0.2s, transform 0.1s;
+  white-space:nowrap;
+}
+#reset-btn:hover { background:rgba(255,120,200,0.35); transform:scale(1.04); }
+#reset-btn:active { transform:scale(0.97); }
+
+#counter {
+  position:fixed; top:18px; right:20px; z-index:200;
+  color:rgba(255,200,240,0.6); font-size:12px; font-family:monospace;
+}
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<div id="warda-text">
+  <h1>HI WARDA!</h1>
+</div>
+
+<div id="cats-layer"></div>
+
+<div id="ui">
+  <div id="tip">Hover to part the kittens · Click to shoo them!</div>
+  <button id="reset-btn" onclick="spawnCats()">🐱 More kittens!</button>
+</div>
+<div id="counter"></div>
+
+<script>
+/* ── Stars background ─────────────────────────────── */
+(function(){
+  const c = document.getElementById('stars');
+  const ctx = c.getContext('2d');
+  function resize(){ c.width=innerWidth; c.height=innerHeight; draw(); }
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    for(let i=0;i<180;i++){
+      const x=Math.random()*c.width, y=Math.random()*c.height;
+      const r=Math.random()*1.2+0.2;
+      const a=Math.random()*0.7+0.15;
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,230,255,${a})`; ctx.fill();
+    }
+  }
+  resize();
+  window.addEventListener('resize', resize);
+})();
+
+/* ── Palette ──────────────────────────────────────── */
+const COLORS = [
+  { body:'#f9c5d1', inner:'#f7a8b8', stripe:'#e07a8e', eye:'#4CAF50', nose:'#ff6b95', pupil:'#1a4a1a', accent:'#fde8ed' },
+  { body:'#ffd4a3', inner:'#ffbf7a', stripe:'#e8944a', eye:'#5b9bd5', nose:'#ff7eb3', pupil:'#1a2a4a', accent:'#fff0de' },
+  { body:'#d4d4d4', inner:'#bfbfbf', stripe:'#888',    eye:'#7B68EE', nose:'#ffaecb', pupil:'#1a1a3a', accent:'#f0f0f0' },
+  { body:'#c8a87a', inner:'#b08d5a', stripe:'#7a5c30', eye:'#66bb6a', nose:'#ffb3c8', pupil:'#1a3a1a', accent:'#eedfc0' },
+  { body:'#fff4d6', inner:'#ffe8a0', stripe:'#d4b460', eye:'#9c6fe4', nose:'#ffbcd4', pupil:'#2a1a4a', accent:'#fffbe8' },
+  { body:'#b0c4de', inner:'#8faacc', stripe:'#5a7aa0', eye:'#ff7043', nose:'#ff9ab8', pupil:'#2a0a0a', accent:'#ddeeff' },
+  { body:'#e8c8f0', inner:'#d4a8e0', stripe:'#a070b8', eye:'#4db6ac', nose:'#ff88c0', pupil:'#0a2a28', accent:'#f5e0ff' },
+  { body:'#3a3a3a', inner:'#2a2a2a', stripe:'#555',    eye:'#FFD700', nose:'#ff5599', pupil:'#1a1000', accent:'#555' },
+];
+
+const EXPRS = ['happy','blep','wink','uwu','stars'];
+
+/* ── Draw one kitten SVG ──────────────────────────── */
+function makeCat(color, sz, expr, flip) {
+  const s = sz;
+  const {body,inner,stripe,eye,nose,pupil,accent} = color;
+
+  /* Blush circles */
+  const blush = `
+    <ellipse cx="${s*.3}" cy="${s*.52}" rx="${s*.065}" ry="${s*.04}" fill="#ffb3c8" opacity=".35"/>
+    <ellipse cx="${s*.7}" cy="${s*.52}" rx="${s*.065}" ry="${s*.04}" fill="#ffb3c8" opacity=".35"/>`;
+
+  /* Eyes by expression */
+  let eyes;
+  if(expr==='happy'){
+    eyes=`
+      <path d="M${s*.3},${s*.42} Q${s*.38},${s*.36} ${s*.46},${s*.42}" fill="none" stroke="${eye}" stroke-width="${s*.03}" stroke-linecap="round"/>
+      <path d="M${s*.54},${s*.42} Q${s*.62},${s*.36} ${s*.7},${s*.42}" fill="none" stroke="${eye}" stroke-width="${s*.03}" stroke-linecap="round"/>`;
+  } else if(expr==='wink'){
+    eyes=`
+      <ellipse cx="${s*.38}" cy="${s*.42}" rx="${s*.08}" ry="${s*.08}" fill="${eye}"/>
+      <ellipse cx="${s*.38}" cy="${s*.42}" rx="${s*.04}" ry="${s*.065}" fill="${pupil}"/>
+      <circle cx="${s*.365}" cy="${s*.405}" r="${s*.02}" fill="white"/>
+      <path d="M${s*.55},${s*.43} Q${s*.62},${s*.37} ${s*.69},${s*.43}" fill="none" stroke="${eye}" stroke-width="${s*.028}" stroke-linecap="round"/>`;
+  } else if(expr==='blep'){
+    eyes=`
+      <ellipse cx="${s*.38}" cy="${s*.42}" rx="${s*.08}" ry="${s*.08}" fill="${eye}"/>
+      <ellipse cx="${s*.62}" cy="${s*.42}" rx="${s*.08}" ry="${s*.08}" fill="${eye}"/>
+      <ellipse cx="${s*.38}" cy="${s*.42}" rx="${s*.04}" ry="${s*.065}" fill="${pupil}"/>
+      <ellipse cx="${s*.62}" cy="${s*.42}" rx="${s*.04}" ry="${s*.065}" fill="${pupil}"/>
+      <circle cx="${s*.365}" cy="${s*.405}" r="${s*.02}" fill="white"/>
+      <circle cx="${s*.605}" cy="${s*.405}" r="${s*.02}" fill="white"/>`;
+  } else if(expr==='uwu'){
+    eyes=`
+      <path d="M${s*.28},${s*.44} Q${s*.38},${s*.35} ${s*.48},${s*.44}" fill="none" stroke="${eye}" stroke-width="${s*.032}" stroke-linecap="round"/>
+      <path d="M${s*.52},${s*.44} Q${s*.62},${s*.35} ${s*.72},${s*.44}" fill="none" stroke="${eye}" stroke-width="${s*.032}" stroke-linecap="round"/>`;
+  } else { /* stars */
+    const star=(cx,cy,r)=>{let p='';for(let i=0;i<5;i++){const a=i*72-90,b=a+36,ro=r*0.42;p+=`${cx+r*Math.cos(a*Math.PI/180)},${cy+r*Math.sin(a*Math.PI/180)} ${cx+ro*Math.cos(b*Math.PI/180)},${cy+ro*Math.sin(b*Math.PI/180)} `;}return`<polygon points="${p.trim()}" fill="${eye}"/>`;};
+    eyes=star(s*.38,s*.42,s*.08)+star(s*.62,s*.42,s*.08);
+  }
+
+  /* Mouth by expression */
+  let mouth;
+  if(expr==='blep'){
+    mouth=`
+      <path d="M${s*.43},${s*.56} Q${s*.5},${s*.6} ${s*.57},${s*.56}" fill="none" stroke="#d94f6e" stroke-width="${s*.022}" stroke-linecap="round"/>
+      <ellipse cx="${s*.5}" cy="${s*.63}" rx="${s*.04}" ry="${s*.055}" fill="#ff6b95" opacity=".9"/>`;
+  } else if(expr==='uwu'){
+    mouth=`<path d="M${s*.4},${s*.56} Q${s*.5},${s*.64} ${s*.6},${s*.56}" fill="none" stroke="#d94f6e" stroke-width="${s*.025}" stroke-linecap="round"/>`;
+  } else {
+    mouth=`<path d="M${s*.43},${s*.56} Q${s*.5},${s*.62} ${s*.57},${s*.56}" fill="none" stroke="#d94f6e" stroke-width="${s*.022}" stroke-linecap="round"/>`;
+  }
+
+  /* Tail */
+  const tail=`
+    <path d="M${s*.75},${s*.84} Q${s*1.08},${s*.55} ${s*.94},${s*.28} Q${s*.87},${s*.12} ${s*.74},${s*.32}" fill="none" stroke="${body}" stroke-width="${s*.08}" stroke-linecap="round"/>
+    <path d="M${s*.75},${s*.84} Q${s*1.08},${s*.55} ${s*.94},${s*.28} Q${s*.87},${s*.12} ${s*.74},${s*.32}" fill="none" stroke="${inner}" stroke-width="${s*.03}" stroke-linecap="round"/>`;
+
+  /* Inner ear highlight */
+  const earInner=`
+    <polygon points="${s*.27},${s*.165} ${s*.215},${s*.065} ${s*.345},${s*.155}" fill="${inner}" opacity=".7"/>
+    <polygon points="${s*.73},${s*.165} ${s*.785},${s*.065} ${s*.655},${s*.155}" fill="${inner}" opacity=".7"/>`;
+
+  /* Cheek tufts */
+  const tufts=`
+    <line x1="${s*.2}" y1="${s*.48}" x2="${s*.02}" y2="${s*.455}" stroke="${stripe}" stroke-width="${s*.016}" stroke-linecap="round" opacity=".75"/>
+    <line x1="${s*.2}" y1="${s*.515}" x2="${s*.03}" y2="${s*.535}" stroke="${stripe}" stroke-width="${s*.016}" stroke-linecap="round" opacity=".75"/>
+    <line x1="${s*.2}" y1="${s*.55}"  x2="${s*.05}" y2="${s*.595}" stroke="${stripe}" stroke-width="${s*.014}" stroke-linecap="round" opacity=".55"/>
+    <line x1="${s*.8}" y1="${s*.48}"  x2="${s*.98}" y2="${s*.455}" stroke="${stripe}" stroke-width="${s*.016}" stroke-linecap="round" opacity=".75"/>
+    <line x1="${s*.8}" y1="${s*.515}" x2="${s*.97}" y2="${s*.535}" stroke="${stripe}" stroke-width="${s*.016}" stroke-linecap="round" opacity=".75"/>
+    <line x1="${s*.8}" y1="${s*.55}"  x2="${s*.95}" y2="${s*.595}" stroke="${stripe}" stroke-width="${s*.014}" stroke-linecap="round" opacity=".55"/>`;
+
+  /* Forehead stripes */
+  const foreStripes=`
+    <path d="M${s*.4},${s*.24} Q${s*.45},${s*.18} ${s*.5},${s*.24}" fill="none" stroke="${stripe}" stroke-width="${s*.018}" stroke-linecap="round" opacity=".5"/>
+    <path d="M${s*.46},${s*.2}  Q${s*.5},${s*.14}  ${s*.54},${s*.2}" fill="none" stroke="${stripe}" stroke-width="${s*.015}" stroke-linecap="round" opacity=".4"/>`;
+
+  /* Paws */
+  const paws=`
+    <ellipse cx="${s*.35}" cy="${s*.88}" rx="${s*.09}" ry="${s*.055}" fill="${inner}" opacity=".9"/>
+    <ellipse cx="${s*.65}" cy="${s*.88}" rx="${s*.09}" ry="${s*.055}" fill="${inner}" opacity=".9"/>
+    <ellipse cx="${s*.35}" cy="${s*.88}" rx="${s*.06}" ry="${s*.035}" fill="${body}" opacity=".6"/>
+    <ellipse cx="${s*.65}" cy="${s*.88}" rx="${s*.06}" ry="${s*.035}" fill="${body}" opacity=".6"/>`;
+
+  /* Small heart above head */
+  const heart=`<path d="M${s*.48},${s*.06} Q${s*.48},${s*.02} ${s*.5},${s*.04} Q${s*.52},${s*.02} ${s*.52},${s*.06} Q${s*.52},${s*.09} ${s*.5},${s*.11} Q${s*.48},${s*.09} ${s*.48},${s*.06}" fill="#ff79c6" opacity=".7"/>`;
+
+  const fl = flip ? `transform="scale(-1,1) translate(-${s},0)"` : '';
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" ${fl}>
+  ${heart}
+  ${tail}
+  <ellipse cx="${s*.5}" cy="${s*.74}" rx="${s*.32}" ry="${s*.22}" fill="${body}"/>
+  ${paws}
+  <ellipse cx="${s*.5}" cy="${s*.38}" rx="${s*.29}" ry="${s*.31}" fill="${body}"/>
+  <polygon points="${s*.24},${s*.19} ${s*.17},${s*.04} ${s*.36},${s*.16}" fill="${body}"/>
+  <polygon points="${s*.76},${s*.19} ${s*.83},${s*.04} ${s*.64},${s*.16}" fill="${body}"/>
+  ${earInner}
+  ${foreStripes}
+  ${blush}
+  ${tufts}
+  ${eyes}
+  <ellipse cx="${s*.5}" cy="${s*.53}" rx="${s*.048}" ry="${s*.032}" fill="${nose}"/>
+  ${mouth}
+  <line x1="${s*.47}" y1="${s*.53}" x2="${s*.4}" y2="${s*.575}" stroke="${nose}" stroke-width="${s*.014}" stroke-linecap="round" opacity=".6"/>
+  <line x1="${s*.53}" y1="${s*.53}" x2="${s*.6}" y2="${s*.575}" stroke="${nose}" stroke-width="${s*.014}" stroke-linecap="round" opacity=".6"/>
+</svg>`;
+}
+
+/* ── State ───────────────────────────────────────── */
+let cats = [];      // {el, bx, by, cx, cy, sz, rot, removing}
+let mouse = {x:-9999, y:-9999};
+const REPEL = 140;  // radius in px
+
+/* ── Spawn ───────────────────────────────────────── */
+function spawnCats(){
+  const layer = document.getElementById('cats-layer');
+  layer.innerHTML = '';
+  cats = [];
+
+  const vw = innerWidth, vh = innerHeight;
+  const sz0 = Math.min(vw,vh)*0.10;
+  const sz1 = Math.min(vw,vh)*0.175;
+
+  const cols = Math.ceil(vw / (sz0 * 1.2)) + 1;
+  const rows = Math.ceil(vh / (sz0 * 1.2)) + 1;
+
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const sz  = sz0 + Math.random()*(sz1-sz0);
+      const cw  = vw/cols, ch = vh/rows;
+      const bx  = c*cw + (cw-sz)/2 + (Math.random()-.5)*cw*.35;
+      const by  = r*ch + (ch-sz)/2 + (Math.random()-.5)*ch*.3;
+      const rot = (Math.random()-.5)*28;
+      const col = COLORS[Math.floor(Math.random()*COLORS.length)];
+      const exp = EXPRS [Math.floor(Math.random()*EXPRS.length)];
+      const flip= Math.random()>.5;
+      const delay = Math.random()*0.4;
+
+      const el = document.createElement('div');
+      el.className = 'cat spawn';
+      el.style.cssText = `left:${bx}px;top:${by}px;transform:rotate(${rot}deg) scale(0);z-index:${10+r*cols+c};animation-delay:${delay}s`;
+      el.innerHTML = makeCat(col, sz, exp, flip);
+      el.addEventListener('click', ()=>removeCat(entry));
+      layer.appendChild(el);
+
+      const entry = {el, bx, by, cx:bx, cy:by, sz, rot, removing:false};
+      cats.push(entry);
+    }
+  }
+  updateCounter();
+}
+
+function removeCat(cat){
+  if(cat.removing) return;
+  cat.removing = true;
+  cat.el.classList.add('removing');
+  setTimeout(()=>{ cat.el.remove(); cats = cats.filter(c=>c!==cat); updateCounter(); },540);
+}
+
+function updateCounter(){
+  const n = cats.filter(c=>!c.removing).length;
+  document.getElementById('counter').textContent = n>0 ? `${n} kittens` : 'All gone! 🌸';
+}
+
+/* ── Repel loop ──────────────────────────────────── */
+function tick(){
+  requestAnimationFrame(tick);
+  cats.forEach(cat=>{
+    if(cat.removing) return;
+    const cx = cat.bx + cat.sz/2;
+    const cy = cat.by + cat.sz/2;
+    const dx = cx - mouse.x;
+    const dy = cy - mouse.y;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+
+    let tx = cat.bx, ty = cat.by, scl = 1, extraRot = 0;
+
+    if(dist < REPEL){
+      const force = (REPEL - dist)/REPEL;  // 0..1
+      const pushX = (dx/dist) * force * REPEL * 0.85;
+      const pushY = (dy/dist) * force * REPEL * 0.85;
+      tx = cat.bx + pushX;
+      ty = cat.by + pushY;
+      scl = 0.9 + force*0.15;
+      extraRot = (dx > 0 ? 1 : -1) * force * 22;
+    }
+
+    cat.el.style.left      = tx + 'px';
+    cat.el.style.top       = ty + 'px';
+    cat.el.style.transform = `rotate(${cat.rot + extraRot}deg) scale(${scl})`;
+  });
+}
+
+document.addEventListener('mousemove', e=>{ mouse.x=e.clientX; mouse.y=e.clientY; });
+document.addEventListener('mouseleave', ()=>{ mouse.x=-9999; mouse.y=-9999; });
+
+spawnCats();
+window.addEventListener('resize', spawnCats);
+tick();
+</script>
+</body>
+</html>

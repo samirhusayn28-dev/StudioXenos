@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unknown-property */
-import { useRef, useEffect, forwardRef } from 'react';
+import { useRef, useEffect, useState, forwardRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { EffectComposer, wrapEffect } from '@react-three/postprocessing';
 import { Effect } from 'postprocessing';
@@ -243,12 +243,27 @@ export default function Dither({
   enableMouseInteraction = true,
   mouseRadius = 1
 }) {
+  // Detect mobile/touch devices to keep things light — no hover concept
+  // on touch, and lower-end GPUs benefit from skipping antialiasing
+  // + reducing render resolution.
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const coarse = window.matchMedia('(pointer: coarse)').matches;
+      setIsMobile(window.innerWidth <= 768 || coarse);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <Canvas
       className="w-full h-full relative"
       camera={{ position: [0, 0, 6] }}
-      dpr={1}
-      gl={{ antialias: true, preserveDrawingBuffer: true }}
+      dpr={isMobile ? 0.75 : 1}
+      gl={{ antialias: !isMobile, preserveDrawingBuffer: true }}
     >
       <DitheredWaves
         waveSpeed={waveSpeed}
@@ -258,7 +273,7 @@ export default function Dither({
         colorNum={colorNum}
         pixelSize={pixelSize}
         disableAnimation={disableAnimation}
-        enableMouseInteraction={enableMouseInteraction}
+        enableMouseInteraction={isMobile ? false : enableMouseInteraction}
         mouseRadius={mouseRadius}
       />
     </Canvas>

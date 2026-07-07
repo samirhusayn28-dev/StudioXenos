@@ -170,7 +170,34 @@ export default function ChatBot({ theme }) {
         .sx-pulse{animation:xenosPulse 2s infinite}
         .sx-msgs::-webkit-scrollbar{width:4px}
         .sx-msgs::-webkit-scrollbar-thumb{background:rgba(128,128,128,.2);border-radius:2px}
-        @media(max-width:440px){.sx-win{width:calc(100vw - 32px)!important;right:16px!important}.sx-fab{right:16px!important;bottom:20px!important}}
+
+        /* Tablet/small laptop — slightly smaller window */
+        @media(max-width:768px){
+          .sx-win{width:340px!important;height:500px!important;}
+        }
+
+        /* Mobile — minimal: full-width-ish window, shorter height, smaller FAB */
+        @media(max-width:480px){
+          .sx-win{
+            width:calc(100vw - 24px)!important;
+            right:12px!important;
+            left:12px!important;
+            bottom:80px!important;
+            height:min(70vh,500px)!important;
+            border-radius:16px!important;
+          }
+          .sx-fab{
+            width:52px!important;
+            height:52px!important;
+            right:16px!important;
+            bottom:18px!important;
+          }
+        }
+
+        /* Very short screens (landscape phones, small devices) */
+        @media(max-height:600px){
+          .sx-win{height:min(62vh,420px)!important;bottom:74px!important;}
+        }
       `}</style>
 
       {/* FAB */}

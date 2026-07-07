@@ -113,7 +113,7 @@ const footerStyles = `
     backdrop-filter: blur(0px);
     -webkit-backdrop-filter: blur(0px);
     display: flex; align-items: center; justify-content: center;
-    padding: 20px;
+    padding: 16px;
     transition: background 0.35s ease, backdrop-filter 0.35s ease;
     pointer-events: none;
   }
@@ -141,6 +141,8 @@ const footerStyles = `
     transition: opacity 0.42s cubic-bezier(0.34,1.56,0.64,1),
                 transform 0.42s cubic-bezier(0.34,1.56,0.64,1);
     box-shadow: 0 32px 80px rgba(0,0,0,0.45);
+    max-height: 90vh;
+    overflow-y: auto;
   }
   .contact-modal-backdrop.open .contact-modal {
     opacity: 1;
@@ -293,39 +295,74 @@ const footerStyles = `
 
   /* ── MOBILE LARGE (700px) ── */
   @media (max-width: 700px) {
+    .footer-root { padding: 40px 5% 20px !important; }
+
     .footer-main-grid {
       grid-template-columns: 1fr 1fr;
       grid-template-areas:
         "brand brand"
         "l1 l2"
         "l3 cta";
-      gap: 24px 16px;
+      gap: 28px 20px;
+      margin-bottom: 28px;
     }
+    .footer-area-brand { padding-bottom: 4px; }
     .footer-area-cta {
       flex-direction: column;
       align-items: flex-start;
-      justify-content: flex-end;
+      justify-content: flex-start;
       gap: 12px;
     }
     .footer-robot-wrap { display: none; }
-    .footer-col-title  { font-size: 10px; margin-bottom: 10px; letter-spacing: 0.2em; }
-    .footer-nav-btn    { font-size: 12px; }
-    .footer-contact-btn { font-size: 0.78rem; padding: 10px 22px; }
+    .footer-col-title  { font-size: 10px; margin-bottom: 12px; letter-spacing: 0.2em; }
+    .footer-nav-btn    { font-size: 12.5px; }
+    .footer-contact-btn {
+      font-size: 0.78rem;
+      padding: 10px 22px;
+      width: 100%;
+      text-align: center;
+    }
     .footer-brand-desc { display: none; }
-
-    /* Hide mail/whatsapp on mobile brand */
     .footer-desktop-contact { display: none; }
+
+    /* Social icons slightly smaller */
+    .footer-area-brand > div:last-child { gap: 8px !important; }
+
+    /* Logo smaller on mobile */
+    .footer-area-brand > img { width: 26px !important; height: 26px !important; margin-bottom: 14px !important; }
   }
 
   /* ── MOBILE SMALL (480px) ── */
   @media (max-width: 480px) {
-    .contact-modal { padding: 28px 20px 24px; border-radius: 20px; }
+    .footer-root { padding: 32px 5% 16px !important; }
+
+    .contact-modal {
+      padding: 24px 18px 20px;
+      border-radius: 18px;
+      margin: 0;
+    }
     .modal-fields-grid { grid-template-columns: 1fr !important; }
+
     .footer-bottom-bar {
       flex-direction: column !important;
       align-items: flex-start !important;
       gap: 4px !important;
     }
+
+    .footer-main-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 24px 16px;
+    }
+
+    /* Compact nav links on small mobile */
+    .footer-nav-btn { font-size: 12px; }
+    ul[style] { gap: 10px !important; }
+
+    /* Submit button full width on mobile */
+    .modal-submit-btn { width: 100%; }
+
+    /* Modal warning left aligned */
+    .modal-warning { text-align: left; font-size: 12px; }
   }
 
   /* ── VERY SMALL (360px) ── */
@@ -338,6 +375,9 @@ const footerStyles = `
     .footer-area-cta {
       align-items: flex-start;
     }
+    .footer-contact-btn { width: auto; }
+
+    .contact-modal { padding: 20px 14px 18px; }
   }
 `;
 

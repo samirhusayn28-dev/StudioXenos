@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import leftImg from './assets/left.png';
 import rightImg from './assets/right.png';
 
@@ -111,11 +111,9 @@ const aboutStyles = `
     line-height: 1;
   }
 
-  .view-more-arrow.open {
-    transform: rotate(180deg);
-  }
+  .view-more-arrow.open { transform: rotate(180deg); }
 
-  /* Expanded overlay — dark blur backdrop */
+  /* Expand overlay */
   .about-expand-overlay {
     display: none;
     position: fixed;
@@ -129,9 +127,7 @@ const aboutStyles = `
     transition: background 0.35s ease, backdrop-filter 0.35s ease;
   }
 
-  .about-expand-overlay.visible {
-    display: flex;
-  }
+  .about-expand-overlay.visible { display: flex; }
 
   .about-expand-overlay.animating {
     background: rgba(0,0,0,0.62);
@@ -139,8 +135,6 @@ const aboutStyles = `
     -webkit-backdrop-filter: blur(12px);
   }
 
-  /* Mac Quick Look / peek animation:
-     starts small + slightly down, springs up to full size */
   .about-expand-box {
     width: calc(100% - 32px);
     max-width: 520px;
@@ -163,7 +157,6 @@ const aboutStyles = `
     opacity: 1;
   }
 
-  /* Closing animation */
   .about-expand-overlay.closing .about-expand-box {
     transform: scale(0.88) translateY(12px);
     opacity: 0;
@@ -185,7 +178,6 @@ const aboutStyles = `
     margin: 0 auto 12px;
   }
 
-  /* Close button — top right */
   .about-expand-close {
     position: absolute;
     top: 16px; right: 18px;
@@ -297,7 +289,7 @@ const aboutStyles = `
 
   .about-img:hover { transform: translateY(-6px) scale(1.015); }
 
-  [data-theme="dark"] .about-img { box-shadow: 0 12px 40px rgba(0,0,0,0.48); }
+  [data-theme="dark"] .about-img  { box-shadow: 0 12px 40px rgba(0,0,0,0.48); }
   [data-theme="light"] .about-img { box-shadow: 0 12px 40px rgba(120,70,20,0.14); }
 
   .img-tag {
@@ -309,8 +301,19 @@ const aboutStyles = `
     white-space: nowrap; z-index: 4; pointer-events: none;
   }
 
+  /* ── TABLET (768px – 1024px) ── */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .about-stats { display: grid; }
+    .img-tag { display: block; }
+    .img-bracket-tl, .img-bracket-br { display: block; }
+    .view-more-btn { display: none !important; }
+    .about-heading { font-size: clamp(44px, 6vw, 70px); }
+    .about-para { font-size: 14px; }
+    .stat-num { font-size: 28px; }
+  }
+
   /* ── DESKTOP ── */
-  @media (min-width: 768px) {
+  @media (min-width: 1025px) {
     .about-stats { display: grid; }
     .img-tag { display: block; }
     .img-bracket-tl, .img-bracket-br { display: block; }
@@ -319,65 +322,74 @@ const aboutStyles = `
 
   /* ── MOBILE ── */
   @media (max-width: 767px) {
+    .about-section::before { display: none; }
     .about-stats { display: none !important; }
     .img-bracket-tl, .img-bracket-br { display: none; }
-    .about-section::before { display: none; }
     .img-tag { display: none; }
     .view-more-btn { display: inline-flex; }
+    .about-extra-paras { display: none; }
 
     .about-mobile-row {
       display: flex !important;
       flex-direction: row !important;
-      gap: 16px;
+      gap: 14px;
       align-items: flex-start;
     }
 
     .about-text-col {
       flex: 1;
       min-width: 0;
-      overflow: visible;
     }
 
     .about-img-col {
-      width: 42% !important;
+      width: 40% !important;
       flex-shrink: 0;
     }
 
     .about-heading {
-      font-size: clamp(36px, 10vw, 52px) !important;
-      margin-bottom: 14px !important;
+      font-size: clamp(34px, 9vw, 50px) !important;
+      margin-bottom: 12px !important;
+      line-height: 0.9 !important;
     }
 
     .about-badge {
-      margin-bottom: 12px !important;
+      margin-bottom: 10px !important;
       font-size: 10px !important;
       padding: 4px 10px 4px 8px !important;
     }
 
-    .about-divider { margin-bottom: 14px !important; width: 32px !important; }
-    .about-para { font-size: 13px !important; line-height: 1.75 !important; }
+    .about-divider {
+      margin-bottom: 12px !important;
+      width: 28px !important;
+    }
+
+    .about-para {
+      font-size: 12.5px !important;
+      line-height: 1.7 !important;
+    }
 
     .about-img-col .image-frame {
       height: auto !important;
-      display: flex; flex-direction: column; gap: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .about-img-col .about-img {
       position: static !important;
       width: 100% !important;
-      height: 155px !important;
+      height: 140px !important;
+      border-radius: 10px !important;
     }
   }
 
   @media (max-width: 380px) {
-    .about-img-col { width: 38% !important; }
-    .about-img-col .about-img { height: 120px !important; }
+    .about-img-col { width: 36% !important; }
+    .about-img-col .about-img { height: 110px !important; }
+    .about-heading { font-size: 30px !important; }
   }
 
-  /* Hide extra paragraphs on mobile — shown in overlay instead */
-  @media (max-width: 767px) {
-    .about-extra-paras { display: none; }
-  }
+  /* Desktop show extra paras */
   @media (min-width: 768px) {
     .about-extra-paras { display: block; }
   }
@@ -392,11 +404,11 @@ const paragraphs = [
 const stats = [
   { number: '50+', label: 'Projects Delivered' },
   { number: '30+', label: 'Happy Clients' },
-  { number: '4+', label: 'Years Experience' },
+  { number: '4+',  label: 'Years Experience' },
 ];
 
 export default function AboutUs() {
-  const [state, setState] = useState('hidden'); // hidden | mounted | animating | closing
+  const [state, setState] = useState('hidden');
 
   const openBox = () => {
     setState('mounted');
@@ -412,16 +424,19 @@ export default function AboutUs() {
 
   const overlayClass = [
     'about-expand-overlay',
-    state !== 'hidden' ? 'visible' : '',
+    state !== 'hidden'    ? 'visible'   : '',
     state === 'animating' ? 'animating' : '',
-    state === 'closing' ? 'closing' : '',
+    state === 'closing'   ? 'closing'   : '',
   ].filter(Boolean).join(' ');
 
   return (
-    <section id="about" className="about-section py-20 md:py-32 px-5 sm:px-10 md:px-16 lg:px-24">
+    <section
+      id="about"
+      className="about-section py-16 md:py-28 lg:py-32 px-5 sm:px-8 md:px-16 lg:px-24"
+    >
       <style>{aboutStyles}</style>
 
-      <div className="about-mobile-row max-w-6xl mx-auto grid md:grid-cols-2 gap-4 md:gap-20 items-center">
+      <div className="about-mobile-row max-w-6xl mx-auto grid md:grid-cols-2 gap-4 md:gap-16 lg:gap-20 items-center">
 
         {/* LEFT: Text */}
         <div className="about-text-col">
@@ -453,10 +468,10 @@ export default function AboutUs() {
             aria-label="View more about us"
           >
             View More
-            <span className="view-more-arrow">▾</span>
+            <span className="view-more-arrow">&#9662;</span>
           </button>
 
-          {/* Stats bar — desktop only */}
+          {/* Stats — tablet + desktop */}
           <div className="about-stats">
             {stats.map((s, i) => (
               <div key={i} className="stat-item">
@@ -471,7 +486,7 @@ export default function AboutUs() {
         <div className="about-img-col">
           <div
             className="image-frame"
-            style={{ position: 'relative', height: 'clamp(240px, 38vw, 500px)' }}
+            style={{ position: 'relative', height: 'clamp(220px, 36vw, 500px)' }}
           >
             <div className="img-bracket-tl" />
             <div className="img-bracket-br" />
@@ -495,7 +510,7 @@ export default function AboutUs() {
 
       </div>
 
-      {/* ── Expand overlay — dark, blurred, Mac peek animation ── */}
+      {/* Expand overlay */}
       <div
         className={overlayClass}
         onClick={(e) => { if (e.target === e.currentTarget) closeBox(); }}
@@ -508,7 +523,7 @@ export default function AboutUs() {
             onClick={closeBox}
             aria-label="Close"
           >
-            ✕
+            &#x2715;
           </button>
 
           <div className="about-expand-title">

@@ -27,10 +27,14 @@ class Media {
     this.viewport = viewport;
     this.bend = bend;
     this.borderRadius = borderRadius;
+    // Natural image dimensions — filled once image loads
+    this.imageNaturalWidth = 1;
+    this.imageNaturalHeight = 1;
     this.createShader();
     this.createMesh();
     this.onResize();
   }
+
   createShader() {
     const texture = new Texture(this.gl, { generateMipmaps: true });
     this.program = new Program(this.gl, {
@@ -88,18 +92,25 @@ class Media {
       },
       transparent: true
     });
+
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.src = this.image;
     img.onload = () => {
       texture.image = img;
+      this.imageNaturalWidth = img.naturalWidth;
+      this.imageNaturalHeight = img.naturalHeight;
       this.program.uniforms.uImageSizes.value = [img.naturalWidth, img.naturalHeight];
+      // Re-calculate plane scale now that we know the real ratio
+      this.onResize();
     };
   }
+
   createMesh() {
     this.plane = new Mesh(this.gl, { geometry: this.geometry, program: this.program });
     this.plane.setParent(this.scene);
   }
+
   getScreenRect(camera, screen) {
     const fov = (camera.fov * Math.PI) / 180;
     const worldH = 2 * Math.tan(fov / 2) * camera.position.z;
@@ -110,6 +121,7 @@ class Media {
     const ph = (this.plane.scale.y / worldH) * screen.height;
     return { cx, cy, pw, ph };
   }
+
   update(scroll, direction) {
     this.plane.position.x = this.x - scroll.current - this.extra;
     const x = this.plane.position.x;
@@ -146,6 +158,7 @@ class Media {
       this.isBefore = this.isAfter = false;
     }
   }
+
   onResize({ screen, viewport } = {}) {
     if (screen) this.screen = screen;
     if (viewport) {
@@ -154,11 +167,27 @@ class Media {
         this.plane.program.uniforms.uViewportSizes.value = [this.viewport.width, this.viewport.height];
       }
     }
+
     this.scale = this.screen.height / 1500;
-    this.plane.scale.y = (this.viewport.height * (900 * this.scale)) / this.screen.height;
-    this.plane.scale.x = (this.viewport.width * (700 * this.scale)) / this.screen.width;
+
+    // Base height stays the same for all cards
+    const baseH = this.viewport.height * (900 * this.scale) / this.screen.height;
+
+    // Derive width from actual image aspect ratio so frame matches image shape
+    const imgRatio = this.imageNaturalWidth / this.imageNaturalHeight || 1;
+
+    // Clamp ratio so portrait images don't become too narrow
+    // and landscape images don't become too wide
+    const clampedRatio = Math.min(Math.max(imgRatio, 0.55), 1.85);
+
+    this.plane.scale.y = baseH;
+    this.plane.scale.x = baseH * clampedRatio;
+
     this.plane.program.uniforms.uPlaneSizes.value = [this.plane.scale.x, this.plane.scale.y];
-    this.padding = 2;
+
+    // Padding now scales with each card's own width so gap stays
+    // consistent across narrow and wide images — fixes overlap
+    this.padding = this.plane.scale.x * 0.4;
     this.width = this.plane.scale.x + this.padding;
     this.widthTotal = this.width * this.length;
     this.x = this.width * this.index;
@@ -181,23 +210,28 @@ class App {
     this.update();
     this.addEventListeners();
   }
+
   createRenderer() {
     this.renderer = new Renderer({ alpha: true, antialias: true, dpr: Math.min(window.devicePixelRatio || 1, 2) });
     this.gl = this.renderer.gl;
     this.gl.clearColor(0, 0, 0, 0);
     this.container.appendChild(this.gl.canvas);
   }
+
   createCamera() {
     this.camera = new Camera(this.gl);
     this.camera.fov = 45;
     this.camera.position.z = 20;
   }
+
   createScene() {
     this.scene = new Transform();
   }
+
   createGeometry() {
     this.planeGeometry = new Plane(this.gl, { heightSegments: 50, widthSegments: 100 });
   }
+
   createMedias(items, bend = 1, borderRadius) {
     const galleryItems = items && items.length ? items : [];
     this.mediasImages = galleryItems.concat(galleryItems);
@@ -217,6 +251,7 @@ class App {
       });
     });
   }
+
   getHoveredIndex(clientX, clientY) {
     if (!this.medias) return -1;
     const rect = this.container.getBoundingClientRect();
@@ -239,32 +274,38 @@ class App {
     }
     return -1;
   }
+
   getCardScreenRect(index) {
     if (!this.medias) return null;
     const m = this.medias[index];
     if (!m) return null;
     return m.getScreenRect(this.camera, this.screen);
   }
+
   onTouchDown(e) {
     this.isDown = true;
     this.scroll.position = this.scroll.current;
     this.start = e.touches ? e.touches[0].clientX : e.clientX;
   }
+
   onTouchMove(e) {
     if (!this.isDown) return;
     const x = e.touches ? e.touches[0].clientX : e.clientX;
     const distance = (this.start - x) * (this.scrollSpeed * 0.025);
     this.scroll.target = this.scroll.position + distance;
   }
+
   onTouchUp() {
     this.isDown = false;
     this.onCheck();
   }
+
   onWheel(e) {
     const delta = e.deltaY || e.wheelDelta || e.detail;
     this.scroll.target += (delta > 0 ? this.scrollSpeed : -this.scrollSpeed) * 0.2;
     this.onCheckDebounce();
   }
+
   onCheck() {
     if (!this.medias || !this.medias[0]) return;
     const width = this.medias[0].width;
@@ -272,6 +313,7 @@ class App {
     const item = width * itemIndex;
     this.scroll.target = this.scroll.target < 0 ? -item : item;
   }
+
   onResize() {
     this.screen = { width: this.container.clientWidth, height: this.container.clientHeight };
     this.renderer.setSize(this.screen.width, this.screen.height);
@@ -284,6 +326,7 @@ class App {
       this.medias.forEach(media => media.onResize({ screen: this.screen, viewport: this.viewport }));
     }
   }
+
   update() {
     this.scroll.current = lerp(this.scroll.current, this.scroll.target, this.scroll.ease);
     const direction = this.scroll.current > this.scroll.last ? 'right' : 'left';
@@ -294,33 +337,35 @@ class App {
     this.scroll.last = this.scroll.current;
     this.raf = window.requestAnimationFrame(this.update.bind(this));
   }
+
   addEventListeners() {
-    this.boundOnResize = this.onResize.bind(this);
-    this.boundOnWheel = this.onWheel.bind(this);
+    this.boundOnResize    = this.onResize.bind(this);
+    this.boundOnWheel     = this.onWheel.bind(this);
     this.boundOnTouchDown = this.onTouchDown.bind(this);
     this.boundOnTouchMove = this.onTouchMove.bind(this);
-    this.boundOnTouchUp = this.onTouchUp.bind(this);
-    window.addEventListener('resize', this.boundOnResize);
-    window.addEventListener('mousewheel', this.boundOnWheel);
-    window.addEventListener('wheel', this.boundOnWheel);
-    window.addEventListener('mousedown', this.boundOnTouchDown);
-    window.addEventListener('mousemove', this.boundOnTouchMove);
-    window.addEventListener('mouseup', this.boundOnTouchUp);
-    window.addEventListener('touchstart', this.boundOnTouchDown);
-    window.addEventListener('touchmove', this.boundOnTouchMove);
-    window.addEventListener('touchend', this.boundOnTouchUp);
+    this.boundOnTouchUp   = this.onTouchUp.bind(this);
+    window.addEventListener('resize',      this.boundOnResize);
+    window.addEventListener('mousewheel',  this.boundOnWheel);
+    window.addEventListener('wheel',       this.boundOnWheel);
+    window.addEventListener('mousedown',   this.boundOnTouchDown);
+    window.addEventListener('mousemove',   this.boundOnTouchMove);
+    window.addEventListener('mouseup',     this.boundOnTouchUp);
+    window.addEventListener('touchstart',  this.boundOnTouchDown);
+    window.addEventListener('touchmove',   this.boundOnTouchMove);
+    window.addEventListener('touchend',    this.boundOnTouchUp);
   }
+
   destroy() {
     window.cancelAnimationFrame(this.raf);
-    window.removeEventListener('resize', this.boundOnResize);
-    window.removeEventListener('mousewheel', this.boundOnWheel);
-    window.removeEventListener('wheel', this.boundOnWheel);
-    window.removeEventListener('mousedown', this.boundOnTouchDown);
-    window.removeEventListener('mousemove', this.boundOnTouchMove);
-    window.removeEventListener('mouseup', this.boundOnTouchUp);
-    window.removeEventListener('touchstart', this.boundOnTouchDown);
-    window.removeEventListener('touchmove', this.boundOnTouchMove);
-    window.removeEventListener('touchend', this.boundOnTouchUp);
+    window.removeEventListener('resize',      this.boundOnResize);
+    window.removeEventListener('mousewheel',  this.boundOnWheel);
+    window.removeEventListener('wheel',       this.boundOnWheel);
+    window.removeEventListener('mousedown',   this.boundOnTouchDown);
+    window.removeEventListener('mousemove',   this.boundOnTouchMove);
+    window.removeEventListener('mouseup',     this.boundOnTouchUp);
+    window.removeEventListener('touchstart',  this.boundOnTouchDown);
+    window.removeEventListener('touchmove',   this.boundOnTouchMove);
+    window.removeEventListener('touchend',    this.boundOnTouchUp);
     if (this.renderer && this.renderer.gl && this.renderer.gl.canvas.parentNode) {
       this.renderer.gl.canvas.parentNode.removeChild(this.renderer.gl.canvas);
     }
@@ -334,10 +379,10 @@ export default function CircularGallery({
   scrollSpeed = 2,
   scrollEase = 0.05
 }) {
-  const containerRef = useRef(null);
-  const appRef = useRef(null);
-  const holdTimerRef = useRef(null);
-  const animFrameRef = useRef(null);
+  const containerRef    = useRef(null);
+  const appRef          = useRef(null);
+  const holdTimerRef    = useRef(null);
+  const animFrameRef    = useRef(null);
   const holdStartTimeRef = useRef(null);
   const [modal, setModal] = useState(null);
   const [progressState, setProgressState] = useState(null);
@@ -345,8 +390,8 @@ export default function CircularGallery({
   const HOLD_DURATION = 2000;
 
   const cancelHold = () => {
-    if (holdTimerRef.current) { clearTimeout(holdTimerRef.current); holdTimerRef.current = null; }
-    if (animFrameRef.current) { cancelAnimationFrame(animFrameRef.current); animFrameRef.current = null; }
+    if (holdTimerRef.current)  { clearTimeout(holdTimerRef.current);      holdTimerRef.current  = null; }
+    if (animFrameRef.current)  { cancelAnimationFrame(animFrameRef.current); animFrameRef.current = null; }
     holdStartTimeRef.current = null;
     setProgressState(null);
   };
@@ -358,15 +403,13 @@ export default function CircularGallery({
 
     const animate = (now) => {
       const elapsed = now - holdStartTimeRef.current;
-      const pct = Math.min(elapsed / HOLD_DURATION, 1);
-      const scaleY = 0.6 + pct * 0.6;
-      const scaleX = 0.88 + pct * 0.12;
-      const glow = 0.2 + pct * 0.7;
+      const pct     = Math.min(elapsed / HOLD_DURATION, 1);
+      const scaleY  = 0.6 + pct * 0.6;
+      const scaleX  = 0.88 + pct * 0.12;
+      const glow    = 0.2 + pct * 0.7;
       const glowSize = 4 + pct * 16;
       setProgressState({ cx, cy, pw, ph, pct, scaleY, scaleX, glow, glowSize });
-      if (pct < 1) {
-        animFrameRef.current = requestAnimationFrame(animate);
-      }
+      if (pct < 1) animFrameRef.current = requestAnimationFrame(animate);
     };
     animFrameRef.current = requestAnimationFrame(animate);
 
@@ -401,20 +444,20 @@ export default function CircularGallery({
     };
     const onUp = () => cancelHold();
 
-    el.addEventListener('mousedown', onDown);
+    el.addEventListener('mousedown',  onDown);
     el.addEventListener('touchstart', onDown);
-    window.addEventListener('mouseup', onUp);
-    window.addEventListener('touchend', onUp);
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('touchmove', onMove);
+    window.addEventListener('mouseup',    onUp);
+    window.addEventListener('touchend',   onUp);
+    window.addEventListener('mousemove',  onMove);
+    window.addEventListener('touchmove',  onMove);
 
     return () => {
       appRef.current?.destroy();
       cancelHold();
-      el.removeEventListener('mousedown', onDown);
+      el.removeEventListener('mousedown',  onDown);
       el.removeEventListener('touchstart', onDown);
-      window.removeEventListener('mouseup', onUp);
-      window.removeEventListener('touchend', onUp);
+      window.removeEventListener('mouseup',   onUp);
+      window.removeEventListener('touchend',  onUp);
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('touchmove', onMove);
     };
@@ -423,15 +466,18 @@ export default function CircularGallery({
   return (
     <>
       <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-        <div className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing" ref={containerRef} />
+        <div
+          className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing"
+          ref={containerRef}
+        />
 
         {progressState && (
           <div
             style={{
               position: 'absolute',
-              left: progressState.cx - progressState.pw * 0.35,
-              top: progressState.cy + progressState.ph * 0.5 - 14,
-              width: progressState.pw * 0.7,
+              left:   progressState.cx - progressState.pw * 0.35,
+              top:    progressState.cy + progressState.ph * 0.5 - 14,
+              width:  progressState.pw * 0.7,
               height: '7px',
               background: 'rgba(255,255,255,0.12)',
               borderRadius: '999px',
@@ -446,7 +492,7 @@ export default function CircularGallery({
             <div
               style={{
                 height: '100%',
-                width: `${progressState.pct * 100}%`,
+                width:  progressState.pct * 100 + '%',
                 background: 'linear-gradient(90deg, #007AFF 0%, #34AADC 100%)',
                 borderRadius: '999px',
                 boxShadow: `0 0 ${progressState.glowSize + 4}px rgba(0,122,255,${progressState.glow + 0.1})`,
@@ -475,7 +521,7 @@ export default function CircularGallery({
           <style>{`
             @keyframes bgFadeIn {
               from { opacity: 0; }
-              to { opacity: 1; }
+              to   { opacity: 1; }
             }
             @keyframes quickLook {
               0%   { opacity: 0; transform: scale(0.82) translateY(40px); filter: blur(10px); }
@@ -485,21 +531,23 @@ export default function CircularGallery({
             }
             @keyframes descSlide {
               from { opacity: 0; transform: translateY(14px); filter: blur(4px); }
-              to   { opacity: 1; transform: translateY(0); filter: blur(0px); }
+              to   { opacity: 1; transform: translateY(0);    filter: blur(0px); }
             }
           `}</style>
 
           <div
             onClick={e => e.stopPropagation()}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', padding: '0 16px' }}
           >
             <img
               src={modal.image}
               alt={modal.text}
               style={{
-                width: 'min(92vw, 920px)',
-                height: 'min(78vh, 680px)',
-                objectFit: 'cover',
+                maxWidth: 'min(92vw, 920px)',
+                maxHeight: 'min(72vh, 680px)',
+                width: 'auto',
+                height: 'auto',
+                objectFit: 'contain',
                 borderRadius: '18px',
                 boxShadow: '0 48px 120px rgba(0,0,0,0.85), 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)',
                 animation: 'quickLook 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards',
