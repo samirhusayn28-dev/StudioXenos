@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo, memo } from "react";
 
 const SYSTEM_PROMPT = `You are a helpful customer service assistant for StudioXenos, a creative studio. 
 You help visitors with questions about services, projects, pricing, collaboration, and general inquiries.
@@ -15,6 +15,112 @@ const suggestedQuestions = [
 
 // Display messages (includes welcome msg shown to user)
 const WELCOME = "Hey! 👋 Welcome to StudioXenos. I'm here to help. What can I do for you today?";
+
+// Theme tokens computed once per mode - moved outside component so they're
+// never re-created, just looked up
+const THEME = {
+  dark: {
+    window: "#0a0a0f", header: "linear-gradient(135deg,#0f0f1a,#13131f)",
+    headerBorder: "rgba(255,255,255,0.06)", titleColor: "#f0f0f0",
+    closeBg: "rgba(255,255,255,0.06)", closeColor: "#888", closeHoverBg: "rgba(255,255,255,0.1)",
+    msgsBg: "#0a0a0f",
+    assistantBg: "rgba(255,255,255,0.05)", assistantBorder: "rgba(255,255,255,0.07)", assistantText: "#d4d4d8",
+    inputAreaBg: "#0a0a0f", inputAreaBorder: "rgba(255,255,255,0.06)",
+    textareaBg: "rgba(255,255,255,0.05)", textareaBorder: "rgba(255,255,255,0.09)",
+    textareaColor: "#e4e4e7", placeholder: "#555",
+    windowBorder: "rgba(255,255,255,0.08)",
+    windowShadow: "0 24px 80px rgba(0,0,0,0.7)",
+    chipColor: "#a5b4fc",
+  },
+  light: {
+    window: "#ffffff", header: "linear-gradient(135deg,#f8f8ff,#f0f0fa)",
+    headerBorder: "rgba(0,0,0,0.08)", titleColor: "#111",
+    closeBg: "rgba(0,0,0,0.06)", closeColor: "#666", closeHoverBg: "rgba(0,0,0,0.1)",
+    msgsBg: "#f4f4ff",
+    assistantBg: "#fff", assistantBorder: "rgba(0,0,0,0.09)", assistantText: "#222",
+    inputAreaBg: "#ffffff", inputAreaBorder: "rgba(0,0,0,0.08)",
+    textareaBg: "rgba(0,0,0,0.03)", textareaBorder: "rgba(0,0,0,0.1)",
+    textareaColor: "#111", placeholder: "#aaa",
+    windowBorder: "rgba(0,0,0,0.1)",
+    windowShadow: "0 24px 80px rgba(0,0,0,0.15)",
+    chipColor: "#4f46e5",
+  },
+};
+
+// ── Memoized subcomponents ──────────────────────────────────────
+// Each message bubble only re-renders if its own text/role/theme changes,
+// not every time a new message is appended to the list.
+const MessageBubble = memo(function MessageBubble({ msg, t }) {
+  const style = useMemo(
+    () =>
+      msg.role === "user"
+        ? {
+            maxWidth: "82%", padding: "10px 14px",
+            borderRadius: "14px 14px 3px 14px",
+            background: "linear-gradient(135deg,#6366f1,#7c3aed)",
+            color: "#fff", fontSize: 13.5, lineHeight: 1.55,
+            alignSelf: "flex-end",
+            boxShadow: "0 4px 16px rgba(99,102,241,.3)",
+            animation: "xenosIn .25s ease",
+          }
+        : {
+            maxWidth: "82%", padding: "10px 14px",
+            borderRadius: "14px 14px 14px 3px",
+            background: t.assistantBg,
+            border: `1px solid ${t.assistantBorder}`,
+            color: t.assistantText,
+            fontSize: 13.5, lineHeight: 1.55,
+            alignSelf: "flex-start",
+            animation: "xenosIn .25s ease",
+            transition: "background .3s,color .3s",
+          },
+    [msg.role, t.assistantBg, t.assistantBorder, t.assistantText]
+  );
+  return <div style={style}>{msg.text}</div>;
+});
+
+const TypingDots = memo(function TypingDots({ t }) {
+  return (
+    <div style={{
+      display: "flex", gap: 4, alignItems: "center",
+      padding: "12px 16px",
+      background: t.assistantBg, border: `1px solid ${t.assistantBorder}`,
+      borderRadius: "14px 14px 14px 3px",
+      alignSelf: "flex-start", width: "fit-content",
+    }}>
+      {[1, 2, 3].map(n => (
+        <span key={n} className={`sx-d${n}`} style={{
+          width: 6, height: 6, background: "#6366f1",
+          borderRadius: "50%", display: "inline-block",
+        }} />
+      ))}
+    </div>
+  );
+});
+
+const SuggestionChips = memo(function SuggestionChips({ t, onPick }) {
+  return (
+    <>
+      {suggestedQuestions.map((q, i) => (
+        <button
+          key={i}
+          className="sx-chip"
+          onClick={() => onPick(q)}
+          style={{
+            background: "rgba(99,102,241,0.1)",
+            border: "1px solid rgba(99,102,241,0.25)",
+            color: t.chipColor, fontSize: 11.5,
+            padding: "5px 11px", borderRadius: 20,
+            cursor: "pointer", whiteSpace: "nowrap",
+            fontFamily: "'DM Sans',sans-serif",
+          }}
+        >
+          {q}
+        </button>
+      ))}
+    </>
+  );
+});
 
 export default function ChatBot({ theme }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,7 +164,10 @@ export default function ChatBot({ theme }) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [displayMsgs]);
 
-  const sendMessage = async (text) => {
+  // Stable theme object reference - only recomputed when isDark flips
+  const t = useMemo(() => (isDark ? THEME.dark : THEME.light), [isDark]);
+
+  const sendMessage = useCallback(async (text) => {
     const userText = text || input.trim();
     if (!userText || isLoading) return;
 
@@ -123,38 +232,19 @@ export default function ChatBot({ theme }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [input, isLoading, displayMsgs, historyMsgs]);
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = useCallback((e) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  };
+  }, [sendMessage]);
 
-  // ── Theme tokens ──────────────────────────────────────────────
-  const t = isDark ? {
-    window: "#0a0a0f", header: "linear-gradient(135deg,#0f0f1a,#13131f)",
-    headerBorder: "rgba(255,255,255,0.06)", titleColor: "#f0f0f0",
-    closeBg: "rgba(255,255,255,0.06)", closeColor: "#888", closeHoverBg: "rgba(255,255,255,0.1)",
-    msgsBg: "#0a0a0f",
-    assistantBg: "rgba(255,255,255,0.05)", assistantBorder: "rgba(255,255,255,0.07)", assistantText: "#d4d4d8",
-    inputAreaBg: "#0a0a0f", inputAreaBorder: "rgba(255,255,255,0.06)",
-    textareaBg: "rgba(255,255,255,0.05)", textareaBorder: "rgba(255,255,255,0.09)",
-    textareaColor: "#e4e4e7", placeholder: "#555",
-    windowBorder: "rgba(255,255,255,0.08)",
-    windowShadow: "0 24px 80px rgba(0,0,0,0.7)",
-    chipColor: "#a5b4fc",
-  } : {
-    window: "#ffffff", header: "linear-gradient(135deg,#f8f8ff,#f0f0fa)",
-    headerBorder: "rgba(0,0,0,0.08)", titleColor: "#111",
-    closeBg: "rgba(0,0,0,0.06)", closeColor: "#666", closeHoverBg: "rgba(0,0,0,0.1)",
-    msgsBg: "#f4f4ff",
-    assistantBg: "#fff", assistantBorder: "rgba(0,0,0,0.09)", assistantText: "#222",
-    inputAreaBg: "#ffffff", inputAreaBorder: "rgba(0,0,0,0.08)",
-    textareaBg: "rgba(0,0,0,0.03)", textareaBorder: "rgba(0,0,0,0.1)",
-    textareaColor: "#111", placeholder: "#aaa",
-    windowBorder: "rgba(0,0,0,0.1)",
-    windowShadow: "0 24px 80px rgba(0,0,0,0.15)",
-    chipColor: "#4f46e5",
-  };
+  const handleInputChange = useCallback((e) => setInput(e.target.value), []);
+  const toggleOpen = useCallback(() => setIsOpen(o => !o), []);
+  const closeChat = useCallback(() => setIsOpen(false), []);
+  const handleSend = useCallback(() => sendMessage(), [sendMessage]);
+  const handleChipPick = useCallback((q) => sendMessage(q), [sendMessage]);
+
+  const sendDisabled = !input.trim() || isLoading;
 
   return (
     <>
@@ -170,6 +260,22 @@ export default function ChatBot({ theme }) {
         .sx-pulse{animation:xenosPulse 2s infinite}
         .sx-msgs::-webkit-scrollbar{width:4px}
         .sx-msgs::-webkit-scrollbar-thumb{background:rgba(128,128,128,.2);border-radius:2px}
+
+        /* Hover handled in pure CSS instead of JS mouseenter/leave - lighter, GPU-friendly */
+        .sx-fab{ will-change:transform; transition:transform .25s cubic-bezier(.34,1.56,.64,1); }
+        .sx-fab:hover{ transform:scale(1.1); }
+
+        .sx-close{ transition:background .2s; }
+        .sx-close:hover{ background:var(--sx-close-hover); }
+
+        .sx-chip{ transition:background .2s; will-change:background; }
+        .sx-chip:hover{ background:rgba(99,102,241,0.2)!important; }
+
+        .sx-textarea{ transition:border-color .2s,background .3s,color .3s; }
+        .sx-textarea:focus{ border-color:rgba(99,102,241,0.55)!important; }
+
+        .sx-send{ will-change:transform,opacity; transition:opacity .2s,transform .15s; }
+        .sx-send:not(:disabled):hover{ transform:scale(1.08); }
 
         /* Tablet/small laptop — slightly smaller window */
         @media(max-width:768px){
@@ -203,17 +309,15 @@ export default function ChatBot({ theme }) {
       {/* FAB */}
       <button
         className="sx-fab"
-        onClick={() => setIsOpen(o => !o)}
+        onClick={toggleOpen}
         style={{
           position:"fixed", bottom:28, right:28, width:60, height:60, borderRadius:"50%",
           background:"linear-gradient(135deg,#1a1a2e,#0f0f0f)",
           border:"1.5px solid rgba(255,255,255,0.15)",
           boxShadow:"0 8px 32px rgba(0,0,0,0.45)",
           cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
-          zIndex:9999, transition:"transform .25s cubic-bezier(.34,1.56,.64,1)",
+          zIndex:9999,
         }}
-        onMouseEnter={e=>e.currentTarget.style.transform="scale(1.1)"}
-        onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}
         aria-label="Chat"
       >
         {isOpen
@@ -235,6 +339,7 @@ export default function ChatBot({ theme }) {
             animation:"xenosUp .3s cubic-bezier(.34,1.36,.64,1)",
             transition:"background .3s,border-color .3s",
             fontFamily:"'DM Sans',sans-serif",
+            "--sx-close-hover": t.closeHoverBg,
           }}
         >
           {/* Header */}
@@ -261,15 +366,13 @@ export default function ChatBot({ theme }) {
             </div>
 
             <button
-              onClick={() => setIsOpen(false)}
+              className="sx-close"
+              onClick={closeChat}
               style={{
                 marginLeft:"auto", background:t.closeBg, border:"none",
                 color:t.closeColor, width:28, height:28, borderRadius:8,
                 cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
-                transition:"background .2s",
               }}
-              onMouseEnter={e=>e.currentTarget.style.background=t.closeHoverBg}
-              onMouseLeave={e=>e.currentTarget.style.background=t.closeBg}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -284,49 +387,10 @@ export default function ChatBot({ theme }) {
             background:t.msgsBg, transition:"background .3s",
           }}>
             {displayMsgs.map((msg, i) => (
-              <div key={i} style={
-                msg.role === "user"
-                  ? {
-                      maxWidth:"82%", padding:"10px 14px",
-                      borderRadius:"14px 14px 3px 14px",
-                      background:"linear-gradient(135deg,#6366f1,#7c3aed)",
-                      color:"#fff", fontSize:13.5, lineHeight:1.55,
-                      alignSelf:"flex-end",
-                      boxShadow:"0 4px 16px rgba(99,102,241,.3)",
-                      animation:"xenosIn .25s ease",
-                    }
-                  : {
-                      maxWidth:"82%", padding:"10px 14px",
-                      borderRadius:"14px 14px 14px 3px",
-                      background:t.assistantBg,
-                      border:`1px solid ${t.assistantBorder}`,
-                      color:t.assistantText,
-                      fontSize:13.5, lineHeight:1.55,
-                      alignSelf:"flex-start",
-                      animation:"xenosIn .25s ease",
-                      transition:"background .3s,color .3s",
-                    }
-              }>
-                {msg.text}
-              </div>
+              <MessageBubble key={i} msg={msg} t={t} />
             ))}
 
-            {isLoading && (
-              <div style={{
-                display:"flex", gap:4, alignItems:"center",
-                padding:"12px 16px",
-                background:t.assistantBg, border:`1px solid ${t.assistantBorder}`,
-                borderRadius:"14px 14px 14px 3px",
-                alignSelf:"flex-start", width:"fit-content",
-              }}>
-                {[1,2,3].map(n=>(
-                  <span key={n} className={`sx-d${n}`} style={{
-                    width:6, height:6, background:"#6366f1",
-                    borderRadius:"50%", display:"inline-block",
-                  }}/>
-                ))}
-              </div>
-            )}
+            {isLoading && <TypingDots t={t} />}
             <div ref={messagesEndRef}/>
           </div>
 
@@ -336,20 +400,7 @@ export default function ChatBot({ theme }) {
               padding:"8px 16px 4px", display:"flex", flexWrap:"wrap", gap:6,
               background:t.msgsBg, borderTop:`1px solid ${t.headerBorder}`,
             }}>
-              {suggestedQuestions.map((q,i) => (
-                <button key={i} onClick={()=>sendMessage(q)} style={{
-                  background:"rgba(99,102,241,0.1)",
-                  border:"1px solid rgba(99,102,241,0.25)",
-                  color:t.chipColor, fontSize:11.5,
-                  padding:"5px 11px", borderRadius:20,
-                  cursor:"pointer", whiteSpace:"nowrap",
-                  fontFamily:"'DM Sans',sans-serif",
-                  transition:"background .2s",
-                }}
-                onMouseEnter={e=>e.currentTarget.style.background="rgba(99,102,241,0.2)"}
-                onMouseLeave={e=>e.currentTarget.style.background="rgba(99,102,241,0.1)"}
-                >{q}</button>
-              ))}
+              <SuggestionChips t={t} onPick={handleChipPick} />
             </div>
           )}
 
@@ -360,9 +411,10 @@ export default function ChatBot({ theme }) {
             transition:"background .3s",
           }}>
             <textarea
+              className="sx-textarea"
               placeholder="Ask us anything..."
               value={input}
-              onChange={e=>setInput(e.target.value)}
+              onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               rows={1}
               style={{
@@ -370,25 +422,21 @@ export default function ChatBot({ theme }) {
                 borderRadius:12, padding:"10px 14px", color:t.textareaColor,
                 fontSize:13, fontFamily:"'DM Sans',sans-serif",
                 resize:"none", outline:"none", maxHeight:100, minHeight:40,
-                lineHeight:1.5, transition:"border-color .2s,background .3s,color .3s",
+                lineHeight:1.5,
               }}
-              onFocus={e=>e.target.style.borderColor="rgba(99,102,241,0.55)"}
-              onBlur={e=>e.target.style.borderColor=t.textareaBorder}
             />
             <button
-              onClick={()=>sendMessage()}
-              disabled={!input.trim()||isLoading}
+              className="sx-send"
+              onClick={handleSend}
+              disabled={sendDisabled}
               style={{
                 width:40, height:40, borderRadius:11,
                 background:"linear-gradient(135deg,#6366f1,#7c3aed)",
-                border:"none", cursor: (!input.trim()||isLoading)?"not-allowed":"pointer",
+                border:"none", cursor: sendDisabled ? "not-allowed" : "pointer",
                 display:"flex", alignItems:"center", justifyContent:"center",
-                flexShrink:0, opacity:(!input.trim()||isLoading)?0.4:1,
+                flexShrink:0, opacity: sendDisabled ? 0.4 : 1,
                 boxShadow:"0 4px 14px rgba(99,102,241,.35)",
-                transition:"opacity .2s,transform .15s",
               }}
-              onMouseEnter={e=>{ if(input.trim()&&!isLoading) e.currentTarget.style.transform="scale(1.08)"; }}
-              onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
                 <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>

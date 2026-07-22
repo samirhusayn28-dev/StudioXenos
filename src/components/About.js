@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import leftImg from './assets/left.png';
 import rightImg from './assets/right.png';
 
@@ -107,13 +107,13 @@ const aboutStyles = `
   .view-more-arrow {
     display: inline-block;
     font-size: 14px;
-    transition: transform 0.3s ease;
+    transition: transform 0.25s ease;
     line-height: 1;
   }
 
   .view-more-arrow.open { transform: rotate(180deg); }
 
-  /* Expand overlay */
+  /* ── Expand overlay (lighter blur = cheaper composite, especially on mobile) ── */
   .about-expand-overlay {
     display: none;
     position: fixed;
@@ -124,15 +124,16 @@ const aboutStyles = `
     -webkit-backdrop-filter: blur(0px);
     align-items: center;
     justify-content: center;
-    transition: background 0.35s ease, backdrop-filter 0.35s ease;
+    transition: background 0.3s ease, backdrop-filter 0.3s ease;
+    will-change: background, backdrop-filter;
   }
 
   .about-expand-overlay.visible { display: flex; }
 
   .about-expand-overlay.animating {
-    background: rgba(0,0,0,0.62);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(0,0,0,0.60);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   .about-expand-box {
@@ -145,10 +146,10 @@ const aboutStyles = `
     box-shadow: 0 -2px 0 rgba(255,255,255,0.07) inset,
                 0 -24px 60px rgba(0,0,0,0.55);
     border-top: 0.5px solid rgba(255,255,255,0.10);
-    transform: scale(0.82) translateY(24px);
+    transform: scale(0.85) translateY(20px);
     opacity: 0;
-    transition: transform 0.42s cubic-bezier(0.34, 1.56, 0.64, 1),
-                opacity   0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform 0.36s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity   0.24s cubic-bezier(0.22, 1, 0.36, 1);
     will-change: transform, opacity;
   }
 
@@ -158,17 +159,17 @@ const aboutStyles = `
   }
 
   .about-expand-overlay.closing .about-expand-box {
-    transform: scale(0.88) translateY(12px);
+    transform: scale(0.90) translateY(10px);
     opacity: 0;
-    transition: transform 0.26s cubic-bezier(0.4, 0, 1, 1),
-                opacity   0.2s ease;
+    transition: transform 0.22s cubic-bezier(0.4, 0, 1, 1),
+                opacity   0.18s ease;
   }
 
   .about-expand-overlay.closing {
     background: rgba(0,0,0,0);
     backdrop-filter: blur(0px);
     -webkit-backdrop-filter: blur(0px);
-    transition: background 0.26s ease, backdrop-filter 0.26s ease;
+    transition: background 0.22s ease, backdrop-filter 0.22s ease;
   }
 
   .about-expand-handle {
@@ -191,7 +192,7 @@ const aboutStyles = `
     font-size: 15px;
     line-height: 1;
     padding: 0;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: background 0.18s ease, color 0.18s ease;
   }
 
   .about-expand-close:hover {
@@ -284,10 +285,11 @@ const aboutStyles = `
 
   .about-img {
     border-radius: 14px; object-fit: cover; display: block;
-    transition: transform 0.38s cubic-bezier(.22,.68,0,1.2), box-shadow 0.38s ease;
+    transition: transform 0.32s cubic-bezier(.22,.68,0,1.2), box-shadow 0.32s ease;
+    will-change: transform;
   }
 
-  .about-img:hover { transform: translateY(-6px) scale(1.015); }
+  .about-img:hover { transform: translateY(-5px) scale(1.012); }
 
   [data-theme="dark"] .about-img  { box-shadow: 0 12px 40px rgba(0,0,0,0.48); }
   [data-theme="light"] .about-img { box-shadow: 0 12px 40px rgba(120,70,20,0.14); }
@@ -347,9 +349,9 @@ const aboutStyles = `
     }
 
     .about-heading {
-      font-size: clamp(34px, 9vw, 50px) !important;
+      font-size: clamp(30px, 8.5vw, 46px) !important;
       margin-bottom: 12px !important;
-      line-height: 0.9 !important;
+      line-height: 0.95 !important;
     }
 
     .about-badge {
@@ -386,15 +388,32 @@ const aboutStyles = `
   @media (max-width: 380px) {
     .about-img-col { width: 36% !important; }
     .about-img-col .about-img { height: 110px !important; }
-    .about-heading { font-size: 30px !important; }
+    .about-heading { font-size: clamp(24px, 7.5vw, 30px) !important; }
+  }
+
+  @media (max-width: 340px) {
+    .about-heading { font-size: clamp(20px, 7vw, 26px) !important; }
+    .about-badge { font-size: 9px !important; }
   }
 
   /* Desktop show extra paras */
   @media (min-width: 768px) {
     .about-extra-paras { display: block; }
   }
+
+  /* ── Reduced motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    .about-expand-overlay,
+    .about-expand-box,
+    .about-img,
+    .view-more-arrow {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
 `;
 
+// Static content — module-level so it's never recreated on re-render
 const paragraphs = [
   "At Studio Xenos, we turn ideas into impactful digital experiences — specializing in mobile app development, web development, and UI/UX design.",
   "Our team of passionate developers, designers, and strategists crafts intuitive interfaces, scalable applications, and seamless user experiences that move businesses forward.",
@@ -410,24 +429,31 @@ const stats = [
 export default function AboutUs() {
   const [state, setState] = useState('hidden');
 
-  const openBox = () => {
+  const openBox = useCallback(() => {
     setState('mounted');
     requestAnimationFrame(() =>
       requestAnimationFrame(() => setState('animating'))
     );
-  };
+  }, []);
 
-  const closeBox = () => {
+  const closeBox = useCallback(() => {
     setState('closing');
-    setTimeout(() => setState('hidden'), 300);
-  };
+    setTimeout(() => setState('hidden'), 260);
+  }, []);
 
-  const overlayClass = [
-    'about-expand-overlay',
-    state !== 'hidden'    ? 'visible'   : '',
-    state === 'animating' ? 'animating' : '',
-    state === 'closing'   ? 'closing'   : '',
-  ].filter(Boolean).join(' ');
+  // Recompute the class string only when `state` actually changes, not on every render
+  const overlayClass = useMemo(() => (
+    [
+      'about-expand-overlay',
+      state !== 'hidden'    ? 'visible'   : '',
+      state === 'animating' ? 'animating' : '',
+      state === 'closing'   ? 'closing'   : '',
+    ].filter(Boolean).join(' ')
+  ), [state]);
+
+  const handleOverlayClick = useCallback((e) => {
+    if (e.target === e.currentTarget) closeBox();
+  }, [closeBox]);
 
   return (
     <section
@@ -495,12 +521,16 @@ export default function AboutUs() {
               src={leftImg}
               alt="Studio Xenos work 1"
               className="about-img"
+              loading="lazy"
+              decoding="async"
               style={{ position: 'absolute', left: 0, bottom: 0, width: '51%', height: '86%' }}
             />
             <img
               src={rightImg}
               alt="Studio Xenos work 2"
               className="about-img"
+              loading="lazy"
+              decoding="async"
               style={{ position: 'absolute', right: 0, top: 0, width: '51%', height: '86%' }}
             />
 
@@ -513,7 +543,7 @@ export default function AboutUs() {
       {/* Expand overlay */}
       <div
         className={overlayClass}
-        onClick={(e) => { if (e.target === e.currentTarget) closeBox(); }}
+        onClick={handleOverlayClick}
       >
         <div className="about-expand-box">
           <div className="about-expand-handle" />

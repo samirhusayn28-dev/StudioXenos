@@ -1,5 +1,5 @@
 // src/components/Footer.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import emailjs from '@emailjs/browser';
 import robot from './assets/Footer Robot.png';
 import xLogo from './assets/X Logo.png';
@@ -14,6 +14,10 @@ const EMAILJS_SERVICE_ID  = 'service_aimz3zm';
 const EMAILJS_PUBLIC_KEY  = 'nBS7HLI2w7Zq5t3gI';
 const TEMPLATE_TO_COMPANY = 'template_wo2oyuf';
 const TEMPLATE_TO_USER    = 'template_ub2mpjv';
+
+// Module-level constant -> stable reference, Dither ke internal
+// prevColor check (aur re-renders) trigger nahi karega baar baar
+const DITHER_WAVE_COLOR = [0.08, 0.12, 0.28];
 
 const footerStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Outfit:wght@300;400;500;600&family=Poppins:wght@600;700&display=swap');
@@ -63,6 +67,8 @@ const footerStyles = `
     color: var(--text-sub); background: none; border: none; padding: 0;
     cursor: pointer; text-align: left; display: block;
     transition: color 0.2s ease, transform 0.2s ease; line-height: 1;
+    /* transform transitions ke liye GPU layer hint */
+    will-change: transform;
   }
   .footer-nav-btn:hover { color: var(--text-primary); transform: translateX(4px); }
 
@@ -86,6 +92,7 @@ const footerStyles = `
     position: relative; z-index: 1;
     filter: drop-shadow(0 8px 28px rgba(49,92,253,0.35));
     transition: transform 0.4s ease;
+    will-change: transform;
   }
   .footer-robot-wrap:hover img { transform: translateY(-8px); }
 
@@ -99,6 +106,7 @@ const footerStyles = `
     color: #c47a30;
     transition: background 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
     white-space: nowrap;
+    will-change: transform;
   }
   .footer-contact-btn:hover {
     background: rgba(196,122,48,0.22);
@@ -143,6 +151,8 @@ const footerStyles = `
     box-shadow: 0 32px 80px rgba(0,0,0,0.45);
     max-height: 90vh;
     overflow-y: auto;
+    /* opacity+transform GPU pe composite honge, will-change hint */
+    will-change: opacity, transform;
   }
   .contact-modal-backdrop.open .contact-modal {
     opacity: 1;
@@ -204,6 +214,7 @@ const footerStyles = `
     color: #fff;
     transition: transform 0.2s ease, box-shadow 0.25s ease, filter 0.2s ease;
     box-shadow: 0 4px 20px rgba(196,122,48,0.35);
+    will-change: transform;
   }
   .modal-submit-btn:hover {
     transform: scale(1.04); filter: brightness(1.1);
@@ -325,10 +336,7 @@ const footerStyles = `
     .footer-brand-desc { display: none; }
     .footer-desktop-contact { display: none; }
 
-    /* Social icons slightly smaller */
     .footer-area-brand > div:last-child { gap: 8px !important; }
-
-    /* Logo smaller on mobile */
     .footer-area-brand > img { width: 26px !important; height: 26px !important; margin-bottom: 14px !important; }
   }
 
@@ -354,14 +362,10 @@ const footerStyles = `
       gap: 24px 16px;
     }
 
-    /* Compact nav links on small mobile */
     .footer-nav-btn { font-size: 12px; }
     ul[style] { gap: 10px !important; }
 
-    /* Submit button full width on mobile */
     .modal-submit-btn { width: 100%; }
-
-    /* Modal warning left aligned */
     .modal-warning { text-align: left; font-size: 12px; }
   }
 
@@ -387,7 +391,66 @@ const footerLinks = {
   l3: { title: 'Careers',      links: ['Join Our Team', 'Events', 'News']               },
 };
 
-function ContactModal({ open, onClose }) {
+// Static (props/state se independent) style objects module-level pe hoist kiye —
+// pehle yeh ContactModal ke andar the, jo har keystroke pe (typing) naye ban rahe thay.
+const styles = {
+  successIconWrap: {
+    width: '56px', height: '56px', borderRadius: '50%',
+    background: 'rgba(196,122,48,0.15)', border: '1px solid rgba(196,122,48,0.45)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px',
+  },
+  successTitle: {
+    fontFamily: "'Barlow Condensed', sans-serif",
+    fontSize: 'clamp(36px, 5vw, 52px)', fontWeight: 900,
+    textTransform: 'uppercase', lineHeight: 0.95,
+    color: 'var(--text-primary)', marginBottom: '14px',
+  },
+  successBody: {
+    fontFamily: "'Outfit', sans-serif", fontSize: '15px',
+    fontWeight: 300, color: 'var(--text-sub)',
+    lineHeight: 1.7, maxWidth: '340px', margin: '0 auto',
+  },
+  headingWrap: { marginBottom: '28px' },
+  headingTitle: {
+    fontFamily: "'Barlow Condensed', sans-serif",
+    fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 900,
+    textTransform: 'uppercase', lineHeight: 0.92,
+    color: 'var(--text-primary)', marginBottom: '10px',
+  },
+  headingGradient: {
+    background: 'linear-gradient(110deg, #c47a30, #e8a84a)',
+    WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
+  },
+  headingSub: {
+    fontFamily: "'Outfit', sans-serif", fontSize: '14px',
+    fontWeight: 300, color: 'var(--text-muted)', margin: 0,
+  },
+  fieldsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' },
+  textarea: { marginBottom: '20px', display: 'block' },
+  footerRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' },
+  warning: { margin: 0, textAlign: 'left' },
+  submitBtn: { marginLeft: 'auto' },
+  brandLogo: { width: '32px', height: '32px', objectFit: 'contain', marginBottom: '20px' },
+  mailWrap: { marginBottom: '10px' },
+  whatsappWrap: { marginBottom: '24px' },
+  socialTitle: { marginBottom: '12px' },
+  socialRow: { display: 'flex', gap: '10px', flexWrap: 'wrap' },
+  linksList: { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '14px' },
+  robotImg: { width: '95px', objectFit: 'contain' },
+  bottomBar: {
+    paddingTop: '18px', display: 'flex', alignItems: 'center',
+    justifyContent: 'space-between', maxWidth: '1200px',
+    margin: '0 auto', flexWrap: 'wrap', gap: '8px',
+  },
+  copyright: { fontFamily: "'Outfit', sans-serif", fontSize: '12px', color: 'var(--text-muted)', margin: 0 },
+  crafted: {
+    fontFamily: "'Barlow Condensed', sans-serif", fontSize: '12px', fontWeight: 700,
+    letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: 0,
+  },
+  footerRoot: { padding: '56px 6% 24px' },
+};
+
+const ContactModal = memo(function ContactModal({ open, onClose }) {
   const [form, setForm]       = useState({ name: '', email: '', message: '' });
   const [errors, setErrors]   = useState({});
   const [warning, setWarning] = useState('');
@@ -409,136 +472,129 @@ function ContactModal({ open, onClose }) {
     }
   }, [open]);
 
-  const handleChange = e => {
+  // useCallback -> in inputs pe naya handler har keystroke pe nahi banega
+  const handleChange = useCallback(e => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: false }));
+    setErrors(prev => (prev[name] ? { ...prev, [name]: false } : prev));
     setWarning('');
-  };
+  }, []);
 
-  const handleSubmit = async () => {
-    const newErrors = {
-      name:    !form.name.trim(),
-      email:   !form.email.trim() || !/\S+@\S+\.\S+/.test(form.email),
-      message: !form.message.trim(),
-    };
-    const hasError = Object.values(newErrors).some(Boolean);
-    if (hasError) {
-      setErrors(newErrors);
-      setWarning(
-        !form.name.trim() && !form.email.trim() && !form.message.trim()
-          ? 'Please fill in all fields before submitting.'
-          : newErrors.email && form.email.trim()
-          ? 'Please enter a valid email address.'
-          : 'Please fill in all required fields.'
-      );
-      setShaking(true);
-      setTimeout(() => setShaking(false), 450);
-      return;
-    }
-    setStatus('sending');
-    const templateParams = { from_name: form.name, from_email: form.email, message: form.message };
-    try {
-      await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_TO_COMPANY, templateParams, EMAILJS_PUBLIC_KEY);
-      await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_TO_USER,    templateParams, EMAILJS_PUBLIC_KEY);
-      setStatus('sent');
-    } catch (err) {
-      console.error('EmailJS error:', err);
-      setWarning('Something went wrong. Please try again.');
-      setStatus('idle');
-    }
-  };
+  const handleSubmit = useCallback(async () => {
+    setForm(currentForm => {
+      const newErrors = {
+        name:    !currentForm.name.trim(),
+        email:   !currentForm.email.trim() || !/\S+@\S+\.\S+/.test(currentForm.email),
+        message: !currentForm.message.trim(),
+      };
+      const hasError = Object.values(newErrors).some(Boolean);
+      if (hasError) {
+        setErrors(newErrors);
+        setWarning(
+          !currentForm.name.trim() && !currentForm.email.trim() && !currentForm.message.trim()
+            ? 'Please fill in all fields before submitting.'
+            : newErrors.email && currentForm.email.trim()
+            ? 'Please enter a valid email address.'
+            : 'Please fill in all required fields.'
+        );
+        setShaking(true);
+        setTimeout(() => setShaking(false), 450);
+      } else {
+        setStatus('sending');
+        const templateParams = { from_name: currentForm.name, from_email: currentForm.email, message: currentForm.message };
+        (async () => {
+          try {
+            await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_TO_COMPANY, templateParams, EMAILJS_PUBLIC_KEY);
+            await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_TO_USER, templateParams, EMAILJS_PUBLIC_KEY);
+            setStatus('sent');
+          } catch (err) {
+            console.error('EmailJS error:', err);
+            setWarning('Something went wrong. Please try again.');
+            setStatus('idle');
+          }
+        })();
+      }
+      return currentForm;
+    });
+  }, []);
+
+  const backdropClassName = useMemo(
+    () => `contact-modal-backdrop ${open ? 'open' : ''}`,
+    [open]
+  );
+  const modalClassName = useMemo(
+    () => `contact-modal ${shaking ? 'shake' : ''}`,
+    [shaking]
+  );
+  const nameClassName = useMemo(() => `modal-input ${errors.name ? 'error' : ''}`, [errors.name]);
+  const emailClassName = useMemo(() => `modal-input ${errors.email ? 'error' : ''}`, [errors.email]);
+  const messageClassName = useMemo(() => `modal-input ${errors.message ? 'error' : ''}`, [errors.message]);
+  const warningClassName = useMemo(() => `modal-warning ${warning ? 'show' : ''}`, [warning]);
+
+  const handleBackdropClick = useCallback(e => {
+    if (e.target === e.currentTarget) onClose();
+  }, [onClose]);
 
   return (
-    <div
-      className={`contact-modal-backdrop ${open ? 'open' : ''}`}
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div className={`contact-modal ${shaking ? 'shake' : ''}`}>
+    <div className={backdropClassName} onClick={handleBackdropClick}>
+      <div className={modalClassName}>
 
         <button className="contact-modal-close" onClick={onClose} aria-label="Close">✕</button>
 
         {status === 'sent' ? (
           <div className="modal-success">
-            <div style={{
-              width: '56px', height: '56px', borderRadius: '50%',
-              background: 'rgba(196,122,48,0.15)', border: '1px solid rgba(196,122,48,0.45)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px',
-            }}>
+            <div style={styles.successIconWrap}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M5 12l5 5L19 7" stroke="#c47a30" strokeWidth="2.2"
                   strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <div style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontSize: 'clamp(36px, 5vw, 52px)', fontWeight: 900,
-              textTransform: 'uppercase', lineHeight: 0.95,
-              color: 'var(--text-primary)', marginBottom: '14px',
-            }}>Submitted!</div>
-            <p style={{
-              fontFamily: "'Outfit', sans-serif", fontSize: '15px',
-              fontWeight: 300, color: 'var(--text-sub)',
-              lineHeight: 1.7, maxWidth: '340px', margin: '0 auto',
-            }}>
+            <div style={styles.successTitle}>Submitted!</div>
+            <p style={styles.successBody}>
               Thanks for reaching out. We'll get back to you within 24 hours.
               Check your email for confirmation!
             </p>
           </div>
         ) : (
           <>
-            <div style={{ marginBottom: '28px' }}>
-              <div style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 900,
-                textTransform: 'uppercase', lineHeight: 0.92,
-                color: 'var(--text-primary)', marginBottom: '10px',
-              }}>
+            <div style={styles.headingWrap}>
+              <div style={styles.headingTitle}>
                 Get in{' '}
-                <span style={{
-                  background: 'linear-gradient(110deg, #c47a30, #e8a84a)',
-                  WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
-                }}>Touch</span>
+                <span style={styles.headingGradient}>Touch</span>
               </div>
-              <p style={{
-                fontFamily: "'Outfit', sans-serif", fontSize: '14px',
-                fontWeight: 300, color: 'var(--text-muted)', margin: 0,
-              }}>
+              <p style={styles.headingSub}>
                 Tell us about your project and we'll get back to you soon.
               </p>
             </div>
 
-            <div
-              className="modal-fields-grid"
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}
-            >
+            <div className="modal-fields-grid" style={styles.fieldsGrid}>
               <input
-                className={`modal-input ${errors.name ? 'error' : ''}`}
+                className={nameClassName}
                 type="text" name="name" placeholder="Your name *"
                 value={form.name} onChange={handleChange} autoComplete="off"
               />
               <input
-                className={`modal-input ${errors.email ? 'error' : ''}`}
+                className={emailClassName}
                 type="email" name="email" placeholder="Email address *"
                 value={form.email} onChange={handleChange} autoComplete="off"
               />
             </div>
             <textarea
-              className={`modal-input ${errors.message ? 'error' : ''}`}
+              className={messageClassName}
               name="message" placeholder="Tell us about your project... *"
               rows={4} value={form.message} onChange={handleChange}
-              style={{ marginBottom: '20px', display: 'block' }}
+              style={styles.textarea}
             />
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-              <p className={`modal-warning ${warning ? 'show' : ''}`} style={{ margin: 0, textAlign: 'left' }}>
+            <div style={styles.footerRow}>
+              <p className={warningClassName} style={styles.warning}>
                 ⚠ {warning}
               </p>
               <button
                 className="modal-submit-btn"
                 onClick={handleSubmit}
                 disabled={status === 'sending'}
-                style={{ marginLeft: 'auto' }}
+                style={styles.submitBtn}
               >
                 {status === 'sending' ? 'Sending…' : 'Submit Message →'}
               </button>
@@ -548,19 +604,40 @@ function ContactModal({ open, onClose }) {
       </div>
     </div>
   );
-}
+});
 
 export default function Footer() {
   const [modalOpen, setModalOpen] = useState(false);
 
+  // useCallback -> ContactModal ko stable reference milta hai (memo ke saath
+  // paired), warna har Footer render pe naya function ban ke ContactModal
+  // ka memo bekaar ho jaata
+  const handleModalClose = useCallback(() => setModalOpen(false), []);
+  const handleModalOpen  = useCallback(() => setModalOpen(true), []);
+
+  // useMemo -> link columns sirf ek dafa compute honge (footerLinks static hai)
+  const linkColumns = useMemo(
+    () => Object.values(footerLinks).map(({ title, links }, i) => (
+      <div key={i} className={`footer-area-l${i + 1}`}>
+        <p className="footer-col-title">{title}</p>
+        <ul style={styles.linksList}>
+          {links.map(link => (
+            <li key={link}><button className="footer-nav-btn">{link}</button></li>
+          ))}
+        </ul>
+      </div>
+    )),
+    []
+  );
+
   return (
-    <footer className="footer-root" style={{ padding: '56px 6% 24px' }}>
+    <footer className="footer-root" style={styles.footerRoot}>
       <style>{footerStyles}</style>
 
       <div className="footer-dither-wrap">
         <Dither
           waveSpeed={0.03} waveFrequency={3} waveAmplitude={0.3}
-          waveColor={[0.08, 0.12, 0.28]} colorNum={4} pixelSize={2}
+          waveColor={DITHER_WAVE_COLOR} colorNum={4} pixelSize={2}
           enableMouseInteraction={false}
         />
       </div>
@@ -568,47 +645,37 @@ export default function Footer() {
       <div className="footer-glow" />
       <div className="footer-divider-top" />
 
-      <ContactModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <ContactModal open={modalOpen} onClose={handleModalClose} />
 
       <div className="footer-content">
         <div className="footer-main-grid">
 
           {/* Brand */}
           <div className="footer-area-brand">
-            <img src={xLogo} alt="StudioX" style={{ width: '32px', height: '32px', objectFit: 'contain', marginBottom: '20px' }} />
+            <img src={xLogo} alt="StudioX" style={styles.brandLogo} />
             <p className="footer-brand-desc">
               Building digital products for the next generation of startups and enterprises.
             </p>
             <div className="footer-desktop-contact">
-              <div style={{ marginBottom: '10px' }}><MailButton href="/" /></div>
-              <div style={{ marginBottom: '24px' }}><WhatsAppButton href="/" /></div>
+              <div style={styles.mailWrap}><MailButton href="/" /></div>
+              <div style={styles.whatsappWrap}><WhatsAppButton href="/" /></div>
             </div>
-            <p className="footer-col-title" style={{ marginBottom: '12px' }}>Social Media</p>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <p className="footer-col-title" style={styles.socialTitle}>Social Media</p>
+            <div style={styles.socialRow}>
               <InstagramButton href="https://instagram.com" />
               <FacebookButton  href="https://facebook.com"  />
               <LinkedInButton  href="https://linkedin.com"  />
             </div>
           </div>
 
-          {/* Link columns */}
-          {Object.values(footerLinks).map(({ title, links }, i) => (
-            <div key={i} className={`footer-area-l${i + 1}`}>
-              <p className="footer-col-title">{title}</p>
-              <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                {links.map(link => (
-                  <li key={link}><button className="footer-nav-btn">{link}</button></li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {linkColumns}
 
           {/* Robot + CTA */}
           <div className="footer-area-cta">
             <div className="footer-robot-wrap">
-              <img src={robot} alt="Robot" style={{ width: '95px', objectFit: 'contain' }} />
+              <img src={robot} alt="Robot" style={styles.robotImg} />
             </div>
-            <button className="footer-contact-btn" onClick={() => setModalOpen(true)}>
+            <button className="footer-contact-btn" onClick={handleModalOpen}>
               Contact Us →
             </button>
           </div>
@@ -616,18 +683,11 @@ export default function Footer() {
         </div>
 
         <hr className="footer-divider-bottom" />
-        <div
-          className="footer-bottom-bar"
-          style={{
-            paddingTop: '18px', display: 'flex', alignItems: 'center',
-            justifyContent: 'space-between', maxWidth: '1200px',
-            margin: '0 auto', flexWrap: 'wrap', gap: '8px',
-          }}
-        >
-          <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>
+        <div className="footer-bottom-bar" style={styles.bottomBar}>
+          <p style={styles.copyright}>
             © 2025 Studioxenos.com — All Rights Reserved
           </p>
-          <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '12px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: 0 }}>
+          <p style={styles.crafted}>
             Crafted with precision
           </p>
         </div>

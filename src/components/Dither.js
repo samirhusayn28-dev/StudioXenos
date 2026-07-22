@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unknown-property */
-import { useRef, useEffect, useState, forwardRef } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo, memo, forwardRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { EffectComposer, wrapEffect } from '@react-three/postprocessing';
 import { Effect } from 'postprocessing';
@@ -16,6 +16,8 @@ void main() {
 }
 `;
 
+// octaves ab uniform hai (int uniforms glsl loop bound ke liye kaam nahi karte
+// on some drivers, isliye MAX_OCTAVES tak loop karke early-break karte hain)
 const waveFragmentShader = `
 precision highp float;
 uniform vec2 resolution;
@@ -27,6 +29,7 @@ uniform vec3 waveColor;
 uniform vec2 mousePos;
 uniform int enableMouseInteraction;
 uniform float mouseRadius;
+uniform int octaves;
 
 vec4 mod289(vec4 x) { return x - floor(x * (1.0/289.0)) * 289.0; }
 vec4 permute(vec4 x) { return mod289(((x * 34.0) + 1.0) * x); }
@@ -61,12 +64,13 @@ float cnoise(vec2 P) {
   return 2.3 * mix(n_x.x, n_x.y, fade_xy.y);
 }
 
-const int OCTAVES = 4;
+const int MAX_OCTAVES = 4;
 float fbm(vec2 p) {
   float value = 0.0;
   float amp = 1.0;
   float freq = waveFrequency;
-  for (int i = 0; i < OCTAVES; i++) {
+  for (int i = 0; i < MAX_OCTAVES; i++) {
+    if (i >= octaves) break;
     value += amp * abs(cnoise(p));
     p *= freq;
     amp *= waveAmplitude;
@@ -149,21 +153,25 @@ class RetroEffectImpl extends Effect {
 
 const WrappedRetro = wrapEffect(RetroEffectImpl);
 
-const RetroEffect = forwardRef((props, ref) => {
+// memo: colorNum/pixelSize change na hone par re-render skip
+const RetroEffect = memo(forwardRef((props, ref) => {
   const { colorNum, pixelSize } = props;
   return <WrappedRetro ref={ref} colorNum={colorNum} pixelSize={pixelSize} />;
-});
+}));
 RetroEffect.displayName = 'RetroEffect';
 
 function DitheredWaves({
   waveSpeed, waveFrequency, waveAmplitude, waveColor,
-  colorNum, pixelSize, disableAnimation, enableMouseInteraction, mouseRadius
+  colorNum, pixelSize, disableAnimation, enableMouseInteraction, mouseRadius,
+  octaves
 }) {
   const mesh = useRef(null);
   const mouseRef = useRef(new THREE.Vector2());
+  const rectRef = useRef(null);
   const { viewport, size, gl } = useThree();
 
-  const waveUniformsRef = useRef({
+  // useMemo -> sirf ek baar banega, har render pe naye THREE objects nahi banenge
+  const waveUniforms = useMemo(() => ({
     time: new THREE.Uniform(0),
     resolution: new THREE.Uniform(new THREE.Vector2(0, 0)),
     waveSpeed: new THREE.Uniform(waveSpeed),
@@ -172,39 +180,45 @@ function DitheredWaves({
     waveColor: new THREE.Uniform(new THREE.Color(...waveColor)),
     mousePos: new THREE.Uniform(new THREE.Vector2(0, 0)),
     enableMouseInteraction: new THREE.Uniform(enableMouseInteraction ? 1 : 0),
-    mouseRadius: new THREE.Uniform(mouseRadius)
-  });
+    mouseRadius: new THREE.Uniform(mouseRadius),
+    octaves: new THREE.Uniform(octaves)
+  }), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const dpr = gl.getPixelRatio();
     const w = Math.floor(size.width * dpr);
     const h = Math.floor(size.height * dpr);
-    const res = waveUniformsRef.current.resolution.value;
+    const res = waveUniforms.resolution.value;
     if (res.x !== w || res.y !== h) res.set(w, h);
-  }, [size, gl]);
+    // canvas resize hote hi bounding rect cache refresh karo
+    rectRef.current = gl.domElement.getBoundingClientRect();
+  }, [size, gl, waveUniforms]);
 
-  const prevColor = useRef([...waveColor]);
+  const prevColor = useRef(waveColor);
   useFrame(({ clock }) => {
-    const u = waveUniformsRef.current;
+    const u = waveUniforms;
     if (!disableAnimation) u.time.value = clock.getElapsedTime();
     if (u.waveSpeed.value !== waveSpeed) u.waveSpeed.value = waveSpeed;
     if (u.waveFrequency.value !== waveFrequency) u.waveFrequency.value = waveFrequency;
     if (u.waveAmplitude.value !== waveAmplitude) u.waveAmplitude.value = waveAmplitude;
-    if (!prevColor.current.every((v, i) => v === waveColor[i])) {
+    if (u.octaves.value !== octaves) u.octaves.value = octaves;
+    if (prevColor.current !== waveColor) {
       u.waveColor.value.set(...waveColor);
-      prevColor.current = [...waveColor];
+      prevColor.current = waveColor;
     }
-    u.enableMouseInteraction.value = enableMouseInteraction ? 1 : 0;
-    u.mouseRadius.value = mouseRadius;
+    const wantMouse = enableMouseInteraction ? 1 : 0;
+    if (u.enableMouseInteraction.value !== wantMouse) u.enableMouseInteraction.value = wantMouse;
+    if (u.mouseRadius.value !== mouseRadius) u.mouseRadius.value = mouseRadius;
     if (enableMouseInteraction) u.mousePos.value.copy(mouseRef.current);
   });
 
-  const handlePointerMove = e => {
+  // useCallback -> stable reference, getBoundingClientRect cached rect se (no reflow per move)
+  const handlePointerMove = useCallback((e) => {
     if (!enableMouseInteraction) return;
-    const rect = gl.domElement.getBoundingClientRect();
+    const rect = rectRef.current || gl.domElement.getBoundingClientRect();
     const dpr = gl.getPixelRatio();
     mouseRef.current.set((e.clientX - rect.left) * dpr, (e.clientY - rect.top) * dpr);
-  };
+  }, [enableMouseInteraction, gl]);
 
   return (
     <>
@@ -213,10 +227,10 @@ function DitheredWaves({
         <shaderMaterial
           vertexShader={waveVertexShader}
           fragmentShader={waveFragmentShader}
-          uniforms={waveUniformsRef.current}
+          uniforms={waveUniforms}
         />
       </mesh>
-      <EffectComposer>
+      <EffectComposer multisampling={0}>
         <RetroEffect colorNum={colorNum} pixelSize={pixelSize} />
       </EffectComposer>
       <mesh
@@ -232,6 +246,9 @@ function DitheredWaves({
   );
 }
 
+// memo -> parent re-render pe agar props same hain to yeh sub-tree skip ho jaaye
+const MemoizedDitheredWaves = memo(DitheredWaves);
+
 export default function Dither({
   waveSpeed = 0.05,
   waveFrequency = 3,
@@ -243,29 +260,47 @@ export default function Dither({
   enableMouseInteraction = true,
   mouseRadius = 1
 }) {
-  // Detect mobile/touch devices to keep things light — no hover concept
-  // on touch, and lower-end GPUs benefit from skipping antialiasing
-  // + reducing render resolution.
   const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
-    const checkMobile = () => {
-      const coarse = window.matchMedia('(pointer: coarse)').matches;
-      setIsMobile(window.innerWidth <= 768 || coarse);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+  // useCallback -> resize listener re-attach nahi hoga baar baar
+  const checkMobile = useCallback(() => {
+    const coarse = window.matchMedia('(pointer: coarse)').matches;
+    setIsMobile(window.innerWidth <= 768 || coarse);
   }, []);
+
+  useEffect(() => {
+    checkMobile();
+    // resize event ko debounce kiya taake continuous resize pe check baar baar na chale
+    let timeoutId;
+    const debounced = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(checkMobile, 150);
+    };
+    window.addEventListener('resize', debounced);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', debounced);
+    };
+  }, [checkMobile]);
+
+  // mobile pe shader lighter -> kam octaves (heavy fbm loop kam iterations)
+  const octaves = isMobile ? 2 : 4;
+
+  // canvas gl props ko memoize kiya taake Canvas ko naya object har render pe na mile
+  const glProps = useMemo(() => ({
+    antialias: !isMobile,
+    preserveDrawingBuffer: true,
+    powerPreference: isMobile ? 'low-power' : 'high-performance'
+  }), [isMobile]);
 
   return (
     <Canvas
       className="w-full h-full relative"
       camera={{ position: [0, 0, 6] }}
-      dpr={isMobile ? 0.75 : 1}
-      gl={{ antialias: !isMobile, preserveDrawingBuffer: true }}
+      dpr={isMobile ? 0.6 : 1}
+      gl={glProps}
     >
-      <DitheredWaves
+      <MemoizedDitheredWaves
         waveSpeed={waveSpeed}
         waveFrequency={waveFrequency}
         waveAmplitude={waveAmplitude}
@@ -275,6 +310,7 @@ export default function Dither({
         disableAnimation={disableAnimation}
         enableMouseInteraction={isMobile ? false : enableMouseInteraction}
         mouseRadius={mouseRadius}
+        octaves={octaves}
       />
     </Canvas>
   );

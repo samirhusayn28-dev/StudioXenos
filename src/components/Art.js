@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
 import img1 from '../components/assets/Artimg1.jpg';
 import img2 from '../components/assets/Artimg2.jpg';
 import img3 from '../components/assets/Artimg3.jpg';
@@ -33,6 +33,7 @@ const artStyles = `
     padding: 10px 26px;
     cursor: pointer;
     white-space: nowrap;
+    will-change: transform;
     transition: transform 0.25s ease, box-shadow 0.25s ease,
                 background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
     box-shadow: 0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.12);
@@ -104,6 +105,7 @@ const artStyles = `
     height: 600px;
     width: 100%;
     position: relative;
+    contain: layout paint;
   }
 
   /* Tablet */
@@ -132,6 +134,7 @@ const artStyles = `
   }
 `;
 
+// Static data - defined once outside component, never re-created on renders
 const galleryItems = [
   { image: img1, text: 'Design',   description: 'Crafting visual identities that speak louder than words. Every pixel placed with purpose and precision.' },
   { image: img2, text: 'Branding', description: 'Building brands that leave a lasting impression. From strategy to execution, we shape your story.' },
@@ -143,17 +146,37 @@ const galleryItems = [
   { image: img8, text: 'Creative', description: 'Bold ideas executed with craft. We push boundaries to make work that stands out in any crowd.' },
 ];
 
-export default function ArtGallery() {
+function ArtGallery() {
   const [bend, setBend] = useState(1);
+  const rafId = useRef(null);
+  const lastMobileState = useRef(null);
+
+  // Stable function reference - avoids re-creating on every render
+  const updateBend = useCallback(() => {
+    const isMobile = window.innerWidth <= 767;
+    // Skip state update entirely if breakpoint hasn't actually changed
+    if (lastMobileState.current === isMobile) return;
+    lastMobileState.current = isMobile;
+    setBend(isMobile ? 0.4 : 1);
+  }, []);
+
+  // rAF-throttled resize handler - stops layout thrashing during resize/rotate
+  const handleResize = useCallback(() => {
+    if (rafId.current) return;
+    rafId.current = requestAnimationFrame(() => {
+      rafId.current = null;
+      updateBend();
+    });
+  }, [updateBend]);
 
   useEffect(() => {
-    const updateBend = () => {
-      setBend(window.innerWidth <= 767 ? 0.4 : 1);
-    };
     updateBend();
-    window.addEventListener('resize', updateBend);
-    return () => window.removeEventListener('resize', updateBend);
-  }, []);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+    };
+  }, [updateBend, handleResize]);
 
   return (
     <section
@@ -206,3 +229,5 @@ export default function ArtGallery() {
     </section>
   );
 }
+
+export default memo(ArtGallery);

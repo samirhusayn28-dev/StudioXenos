@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 
-// Swap `team` array data later — layout & role icon are driven by `type` field.
 const team = [
   { name: 'SAMEER HUSSAIN', role: 'Fullstack Developer', type: 'dev',        facebook: '#', github: '#', linkedin: '#' },
   { name: 'MUKHTAR SHAIKH', role: 'Fullstack Developer',   type: 'dev',        facebook: '#', github: '#', linkedin: '#' },
@@ -8,19 +7,25 @@ const team = [
   { name: 'FURQAN HAIDER',  role: 'Marketing Lead',      type: 'marketing', facebook: '#', github: '#', linkedin: '#' },
 ];
 
-// Reads the app's existing [data-theme] attribute (set by ThemeToggle) and
-// reacts live if the user flips the toggle — no separate context needed here.
-function useAppTheme() {
-  const readTheme = () =>
+function readTheme() {
+  return (
     document.documentElement.getAttribute('data-theme') ||
     document.body.getAttribute('data-theme') ||
-    'dark';
+    'dark'
+  );
+}
 
+function useAppTheme() {
   const [theme, setTheme] = useState(readTheme);
 
   useEffect(() => {
     const targets = [document.documentElement, document.body];
-    const observer = new MutationObserver(() => setTheme(readTheme()));
+    const observer = new MutationObserver(() => {
+      setTheme((prev) => {
+        const next = readTheme();
+        return prev === next ? prev : next;
+      });
+    });
     targets.forEach((t) =>
       observer.observe(t, { attributes: true, attributeFilter: ['data-theme'] })
     );
@@ -30,9 +35,6 @@ function useAppTheme() {
   return theme;
 }
 
-// Self-contained palette so the section always looks right, whether or not
-// the host app's global CSS vars are present — values are picked to match
-// this project's existing --text-primary / --glass-bg / --card-shadow tokens.
 const PALETTE = {
   dark: {
     textPrimary: '#f0ebe4',
@@ -107,7 +109,7 @@ const css = `
 
   .ot-title-plain {
     color: var(--ot-text-primary);
-    transition: color 0.4s ease;
+    transition: color 0.3s ease;
   }
 
   .ot-title-gold {
@@ -142,21 +144,21 @@ const css = `
     padding: 28px 20px;
     border-radius: 20px;
     background: var(--ot-glass-bg);
-    backdrop-filter: blur(34px) saturate(140%);
-    -webkit-backdrop-filter: blur(34px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(130%);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
     border: 1px solid var(--ot-glass-border);
     box-shadow:
-      0 25px 60px var(--ot-card-shadow),
-      0 10px 25px var(--ot-card-shadow),
+      0 16px 36px var(--ot-card-shadow),
       inset 0 1px 0 rgba(255,255,255,0.2);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease,
-                background 0.4s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
     overflow: hidden;
+    will-change: transform;
+    transform: translate3d(0,0,0);
   }
 
   .card::before {
@@ -165,15 +167,14 @@ const css = `
     inset: -40%;
     background: radial-gradient(circle, var(--glow) 0%, transparent 60%);
     opacity: 0;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.3s ease;
     pointer-events: none;
   }
 
   .card:hover {
-    transform: translateY(-8px);
+    transform: translate3d(0, -6px, 0);
     box-shadow:
-      0 35px 70px var(--ot-card-shadow-h),
-      0 15px 30px var(--ot-card-shadow-h),
+      0 22px 44px var(--ot-card-shadow-h),
       inset 0 1px 0 rgba(255,255,255,0.25);
   }
 
@@ -192,14 +193,13 @@ const css = `
     pointer-events: none;
     background-repeat: repeat;
     background-size: 110px 110px;
-    animation: pattern-drift 18s linear infinite;
-    transition: transform 0.5s ease;
-    transform-origin: center;
+    animation: pattern-drift 20s linear infinite;
+    animation-play-state: paused;
+    will-change: background-position;
   }
 
   .card:hover .card-pattern {
-    animation-duration: 5s;
-    transform: scale(1.12) rotate(4deg);
+    animation-play-state: running;
   }
 
   @keyframes pattern-drift {
@@ -208,8 +208,7 @@ const css = `
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .card-pattern { animation: none; }
-    .card:hover .card-pattern { transform: none; }
+    .card-pattern { animation: none !important; }
   }
 
   .card-content {
@@ -313,11 +312,11 @@ const css = `
 
   .card-socials-btn:hover {
     opacity: 1;
-    transform: translateY(-3px);
+    transform: translateY(-2px);
   }
 `;
 
-function RoleIcon({ type }) {
+const RoleIcon = memo(function RoleIcon({ type }) {
   if (type === 'dev') {
     return <span className="card-code-tag">{'</>'}</span>;
   }
@@ -337,18 +336,14 @@ function RoleIcon({ type }) {
       <path d="M17 9a3 3 0 010 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
     </svg>
   );
-}
+});
 
-// Each type gets one icon "stamped" at several hand-placed positions/rotations/scales
-// inside a 260x260 tile, so the repeat reads as scattered rather than a grid.
-// {{C}} gets swapped for the role's accent color (theme-aware) at render time.
 const ICON_PATHS = {
   dev: `<text x='0' y='16' font-family='ui-monospace, SFMono-Regular, Consolas, Menlo, monospace' font-weight='700' font-size='15' fill='{{C}}'>&lt;/&gt;</text>`,
   design: `<g fill='none' stroke='{{C}}' stroke-width='1.6'><path d='M12 19l7-7 3 3-7 7-3-3z'/><path d='M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z'/><circle cx='11' cy='11' r='2'/></g>`,
   marketing: `<g fill='none' stroke='{{C}}' stroke-width='1.6'><path d='M3 11v2a2 2 0 002 2h1l1 5h2l-1-5h2l7 4V6l-7 4H6a2 2 0 00-2 2H3z'/><path d='M17 9a3 3 0 010 6'/></g>`,
 };
 
-// Matches the CSS accent overrides above so the pattern stays legible on both themes.
 const ACCENT_COLOR = {
   dark: { dev: '#58dcb4', design: '#b48cff', marketing: '#ff965a' },
   light: { dev: '#0e9678', design: '#7c3aed', marketing: '#d9540a' },
@@ -370,7 +365,12 @@ const SCATTER = [
   { x: 235, y: 215, r: 20, s: 0.55 },
 ];
 
+const patternCache = new Map();
+
 function patternBg(type, theme) {
+  const cacheKey = type + ':' + theme;
+  if (patternCache.has(cacheKey)) return patternCache.get(cacheKey);
+
   const palette = ACCENT_COLOR[theme] || ACCENT_COLOR.dark;
   const iconMarkup = ICON_PATHS[type].split('{{C}}').join(palette[type]);
   const uses = SCATTER
@@ -380,19 +380,28 @@ function patternBg(type, theme) {
     )
     .join('');
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><defs><g id='i'>${iconMarkup}</g></defs>${uses}</svg>`;
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  const result = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  patternCache.set(cacheKey, result);
+  return result;
 }
 
-function TeamCard({ member, theme }) {
+const TeamCard = memo(function TeamCard({ member, theme }) {
+  const patternStyle = useMemo(
+    () => ({ backgroundImage: patternBg(member.type, theme) }),
+    [member.type, theme]
+  );
+
+  const nameLines = useMemo(() => member.name.split(' '), [member.name]);
+
   return (
     <div className={`card card-${member.type}`}>
-      <div className="card-pattern" style={{ backgroundImage: patternBg(member.type, theme) }} />
+      <div className="card-pattern" style={patternStyle} />
       <div className="card-content">
         <div className="card-icon">
           <RoleIcon type={member.type} />
         </div>
         <div className="card-name">
-          {member.name.split(' ').map((word, i) => (
+          {nameLines.map((word, i) => (
             <span className="card-name-line" key={i}>{word}</span>
           ))}
         </div>
@@ -418,30 +427,41 @@ function TeamCard({ member, theme }) {
       </div>
     </div>
   );
-}
+});
+
+const GlobalStyle = memo(function GlobalStyle() {
+  return <style>{css}</style>;
+});
 
 export default function OurTeam() {
   const theme = useAppTheme();
-  const p = PALETTE[theme] || PALETTE.dark;
-  const accents = ACCENT_COLOR[theme] || ACCENT_COLOR.dark;
 
-  const sectionVars = {
-    '--ot-text-primary': p.textPrimary,
-    '--ot-text-sub': p.textSub,
-    '--ot-glass-bg': p.glassBg,
-    '--ot-glass-border': p.glassBorder,
-    '--ot-card-shadow': p.cardShadow,
-    '--ot-card-shadow-h': p.cardShadowH,
-    '--ot-btn-bg': p.btnBg,
-    '--ot-btn-border': p.btnBorder,
-    '--ot-accent-dev': accents.dev,
-    '--ot-accent-design': accents.design,
-    '--ot-accent-marketing': accents.marketing,
-  };
+  const sectionVars = useMemo(() => {
+    const p = PALETTE[theme] || PALETTE.dark;
+    const accents = ACCENT_COLOR[theme] || ACCENT_COLOR.dark;
+    return {
+      '--ot-text-primary': p.textPrimary,
+      '--ot-text-sub': p.textSub,
+      '--ot-glass-bg': p.glassBg,
+      '--ot-glass-border': p.glassBorder,
+      '--ot-card-shadow': p.cardShadow,
+      '--ot-card-shadow-h': p.cardShadowH,
+      '--ot-btn-bg': p.btnBg,
+      '--ot-btn-border': p.btnBorder,
+      '--ot-accent-dev': accents.dev,
+      '--ot-accent-design': accents.design,
+      '--ot-accent-marketing': accents.marketing,
+    };
+  }, [theme]);
+
+  const cards = useMemo(
+    () => team.map((member, i) => <TeamCard key={i} member={member} theme={theme} />),
+    [theme]
+  );
 
   return (
     <section id="our-team" className="ot-section" style={sectionVars}>
-      <style>{css}</style>
+      <GlobalStyle />
 
       <div className="ot-header">
         <div className="ot-badge">
@@ -456,9 +476,7 @@ export default function OurTeam() {
       </div>
 
       <div className="ot-wrap">
-        {team.map((member, i) => (
-          <TeamCard key={i} member={member} theme={theme} />
-        ))}
+        {cards}
       </div>
     </section>
   );

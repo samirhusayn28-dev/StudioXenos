@@ -1,5 +1,5 @@
 import { Camera, Mesh, Plane, Program, Renderer, Texture, Transform } from 'ogl';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 
 function debounce(func, wait) {
   let timeout;
@@ -372,44 +372,71 @@ class App {
   }
 }
 
-export default function CircularGallery({
+const HOLD_DURATION = 2000;
+
+function CircularGallery({
   items,
   bend = 1,
   borderRadius = 0.05,
   scrollSpeed = 2,
   scrollEase = 0.05
 }) {
-  const containerRef    = useRef(null);
-  const appRef          = useRef(null);
-  const holdTimerRef    = useRef(null);
-  const animFrameRef    = useRef(null);
+  const containerRef     = useRef(null);
+  const appRef           = useRef(null);
+  const holdTimerRef     = useRef(null);
+  const animFrameRef     = useRef(null);
   const holdStartTimeRef = useRef(null);
+
+  // Hold-progress bar: driven entirely via direct DOM refs, NOT React state.
+  // Updating state 60x/sec during a hold would trigger 60 re-renders/sec;
+  // instead we mutate style properties directly on the node every frame,
+  // which the browser can composite without touching React's render tree.
+  const barRef  = useRef(null);
+  const fillRef = useRef(null);
+
+  // Only two lightweight state values remain: whether the bar should be
+  // mounted at all, and the fully-resolved modal item. Both change rarely.
+  const [holdVisible, setHoldVisible] = useState(false);
   const [modal, setModal] = useState(null);
-  const [progressState, setProgressState] = useState(null);
 
-  const HOLD_DURATION = 2000;
-
-  const cancelHold = () => {
-    if (holdTimerRef.current)  { clearTimeout(holdTimerRef.current);      holdTimerRef.current  = null; }
-    if (animFrameRef.current)  { cancelAnimationFrame(animFrameRef.current); animFrameRef.current = null; }
+  const cancelHold = useCallback(() => {
+    if (holdTimerRef.current) { clearTimeout(holdTimerRef.current); holdTimerRef.current = null; }
+    if (animFrameRef.current) { cancelAnimationFrame(animFrameRef.current); animFrameRef.current = null; }
     holdStartTimeRef.current = null;
-    setProgressState(null);
-  };
+    setHoldVisible(false);
+  }, []);
 
-  const startHold = (idx, rect) => {
+  const startHold = useCallback((idx, rect) => {
     cancelHold();
     const { cx, cy, pw, ph } = rect;
     holdStartTimeRef.current = performance.now();
+    setHoldVisible(true);
 
     const animate = (now) => {
       const elapsed = now - holdStartTimeRef.current;
-      const pct     = Math.min(elapsed / HOLD_DURATION, 1);
-      const scaleY  = 0.6 + pct * 0.6;
-      const scaleX  = 0.88 + pct * 0.12;
-      const glow    = 0.2 + pct * 0.7;
+      const pct      = Math.min(elapsed / HOLD_DURATION, 1);
+      const scaleY   = 0.6 + pct * 0.6;
+      const scaleX   = 0.88 + pct * 0.12;
+      const glow     = 0.2 + pct * 0.7;
       const glowSize = 4 + pct * 16;
-      setProgressState({ cx, cy, pw, ph, pct, scaleY, scaleX, glow, glowSize });
-      if (pct < 1) animFrameRef.current = requestAnimationFrame(animate);
+
+      const bar = barRef.current;
+      const fill = fillRef.current;
+      if (bar) {
+        bar.style.left = `${cx - pw * 0.35}px`;
+        bar.style.top = `${cy + ph * 0.5 - 14}px`;
+        bar.style.width = `${pw * 0.7}px`;
+        bar.style.transform = `scaleY(${scaleY}) scaleX(${scaleX})`;
+        bar.style.boxShadow = `0 0 ${glowSize}px rgba(0,122,255,${glow})`;
+      }
+      if (fill) {
+        fill.style.width = `${pct * 100}%`;
+        fill.style.boxShadow = `0 0 ${glowSize + 4}px rgba(0,122,255,${glow + 0.1})`;
+      }
+
+      if (pct < 1) {
+        animFrameRef.current = requestAnimationFrame(animate);
+      }
     };
     animFrameRef.current = requestAnimationFrame(animate);
 
@@ -418,7 +445,10 @@ export default function CircularGallery({
       setModal(items[realIndex]);
       cancelHold();
     }, HOLD_DURATION);
-  };
+  }, [cancelHold, items]);
+
+  const closeModal = useCallback(() => setModal(null), []);
+  const stopPropagation = useCallback((e) => e.stopPropagation(), []);
 
   useEffect(() => {
     appRef.current = new App(containerRef.current, {
@@ -461,7 +491,18 @@ export default function CircularGallery({
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('touchmove', onMove);
     };
-  }, [items, bend, borderRadius, scrollSpeed, scrollEase]);
+  }, [items, bend, borderRadius, scrollSpeed, scrollEase, startHold, cancelHold]);
+
+  const modalImgStyle = useMemo(() => ({
+    maxWidth: 'min(92vw, 920px)',
+    maxHeight: 'min(72vh, 680px)',
+    width: 'auto',
+    height: 'auto',
+    objectFit: 'contain',
+    borderRadius: '18px',
+    boxShadow: '0 48px 120px rgba(0,0,0,0.85), 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)',
+    animation: 'quickLook 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+  }), []);
 
   return (
     <>
@@ -471,31 +512,29 @@ export default function CircularGallery({
           ref={containerRef}
         />
 
-        {progressState && (
+        {holdVisible && (
           <div
+            ref={barRef}
             style={{
               position: 'absolute',
-              left:   progressState.cx - progressState.pw * 0.35,
-              top:    progressState.cy + progressState.ph * 0.5 - 14,
-              width:  progressState.pw * 0.7,
               height: '7px',
               background: 'rgba(255,255,255,0.12)',
               borderRadius: '999px',
               pointerEvents: 'none',
               zIndex: 20,
               overflow: 'hidden',
-              transform: `scaleY(${progressState.scaleY}) scaleX(${progressState.scaleX})`,
               transformOrigin: 'center',
-              boxShadow: `0 0 ${progressState.glowSize}px rgba(0,122,255,${progressState.glow})`,
+              willChange: 'transform, box-shadow',
             }}
           >
             <div
+              ref={fillRef}
               style={{
                 height: '100%',
-                width:  progressState.pct * 100 + '%',
+                width: '0%',
                 background: 'linear-gradient(90deg, #007AFF 0%, #34AADC 100%)',
                 borderRadius: '999px',
-                boxShadow: `0 0 ${progressState.glowSize + 4}px rgba(0,122,255,${progressState.glow + 0.1})`,
+                willChange: 'width, box-shadow',
               }}
             />
           </div>
@@ -504,7 +543,7 @@ export default function CircularGallery({
 
       {modal && (
         <div
-          onClick={() => setModal(null)}
+          onClick={closeModal}
           style={{
             position: 'fixed',
             inset: 0,
@@ -536,22 +575,13 @@ export default function CircularGallery({
           `}</style>
 
           <div
-            onClick={e => e.stopPropagation()}
+            onClick={stopPropagation}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', padding: '0 16px' }}
           >
             <img
               src={modal.image}
               alt={modal.text}
-              style={{
-                maxWidth: 'min(92vw, 920px)',
-                maxHeight: 'min(72vh, 680px)',
-                width: 'auto',
-                height: 'auto',
-                objectFit: 'contain',
-                borderRadius: '18px',
-                boxShadow: '0 48px 120px rgba(0,0,0,0.85), 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)',
-                animation: 'quickLook 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards',
-              }}
+              style={modalImgStyle}
             />
             <div
               style={{
@@ -581,3 +611,5 @@ export default function CircularGallery({
     </>
   );
 }
+
+export default memo(CircularGallery);

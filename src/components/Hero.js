@@ -1,15 +1,15 @@
 // src/components/Hero.jsx
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback, useMemo, memo } from "react";
 import Navbar from "./Navbar";
 import Robot3D from "../components/Robot3D";
 
 const heroStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Outfit:wght@300;400;500&family=Poppins:wght@600;700;800&display=swap');
 
-  /* ── Keyframes ── */
+  /* ── Keyframes (lighter blur values = cheaper to composite) ── */
   @keyframes blurSharp {
-    0%   { opacity: 0; filter: blur(32px); transform: translateY(22px); }
-    60%  { filter: blur(6px); opacity: 0.8; }
+    0%   { opacity: 0; filter: blur(14px); transform: translateY(18px); }
+    60%  { filter: blur(4px); opacity: 0.85; }
     100% { opacity: 1; filter: blur(0); transform: translateY(0); }
   }
   @keyframes lineGrow {
@@ -18,31 +18,31 @@ const heroStyles = `
   }
   @keyframes arrowFloat {
     0%, 100% { transform: translateY(0px); opacity: 0.6; }
-    50%       { transform: translateY(7px); opacity: 1; }
+    50%       { transform: translateY(6px); opacity: 1; }
   }
   @keyframes arrowFadeIn {
-    0%   { opacity: 0; transform: translateY(-10px); }
+    0%   { opacity: 0; transform: translateY(-8px); }
     100% { opacity: 1; transform: translateY(0); }
   }
   @keyframes heroSlam {
-    0%   { transform: scale(1)    translateY(0);     filter: blur(0px);  opacity: 1; }
-    100% { transform: scale(1.06) translateY(-40px); filter: blur(18px); opacity: 0; }
+    0%   { transform: scale(1)    translateY(0);     filter: blur(0px); opacity: 1; }
+    100% { transform: scale(1.04) translateY(-30px); filter: blur(8px); opacity: 0; }
   }
   @keyframes nextSlam {
-    0%   { transform: scale(0.94) translateY(30px); filter: blur(16px); opacity: 0; }
-    100% { transform: scale(1)    translateY(0);    filter: blur(0px);  opacity: 1; }
+    0%   { transform: scale(0.96) translateY(24px); filter: blur(8px); opacity: 0; }
+    100% { transform: scale(1)    translateY(0);    filter: blur(0px); opacity: 1; }
   }
   @keyframes bubbleIn {
-    0%   { opacity: 0; transform: scale(0.80) translateY(10px); }
-    65%  { transform: scale(1.02) translateY(-2px); }
+    0%   { opacity: 0; transform: scale(0.85) translateY(8px); }
+    65%  { transform: scale(1.015) translateY(-1px); }
     100% { opacity: 1; transform: scale(1) translateY(0); }
   }
   @keyframes dotBounce {
     0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-    40%           { transform: translateY(-5px); opacity: 1; }
+    40%           { transform: translateY(-4px); opacity: 1; }
   }
   @keyframes chipsIn {
-    0%   { opacity: 0; transform: translateY(5px); }
+    0%   { opacity: 0; transform: translateY(4px); }
     100% { opacity: 1; transform: translateY(0); }
   }
   @keyframes cursorBlink {
@@ -51,36 +51,32 @@ const heroStyles = `
   }
   @keyframes pulseGlow {
     0%,100% { box-shadow: 0 0 4px rgba(49,92,253,0.6); }
-    50%      { box-shadow: 0 0 10px rgba(49,92,253,1); }
-  }
-  @keyframes fadeSlideUp {
-    0%   { opacity: 0; transform: translateY(16px); }
-    100% { opacity: 1; transform: translateY(0); }
+    50%      { box-shadow: 0 0 8px rgba(49,92,253,0.9); }
   }
 
-  /* ── Animated entry classes ── */
-  .hero-h1  { animation: blurSharp 1.1s cubic-bezier(0.16,1,0.3,1) 0.50s both; }
-  .hero-h2  { animation: blurSharp 1.1s cubic-bezier(0.16,1,0.3,1) 0.68s both; }
-  .hero-h3  { animation: blurSharp 1.1s cubic-bezier(0.16,1,0.3,1) 0.84s both; }
-  .hero-hr  { animation: lineGrow  0.8s cubic-bezier(0.16,1,0.3,1) 1.00s both; transform-origin: left; }
-  .hero-sub { animation: blurSharp 0.9s cubic-bezier(0.16,1,0.3,1) 1.12s both; }
-  .hero-btn { animation: blurSharp 0.9s cubic-bezier(0.16,1,0.3,1) 1.26s both; }
-  .hero-scroll-arrow { animation: arrowFadeIn 1s cubic-bezier(0.16,1,0.3,1) 1.6s both; }
+  /* ── Animated entry classes (will-change = browser preps GPU layer early) ── */
+  .hero-h1  { animation: blurSharp 0.85s cubic-bezier(0.16,1,0.3,1) 0.40s both; will-change: transform, opacity, filter; }
+  .hero-h2  { animation: blurSharp 0.85s cubic-bezier(0.16,1,0.3,1) 0.54s both; will-change: transform, opacity, filter; }
+  .hero-h3  { animation: blurSharp 0.85s cubic-bezier(0.16,1,0.3,1) 0.68s both; will-change: transform, opacity, filter; }
+  .hero-hr  { animation: lineGrow  0.7s cubic-bezier(0.16,1,0.3,1) 0.82s both; transform-origin: left; will-change: transform; }
+  .hero-sub { animation: blurSharp 0.75s cubic-bezier(0.16,1,0.3,1) 0.92s both; will-change: transform, opacity; }
+  .hero-btn { animation: blurSharp 0.75s cubic-bezier(0.16,1,0.3,1) 1.04s both; will-change: transform, opacity; }
+  .hero-scroll-arrow { animation: arrowFadeIn 0.8s cubic-bezier(0.16,1,0.3,1) 1.3s both; }
   .hero-arrow-icon   { animation: arrowFloat 1.8s ease-in-out infinite; }
-  .hero-slam-out { animation: heroSlam 0.55s cubic-bezier(0.4,0,0.2,1) forwards; }
-  .next-slam-in  { animation: nextSlam 0.65s cubic-bezier(0.16,1,0.3,1) 0.28s both; }
+  .hero-slam-out { animation: heroSlam 0.45s cubic-bezier(0.4,0,0.2,1) forwards; will-change: transform, opacity, filter; }
+  .next-slam-in  { animation: nextSlam 0.5s cubic-bezier(0.16,1,0.3,1) 0.22s both; will-change: transform, opacity, filter; }
 
   /* ── Book Button ── */
   .hero-book-btn {
     font-family: 'Poppins', sans-serif;
     position: relative; overflow: hidden;
     background: rgba(255,255,255,0.10);
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255,255,255,0.22);
     border-radius: 999px; color: rgba(255,255,255,0.90);
     font-size: 0.82rem; font-weight: 600; letter-spacing: 0.07em;
     padding: 11px 28px; cursor: pointer; white-space: nowrap;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
     box-shadow: 0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.14);
   }
   [data-theme="light"] .hero-book-btn {
@@ -94,7 +90,7 @@ const heroStyles = `
     box-shadow: 0 6px 24px rgba(49,92,253,0.40), inset 0 1px 0 rgba(255,255,255,0.18);
   }
   .hero-book-btn .txt-default,
-  .hero-book-btn .txt-hover { display: block; transition: transform 0.3s ease, opacity 0.3s ease; }
+  .hero-book-btn .txt-hover { display: block; transition: transform 0.25s ease, opacity 0.25s ease; }
   .hero-book-btn .txt-hover {
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
@@ -108,21 +104,19 @@ const heroStyles = `
   .hero-scroll-btn {
     background: none; border: none; cursor: pointer;
     display: flex; flex-direction: column; align-items: center;
-    gap: 8px; padding: 0; transition: opacity 0.25s ease;
+    gap: 8px; padding: 0; transition: opacity 0.2s ease;
   }
   .hero-scroll-btn:hover { opacity: 0.6; }
 
   /* ── Bubble: shared base ── */
-  .robot-bubble-wrap {
-    animation: bubbleIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
-  }
+  .robot-bubble-wrap { animation: bubbleIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; will-change: transform, opacity; }
 
   .robot-bubble-box {
     position: relative;
-    background: rgba(6, 11, 24, 0.88);
+    background: rgba(6, 11, 24, 0.90);
     border: 1px solid rgba(49,92,253,0.38);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-radius: 16px 16px 16px 4px;
     padding: 14px 16px 12px;
     max-width: 220px;
@@ -131,10 +125,10 @@ const heroStyles = `
       0 12px 40px rgba(0,0,0,0.55),
       0 0 0 1px rgba(255,255,255,0.04) inset,
       0 1px 0 rgba(255,255,255,0.07) inset,
-      0 0 28px rgba(49,92,253,0.12);
+      0 0 20px rgba(49,92,253,0.10);
   }
   [data-theme="light"] .robot-bubble-box {
-    background: rgba(255,253,250,0.96);
+    background: rgba(255,253,250,0.97);
     border-color: rgba(196,122,48,0.30);
     box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.03) inset;
   }
@@ -146,17 +140,13 @@ const heroStyles = `
     width: 0; height: 0;
     border-left: 9px solid transparent;
     border-right: 5px solid transparent;
-    border-top: 10px solid rgba(6,11,24,0.88);
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    border-top: 10px solid rgba(6,11,24,0.90);
   }
   [data-theme="light"] .robot-bubble-box::after {
-    border-top-color: rgba(255,253,250,0.96);
+    border-top-color: rgba(255,253,250,0.97);
   }
 
-  .robot-name-badge {
-    display: flex; align-items: center; gap: 6px;
-    margin-bottom: 8px;
-  }
+  .robot-name-badge { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
   .robot-name-dot {
     width: 6px; height: 6px; border-radius: 50%;
     background: #315cfd;
@@ -184,9 +174,7 @@ const heroStyles = `
     margin-left: 2px; vertical-align: middle;
     animation: cursorBlink 0.65s ease-in-out infinite;
   }
-  .robot-dots {
-    display: flex; align-items: center; gap: 4px; padding: 3px 0;
-  }
+  .robot-dots { display: flex; align-items: center; gap: 4px; padding: 3px 0; }
   .robot-dots span {
     width: 6px; height: 6px; border-radius: 50%;
     background: rgba(49,92,253,0.75);
@@ -198,7 +186,7 @@ const heroStyles = `
   .robot-chips {
     display: flex; flex-wrap: wrap; gap: 5px;
     margin-top: 10px;
-    animation: chipsIn 0.3s ease forwards;
+    animation: chipsIn 0.25s ease forwards;
   }
   .robot-chip {
     font-family: 'Outfit', sans-serif;
@@ -208,7 +196,7 @@ const heroStyles = `
     background: rgba(49,92,253,0.10);
     color: rgba(170,195,255,0.9);
     cursor: pointer; pointer-events: all;
-    transition: background 0.2s, transform 0.15s, border-color 0.2s;
+    transition: background 0.15s, transform 0.12s, border-color 0.15s;
     white-space: nowrap;
   }
   [data-theme="light"] .robot-chip {
@@ -227,7 +215,7 @@ const heroStyles = `
     position: absolute;
     top: 20%; left: 8%;
     z-index: 25;
-    animation: bubbleIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.8s both;
+    animation: bubbleIn 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.7s both;
   }
 
   /* ── Desktop layout ── */
@@ -236,10 +224,7 @@ const heroStyles = `
     display: flex; align-items: center;
     padding: 0 6%; overflow: hidden;
   }
-  .hero-text-wrap {
-    width: min(760px, 52%);
-    position: relative; z-index: 2;
-  }
+  .hero-text-wrap { width: min(760px, 52%); position: relative; z-index: 2; }
   .hero-robot-wrap {
     position: absolute;
     right: -2%; top: 0; bottom: 0;
@@ -250,80 +235,55 @@ const heroStyles = `
   @media (min-width: 768px) and (max-width: 1023px) {
     .hero-text-wrap { width: min(580px, 60%); }
     .hero-robot-wrap { width: 48%; right: -4%; }
+    .hero-title-line { font-size: clamp(40px, 6.5vw, 78px) !important; }
   }
 
-  /* ── Mobile ── */
+  /* ── Mobile (≤767px) ── */
   @media (max-width: 767px) {
-    .hero-inner {
-      padding: 0;
-      align-items: flex-end;
-      justify-content: center;
-    }
+    .hero-inner { padding: 0; align-items: flex-end; justify-content: center; }
 
-    /* Robot fills screen as faded background */
     .hero-robot-wrap {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      right: 0;
-      opacity: 0.28;
-      pointer-events: none;
+      position: absolute; inset: 0; width: 100%; right: 0;
+      opacity: 0.28; pointer-events: none;
     }
 
-    /* Text card: bottom of screen, full width */
     .hero-text-wrap {
-      position: relative;
-      z-index: 10;
-      width: 100% !important;
-      max-width: 100% !important;
-      padding: 36px 24px 44px !important;
-      background: linear-gradient(
-        to top,
-        rgba(8,13,20,0.98) 0%,
-        rgba(8,13,20,0.90) 65%,
-        rgba(8,13,20,0.0) 100%
-      );
+      position: relative; z-index: 10;
+      width: 100% !important; max-width: 100% !important;
+      padding: 32px 22px 40px !important;
+      background: linear-gradient(to top,
+        rgba(8,13,20,0.98) 0%, rgba(8,13,20,0.90) 65%, rgba(8,13,20,0.0) 100%);
     }
     [data-theme="light"] .hero-text-wrap {
-      background: linear-gradient(
-        to top,
-        rgba(245,240,232,0.98) 0%,
-        rgba(245,240,232,0.90) 65%,
-        rgba(245,240,232,0.0) 100%
-      );
+      background: linear-gradient(to top,
+        rgba(245,240,232,0.98) 0%, rgba(245,240,232,0.90) 65%, rgba(245,240,232,0.0) 100%);
     }
 
+    /* Fixed: gentler vw scaling so text doesn't blow up on small phones */
     .hero-title-line {
-      font-size: clamp(38px, 11vw, 56px) !important;
+      font-size: clamp(30px, 8.5vw, 48px) !important;
+      line-height: 1.02 !important;
     }
-    .hero-hr-line {
-      margin: 18px 0 14px !important;
-      width: 36px !important;
-    }
-    .hero-sub-text {
-      display: none !important;
-    }
-    .hero-meta-row {
-      display: flex !important;
+    .hero-hr-line { margin: 16px 0 12px !important; width: 32px !important; }
+    .hero-sub-text { display: none !important; }
+    .hero-meta-row { display: flex !important; }
+    .hero-book-btn { width: 100%; padding: 14px 28px; font-size: 0.9rem; text-align: center; }
+    .hero-scroll-arrow { display: none !important; }
+
+    /* Heavy backdrop-filter is expensive on low-end/mid phones — lighten it here */
+    .robot-bubble-box {
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
     }
     .hero-book-btn {
-      width: 100%;
-      padding: 14px 28px;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-    .hero-scroll-arrow {
-      display: none !important;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
   }
 
   /* ── Mobile meta row (tags) ── */
   .hero-meta-row {
-    display: none;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
+    display: none; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
   }
   .hero-meta-tag {
     font-family: 'Outfit', sans-serif;
@@ -342,44 +302,42 @@ const heroStyles = `
 
   /* ── Mobile bubble card ── */
   .hero-mobile-bubble-wrap {
-    position: absolute;
-    top: 80px;
-    right: 16px;
-    z-index: 30;
-    animation: bubbleIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 1.8s both;
+    position: absolute; top: 80px; right: 16px; z-index: 30;
+    animation: bubbleIn 0.4s cubic-bezier(0.34,1.56,0.64,1) 1.3s both;
     opacity: 0;
   }
   .hero-mobile-bubble-wrap .robot-bubble-box {
-    max-width: 185px;
-    min-width: 120px;
+    max-width: 185px; min-width: 120px;
     padding: 12px 14px 10px;
     border-radius: 16px 16px 4px 16px;
   }
-  /* Flip tail for right-aligned bubble */
   .hero-mobile-bubble-wrap .robot-bubble-box::after {
-    bottom: -9px;
-    left: auto;
-    right: 14px;
+    bottom: -9px; left: auto; right: 14px;
     border-left: 5px solid transparent;
     border-right: 9px solid transparent;
-    border-top: 10px solid rgba(6,11,24,0.88);
+    border-top: 10px solid rgba(6,11,24,0.90);
   }
   [data-theme="light"] .hero-mobile-bubble-wrap .robot-bubble-box::after {
-    border-top-color: rgba(255,253,250,0.96);
+    border-top-color: rgba(255,253,250,0.97);
   }
-  .hero-mobile-bubble-wrap .robot-bubble-msg {
-    font-size: 12px;
-    line-height: 1.55;
-  }
+  .hero-mobile-bubble-wrap .robot-bubble-msg { font-size: 12px; line-height: 1.55; }
   .hero-mobile-bubble-wrap .robot-chips { gap: 4px; margin-top: 8px; }
   .hero-mobile-bubble-wrap .robot-chip  { font-size: 10px; padding: 3px 8px; }
 
-  /* ── Extra small ── */
+  /* ── Extra small (≤380px) ── */
   @media (max-width: 380px) {
-    .hero-text-wrap { padding: 28px 18px 38px !important; }
-    .hero-title-line { font-size: clamp(33px, 10.5vw, 46px) !important; }
-    .hero-mobile-bubble-wrap { right: 10px; top: 72px; }
-    .hero-mobile-bubble-wrap .robot-bubble-box { max-width: 160px; }
+    .hero-text-wrap { padding: 24px 16px 34px !important; }
+    .hero-title-line { font-size: clamp(26px, 8vw, 36px) !important; }
+    .hero-hr-line { margin: 14px 0 10px !important; }
+    .hero-mobile-bubble-wrap { right: 10px; top: 68px; }
+    .hero-mobile-bubble-wrap .robot-bubble-box { max-width: 150px; }
+  }
+
+  /* ── Super narrow (≤340px) — old iPhone SE / budget Android ── */
+  @media (max-width: 340px) {
+    .hero-title-line { font-size: clamp(22px, 7.5vw, 30px) !important; }
+    .hero-hr-line { margin: 12px 0 8px !important; width: 26px !important; }
+    .hero-meta-tag { font-size: 9.5px; padding: 3px 8px; }
   }
 
   /* ── Reduced motion ── */
@@ -417,7 +375,8 @@ const MESSAGES = [
 const TYPING_SPEED = 26;
 const DOTS_DELAY   = 700;
 
-function XenosBubble({ extraClass = "" }) {
+// Memoized so it never re-renders when the parent Hero re-renders (e.g. on scroll/theme change)
+const XenosBubble = memo(function XenosBubble({ extraClass = "" }) {
   const [phase, setPhase]         = useState("hidden");
   const [msgIdx, setMsgIdx]       = useState(0);
   const [displayed, setDisplayed] = useState("");
@@ -426,9 +385,9 @@ function XenosBubble({ extraClass = "" }) {
 
   const charRef  = useRef(0);
   const timerRef = useRef(null);
-  const clearT   = () => clearTimeout(timerRef.current);
+  const clearT   = useCallback(() => clearTimeout(timerRef.current), []);
 
-  const typeText = (idx, onDone) => {
+  const typeText = useCallback((idx, onDone) => {
     const text = MESSAGES[idx].text;
     charRef.current = 0;
     const tick = () => {
@@ -441,7 +400,7 @@ function XenosBubble({ extraClass = "" }) {
       }
     };
     tick();
-  };
+  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -457,9 +416,9 @@ function XenosBubble({ extraClass = "" }) {
       }, DOTS_DELAY);
     }, 1600);
     return () => { clearTimeout(t); clearT(); };
-  }, []);
+  }, [typeText, clearT]);
 
-  const handleChip = () => {
+  const handleChip = useCallback(() => {
     clearT();
     const nextIdx = (msgIdx + 1) % MESSAGES.length;
     setShowChips(false);
@@ -477,7 +436,7 @@ function XenosBubble({ extraClass = "" }) {
         setPhase("idle");
       });
     }, DOTS_DELAY);
-  };
+  }, [msgIdx, typeText, clearT]);
 
   if (phase === "hidden") return null;
 
@@ -513,13 +472,14 @@ function XenosBubble({ extraClass = "" }) {
       </div>
     </div>
   );
-}
+});
 
 function Hero() {
   const sectionRef = useRef(null);
   const [isDark, setIsDark]     = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Theme observer
   useEffect(() => {
     const checkTheme = () =>
       setIsDark(document.documentElement.getAttribute("data-theme") !== "light");
@@ -529,14 +489,19 @@ function Hero() {
     return () => obs.disconnect();
   }, []);
 
+  // matchMedia instead of a resize listener — fires only when the boolean actually flips,
+  // no per-pixel resize spam, no layout thrashing on every frame while dragging a window edge.
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    const mql = window.matchMedia("(max-width: 767px)");
+    const update = (e) => setIsMobile(e.matches);
+    update(mql);
+    mql.addEventListener ? mql.addEventListener("change", update) : mql.addListener(update);
+    return () => {
+      mql.removeEventListener ? mql.removeEventListener("change", update) : mql.removeListener(update);
+    };
   }, []);
 
-  const scrollToNext = () => {
+  const scrollToNext = useCallback(() => {
     const heroEl = sectionRef.current;
     const nextEl = document.getElementById("services");
     if (!heroEl || !nextEl) return;
@@ -545,15 +510,20 @@ function Hero() {
     setTimeout(() => {
       window.scrollTo({ top: nextEl.offsetTop - 40, behavior: "instant" });
       heroEl.classList.remove("hero-slam-out");
-      setTimeout(() => nextEl.classList.remove("next-slam-in"), 750);
-    }, 400);
-  };
+      setTimeout(() => nextEl.classList.remove("next-slam-in"), 600);
+    }, 350);
+  }, []);
 
-  const titleColor  = isDark ? "#e8ddd0"               : "#1a0e04";
-  const subColor    = isDark ? "rgba(232,221,208,0.55)" : "rgba(22,10,2,0.55)";
-  const hrColor     = isDark ? "rgba(196,122,48,0.55)"  : "rgba(100,55,10,0.5)";
-  const scrollColor = isDark ? "rgba(232,221,208,0.75)" : "rgba(0,0,0,0.70)";
-  const blendColor  = isDark ? "#080d14" : "#F5F0E8";
+  // Recompute theme-derived colors only when isDark flips, not on every render
+  const colors = useMemo(() => ({
+    titleColor:  isDark ? "#e8ddd0"                : "#1a0e04",
+    subColor:    isDark ? "rgba(232,221,208,0.55)" : "rgba(22,10,2,0.55)",
+    hrColor:     isDark ? "rgba(196,122,48,0.55)"  : "rgba(100,55,10,0.5)",
+    scrollColor: isDark ? "rgba(232,221,208,0.75)" : "rgba(0,0,0,0.70)",
+    blendColor:  isDark ? "#080d14"                : "#F5F0E8",
+  }), [isDark]);
+
+  const { titleColor, subColor, hrColor, scrollColor, blendColor } = colors;
 
   return (
     <section
@@ -571,30 +541,23 @@ function Hero() {
 
       <div className="hero-inner">
 
-        {/* ── Mobile: Xenos bubble (top-right, always visible) ── */}
-        {isMobile && (
-          <XenosBubble extraClass="hero-mobile-bubble-wrap" />
-        )}
+        {isMobile && <XenosBubble extraClass="hero-mobile-bubble-wrap" />}
 
-        {/* ── Left / Bottom: Text content ── */}
         <div className="hero-text-wrap">
-
-          {/* Mobile-only tag pills */}
           <div className="hero-meta-row">
             {["Web Design", "Development", "Branding"].map((tag) => (
               <span key={tag} className="hero-meta-tag">{tag}</span>
             ))}
           </div>
 
-          {/* Headline */}
           <div style={{ lineHeight: 0.92, letterSpacing: "-0.01em" }}>
             <div
               className="hero-h1 hero-title-line"
               style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
-                fontSize: "clamp(44px, 8.5vw, 120px)", fontWeight: 900,
+                fontSize: "clamp(40px, 7.5vw, 120px)", fontWeight: 900,
                 color: titleColor, lineHeight: 0.92, margin: 0,
-                textTransform: "uppercase", transition: "color 0.4s ease",
+                textTransform: "uppercase", transition: "color 0.35s ease",
               }}
             >Unleash the</div>
 
@@ -602,7 +565,7 @@ function Hero() {
               className="hero-h2 hero-title-line"
               style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
-                fontSize: "clamp(44px, 8.5vw, 120px)", fontWeight: 900,
+                fontSize: "clamp(40px, 7.5vw, 120px)", fontWeight: 900,
                 lineHeight: 0.92, margin: 0, textTransform: "uppercase",
                 background: "linear-gradient(110deg, #6b3610 0%, #c47a30 45%, #7a3e12 100%)",
                 WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent",
@@ -613,31 +576,29 @@ function Hero() {
               className="hero-h3 hero-title-line"
               style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
-                fontSize: "clamp(44px, 8.5vw, 120px)", fontWeight: 900,
+                fontSize: "clamp(40px, 7.5vw, 120px)", fontWeight: 900,
                 color: titleColor, lineHeight: 0.92, margin: 0,
-                textTransform: "uppercase", transition: "color 0.4s ease",
+                textTransform: "uppercase", transition: "color 0.35s ease",
               }}
             >of your business</div>
           </div>
 
-          {/* Divider */}
           <div
             className="hero-hr hero-hr-line"
             style={{
               width: "48px", height: "1.5px", background: hrColor,
               borderRadius: "2px", margin: "32px 0 24px",
-              transition: "background 0.4s ease",
+              transition: "background 0.35s ease",
             }}
           />
 
-          {/* Subtitle — desktop only */}
           <p
             className="hero-sub hero-sub-text"
             style={{
               fontFamily: "'Outfit', sans-serif",
               fontSize: "clamp(13px, 1.5vw, 15.5px)", lineHeight: 1.85,
               color: subColor, margin: "0 0 36px", fontWeight: 300,
-              maxWidth: "460px", transition: "color 0.4s ease",
+              maxWidth: "460px", transition: "color 0.35s ease",
             }}
           >
             We craft high-performing websites and apps that help businesses
@@ -652,17 +613,11 @@ function Hero() {
           </div>
         </div>
 
-        {/* ── Right: Robot ── */}
         <div className="hero-robot-wrap">
           <Robot3D />
-
-          {/* Desktop bubble inside robot area */}
-          {!isMobile && (
-            <XenosBubble extraClass="robot-bubble-desktop" />
-          )}
+          {!isMobile && <XenosBubble extraClass="robot-bubble-desktop" />}
         </div>
 
-        {/* ── Scroll arrow (desktop/tablet only) ── */}
         <div
           className="hero-scroll-arrow"
           style={{
@@ -675,7 +630,7 @@ function Hero() {
             <span style={{
               fontFamily: "'Outfit', sans-serif", fontSize: "11px",
               letterSpacing: "0.14em", textTransform: "uppercase",
-              color: scrollColor, fontWeight: 400, transition: "color 0.4s ease",
+              color: scrollColor, fontWeight: 400, transition: "color 0.35s ease",
             }}>Scroll</span>
             <div className="hero-arrow-icon">
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
@@ -688,13 +643,12 @@ function Hero() {
         </div>
       </div>
 
-      {/* Bottom blend */}
       <div
         aria-hidden="true"
         style={{
           position: "absolute", bottom: 0, left: 0, right: 0, height: "220px",
           background: `linear-gradient(to bottom, transparent 0%, ${blendColor} 100%)`,
-          zIndex: 15, pointerEvents: "none", transition: "background 0.4s ease",
+          zIndex: 15, pointerEvents: "none", transition: "background 0.35s ease",
         }}
       />
     </section>
