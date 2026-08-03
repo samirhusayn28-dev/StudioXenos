@@ -59,15 +59,15 @@ const placeNow = (el, slot, skew) =>
   });
 
 // Returns scale + card-distance multiplier based on current width
-const getBreakpointConfig = (w) => {
-  if (w <= 480) {
+const getBreakpointConfig = (key) => {
+  if (key === 'sm') {
     return {
       scale: 0.55,
       transform: 'translateX(-25%) translateY(25%) scale(0.55)',
       transformOrigin: 'bottom left',
     };
   }
-  if (w <= 768) {
+  if (key === 'md') {
     return {
       scale: 0.75,
       transform: 'translateX(-25%) translateY(25%) scale(0.75)',
@@ -157,8 +157,7 @@ const CardSwap = ({
   }, [handleResize]);
 
   const breakpoint = useMemo(
-    () => getBreakpointConfig(typeof window !== 'undefined' ? window.innerWidth : 1200),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    () => getBreakpointConfig(breakpointKey),
     [breakpointKey]
   );
 

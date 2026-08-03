@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useMemo } from 'react';
+import Image from 'next/image';
 const robot = '/assets/Footer Robot.png';
 const xLogo = '/assets/X Logo.png';
 import MailButton from './MailButton';
@@ -577,8 +578,7 @@ export default function Footer() {
 
                     {/* Brand */}
                     <div className="footer-area-brand">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={xLogo} alt="StudioX" style={styles.brandLogo} />
+                        <Image src={xLogo} alt="StudioX" width={36} height={36} style={styles.brandLogo} />
                         <p className="footer-brand-desc">
                             Building digital products for the next generation of startups and enterprises.
                         </p>
@@ -599,8 +599,7 @@ export default function Footer() {
                     {/* Robot + CTA */}
                     <div className="footer-area-cta">
                         <div className="footer-robot-wrap">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={robot} alt="Robot" style={styles.robotImg} />
+                            <Image src={robot} alt="Robot" width={95} height={95} style={styles.robotImg} />
                         </div>
                         <button className="footer-contact-btn" onClick={openModal}>
                             Contact Us →

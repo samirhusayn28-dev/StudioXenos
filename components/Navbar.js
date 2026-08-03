@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, memo, useCallback } from 'react';
+import Image from 'next/image';
 
 const navLinks = [
     // { label: 'Home', id: 'home' },
@@ -216,11 +217,12 @@ function Navbar() {
             <style>{navbarStyles}</style>
 
             <div className="hero-nav-inner">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                     src="/assets/StudioX.png"
                     alt="StudioX Logo"
                     className="nav-logo"
+                    width={140}
+                    height={30}
                     onClick={() => scrollTo('home')}
                 />
 

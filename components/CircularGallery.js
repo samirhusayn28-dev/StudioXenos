@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import Image from 'next/image';
 
 const defaultItems = [
     { image: 'https://picsum.photos/600/400?random=1', text: 'Card 1' },
@@ -170,11 +171,13 @@ export default function SimpleGallery({ items = defaultItems, speed = 0.005 }) {
                                 setSelectedIndex(isSelected ? null : index);
                             }}
                         >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
+                            <Image
                                 src={item.image}
                                 alt={item.text}
                                 className="simple-gallery-image"
+                                fill
+                                sizes="(max-width: 768px) 72vw, 420px"
+                                unoptimized
                             />
                         </div>
                     );

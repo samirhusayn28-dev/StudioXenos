@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
+import Image from 'next/image';
 
 const phtsImg = 'assets/PHTS.png';
 const mp1Img = 'assets/MP1.png';
@@ -772,8 +773,14 @@ function Projects() {
                 <div className={`pj-transition-container ${animDirection}`} key={current}>
                     <div className="pj-img-col" style={{ width: `${imgColPercent}%` }}>
                         <div className="pj-img-card" onClick={() => setLightbox(true)}>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={project.img} alt={project.title} className="pj-img" loading="lazy" />
+                            <Image
+                                src={project.img}
+                                alt={project.title}
+                                className="pj-img"
+                                fill
+                                sizes="(max-width: 768px) 100vw, 45vw"
+                                unoptimized
+                            />
                             <div className="pj-img-overlay" />
 
                             <div className="pj-img-counter">
@@ -991,8 +998,14 @@ function Projects() {
             {lightbox && (
                 <div className="pj-lightbox-backdrop" onClick={() => setLightbox(false)}>
                     <div className="pj-lightbox-inner" onClick={e => e.stopPropagation()}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={projects[current].img} alt={projects[current].title} loading="lazy" />
+                        <Image
+                            src={projects[current].img}
+                            alt={projects[current].title}
+                            width={1200}
+                            height={800}
+                            className="pj-img"
+                            style={{ maxWidth: '88vw', maxHeight: '85vh', width: 'auto', height: 'auto', borderRadius: '12px' }}
+                        />
                         <button className="pj-lightbox-close" onClick={() => setLightbox(false)}>✕</button>
                     </div>
                 </div>

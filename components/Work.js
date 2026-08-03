@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 
 const robot1 = '/assets/Robot.png';
 const robot2 = '/assets/Robot2.png';
@@ -397,10 +398,8 @@ export default function Work() {
 
                             <span className="step-number">{step.id}</span>
                             <div className="robot-wrapper">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={step.robot} alt={step.title} className="robot-img" loading="lazy" />
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={shadow} alt="" className="shadow-img" />
+                                <Image src={step.robot} alt={step.title} className="robot-img" width={120} height={120} />
+                                <Image src={shadow} alt="" className="shadow-img" width={102} height={102} />
                             </div>
                             <span className="step-tag">Step {step.id}</span>
                             <h3 className="card-title">{step.title}</h3>

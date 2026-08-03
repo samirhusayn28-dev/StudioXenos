@@ -2,6 +2,7 @@
 
 // src/components/Services.jsx
 import React, { memo } from 'react';
+import Image from 'next/image';
 
 const designImg = '/assets/Design.png';
 const webDevImg = '/assets/WebDev.png';
@@ -423,14 +424,14 @@ function Services() {
 
                             {/* Icon & Heading Wrapper */}
                             <div className="srv-card-top-row">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
+                                <Image
                                     src={s.img}
                                     alt={s.title}
                                     className="srv-card-icon"
+                                    width={44}
+                                    height={44}
                                     onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = webDevImg;
+                                        e.currentTarget.src = webDevImg;
                                     }}
                                 />
                                 <h3 className="srv-card-heading">{s.title}</h3>

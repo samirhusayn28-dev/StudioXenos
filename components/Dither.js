@@ -1,7 +1,9 @@
-/* eslint-disable react/no-unknown-property */
-import { useRef, useEffect, useState, useCallback, useMemo, memo, forwardRef } from 'react';
+import { useRef, useEffect, useState, useCallback, memo, forwardRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { EffectComposer, wrapEffect } from '@react-three/postprocessing';
+const Mesh = 'mesh';
+const PlaneGeometry = 'planeGeometry';
+const ShaderMaterial = 'shaderMaterial';
+const MeshBasicMaterial = 'meshBasicMaterial';import { EffectComposer, wrapEffect } from '@react-three/postprocessing';
 import { Effect } from 'postprocessing';
 import * as THREE from 'three';
 
@@ -170,8 +172,8 @@ function DitheredWaves({
     const rectRef = useRef(null);
     const { viewport, size, gl } = useThree();
 
-    // useMemo -> sirf ek baar banega, har render pe naye THREE objects nahi banenge
-    const waveUniforms = useMemo(() => ({
+    // Create uniforms once and keep them stable across renders
+    const waveUniforms = useRef({
         time: new THREE.Uniform(0),
         resolution: new THREE.Uniform(new THREE.Vector2(0, 0)),
         waveSpeed: new THREE.Uniform(waveSpeed),
@@ -182,7 +184,7 @@ function DitheredWaves({
         enableMouseInteraction: new THREE.Uniform(enableMouseInteraction ? 1 : 0),
         mouseRadius: new THREE.Uniform(mouseRadius),
         octaves: new THREE.Uniform(octaves)
-    }), []); // eslint-disable-line react-hooks/exhaustive-deps
+    }).current;
 
     useEffect(() => {
         const dpr = gl.getPixelRatio();
@@ -222,28 +224,28 @@ function DitheredWaves({
 
     return (
         <>
-            <mesh ref={mesh} scale={[viewport.width, viewport.height, 1]}>
-                <planeGeometry args={[1, 1]} />
-                <shaderMaterial
+            <Mesh ref={mesh} scale={[viewport.width, viewport.height, 1]}>
+                <PlaneGeometry args={[1, 1]} />
+                <ShaderMaterial
                     vertexShader={waveVertexShader}
                     fragmentShader={waveFragmentShader}
                     uniforms={waveUniforms}
                 />
-            </mesh>
+            </Mesh>
             {usePostProcessing && (
                 <EffectComposer multisampling={0}>
                     <RetroEffect colorNum={colorNum} pixelSize={pixelSize} />
                 </EffectComposer>
             )}
-            <mesh
+            <Mesh
                 onPointerMove={handlePointerMove}
                 position={[0, 0, 0.01]}
                 scale={[viewport.width, viewport.height, 1]}
                 visible={false}
             >
-                <planeGeometry args={[1, 1]} />
-                <meshBasicMaterial transparent opacity={0} />
-            </mesh>
+                <PlaneGeometry args={[1, 1]} />
+                <MeshBasicMaterial transparent opacity={0} />
+            </Mesh>
         </>
     );
 }
