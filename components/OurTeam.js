@@ -262,7 +262,7 @@ const TestimonialCard = memo(function TestimonialCard({ item }) {
                     </div>
                     <span className="t-quote-symbol">“</span>
                 </div>
-                <p className="t-quote">&ldquo;{item.quote}&rdquo;</p>
+                <p className="t-quote">{"\u201C"}{item.quote}{"\u201D"}</p>
             </div>
             <div className="t-footer">
                 <div className="t-avatar">{item.avatar}</div>
