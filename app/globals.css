@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+    scroll-behavior: smooth;
+}
+
+html,
+body {
+    overflow: hidden !important;
+    height: 100%;
+    touch-action: none;
+}
+
+:root {
+    --bg-primary: #f0f4f9;
+    --bg-secondary: #e2e8f0;
+    --surface-primary: #ffffff;
+    --surface-soft: rgba(255, 255, 255, 0.85);
+    --surface-muted: rgba(255, 255, 255, 0.7);
+    --surface-faint: rgba(255, 255, 255, 0.15);
+    --surface-faint-strong: rgba(255, 255, 255, 0.25);
+
+    --text-primary: #0f172a;
+    --text-secondary: rgba(15, 23, 42, 0.75);
+    --text-sub: rgba(15, 23, 42, 0.65);
+    --text-muted: rgba(15, 23, 42, 0.50);
+    --text-muted-strong: rgba(15, 23, 42, 0.7);
+    --text-on-primary: #ffffff;
+    --text-on-surface: #0f172a;
+
+    --border-muted: rgba(15, 23, 42, 0.08);
+    --border-soft: rgba(15, 23, 42, 0.1);
+    --border-strong: rgba(15, 23, 42, 0.18);
+
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --card-border: rgba(37, 99, 235, 0.12);
+    --card-shadow: rgba(15, 23, 42, 0.05);
+    --card-shadow-strong: rgba(15, 23, 42, 0.10);
+
+    --glass-bg: rgba(255, 255, 255, 0.70);
+    --glass-border: rgba(255, 255, 255, 0.90);
+
+    --btn-bg: #2563eb;
+    --btn-border: rgba(37, 99, 235, 0.3);
+    --btn-color: #ffffff;
+    --btn-hover-bg: #2549d4;
+    --btn-shadow: rgba(49, 92, 253, 0.35);
+
+    --accent-blue: #315cfd;
+    --accent-blue-strong: #2549d4;
+    --accent-blue-soft: rgba(49, 92, 253, 0.08);
+    --accent-blue-border: rgba(49, 92, 253, 0.15);
+    --accent-blue-hover: rgba(49, 92, 253, 0.55);
+    --accent-blue-shadow: rgba(49, 92, 253, 0.3);
+    --accent-blue-shadow-strong: rgba(49, 92, 253, 0.45);
+    --accent-blue-overlay: rgba(49, 92, 253, 0.15);
+    --accent-blue-overlay-soft: rgba(49, 92, 253, 0.25);
+
+    --accent-gold: #c47a30;
+    --accent-gold-strong: #e89838;
+    --accent-gold-light: #f7c368;
+    --accent-gold-dark: #d4872e;
+    --accent-gold-palest: #fff8f0;
+    --accent-gold-soft: rgba(196, 122, 48, 0.1);
+    --accent-gold-soft-2: rgba(196, 122, 48, 0.12);
+    --accent-gold-soft-3: rgba(196, 122, 48, 0.15);
+    --accent-gold-soft-4: rgba(196, 122, 48, 0.2);
+    --accent-gold-soft-5: rgba(196, 122, 48, 0.25);
+    --accent-gold-shadow: rgba(196, 122, 48, 0.35);
+
+    --accent-red: #e63946;
+    --accent-green: #22c97a;
+    --accent-facebook: #1877f2;
+    --accent-linkedin: #0077b5;
+    --accent-instagram-start: #bc1888;
+    --accent-instagram-mid: #cc2366;
+    --accent-instagram-end: #dc2743;
+    --accent-instagram-alt: #f09433;
+    --accent-instagram-soft: rgba(240, 149, 83, 0.15);
+
+    --team-dev: #0e9678;
+    --team-design: #7c3aed;
+    --team-marketing: #ff965a;
+    --team-dev-soft: rgba(88, 220, 180, 0.35);
+    --team-design-soft: rgba(180, 140, 255, 0.35);
+    --team-marketing-soft: rgba(255, 150, 90, 0.35);
+
+    --scroll-color: rgba(15, 23, 42, 0.7);
+    --hr-color: rgba(37, 99, 235, 0.25);
+    --shadow-faint: rgba(0, 0, 0, 0.03);
+    --shadow-soft: rgba(0, 0, 0, 0.08);
+    --shadow-medium: rgba(0, 0, 0, 0.18);
+    --shadow-strong: rgba(0, 0, 0, 0.25);
+    --shadow-deep: rgba(0, 0, 0, 0.45);
+
+    --footer-divider: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.18) 20%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.18) 80%, transparent 100%);
+    --footer-divider-alt: linear-gradient(90deg, transparent 0%, rgba(15, 23, 42, 0.12) 20%, rgba(15, 23, 42, 0.25) 50%, rgba(15, 23, 42, 0.12) 80%, transparent 100%);
+    --footer-dither-overlay: rgba(255, 255, 255, 0.88);
+    --footer-glow: rgba(49, 92, 253, 0.07);
+    --contact-modal-backdrop: rgba(4, 6, 16, 0.75);
+    --modal-bg: rgba(255, 255, 255, 0.98);
+    --modal-input-bg: rgba(255, 255, 255, 0.96);
+    --modal-input-border: rgba(15, 23, 42, 0.08);
+    --modal-warning: rgba(220, 60, 60, 0.9);
+
+    --chat-fab-gradient: linear-gradient(135deg, #1a1a2e, #0f0f0f);
+    --chat-fab-border: rgba(255, 255, 255, 0.15);
+    --chat-fab-shadow: rgba(0, 0, 0, 0.45);
+    --chat-window-bg: rgba(255, 255, 255, 0.97);
+    --chat-window-border: rgba(15, 23, 42, 0.08);
+    --chat-window-shadow: rgba(0, 0, 0, 0.35);
+    --chat-header: rgba(255, 255, 255, 0.95);
+    --chat-header-border: rgba(15, 23, 42, 0.08);
+    --chat-title-color: #0f172a;
+    --chat-close-bg: rgba(255, 255, 255, 0.85);
+    --chat-close-color: #0f172a;
+    --chat-close-hover: rgba(99, 102, 241, 0.2);
+    --chat-msgs-bg: rgba(244, 244, 255, 0.95);
+    --chat-input-area-bg: rgba(255, 255, 255, 0.98);
+    --chat-input-area-border: rgba(15, 23, 42, 0.08);
+    --chat-textarea-bg: rgba(255, 255, 255, 0.96);
+    --chat-textarea-border: rgba(15, 23, 42, 0.08);
+    --chat-textarea-color: #0f172a;
+    --chat-user-bg: linear-gradient(135deg, #6366f1, #7c3aed);
+    --chat-user-shadow: rgba(99, 102, 241, 0.35);
+    --chat-msg-bg: rgba(255, 255, 255, 0.92);
+    --chat-msg-border: rgba(15, 23, 42, 0.08);
+    --chat-msg-text: #0f172a;
+    --chat-chip-bg: rgba(99, 102, 241, 0.1);
+    --chat-chip-border: rgba(99, 102, 241, 0.25);
+    --chat-chip-color: #4f46e5;
+    --chat-chip-hover-bg: rgba(99, 102, 241, 0.2);
+}
+
+body {
+    margin: 0;
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
