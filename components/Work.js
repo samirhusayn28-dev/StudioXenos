@@ -7,37 +7,14 @@ const robot2 = '/assets/Robot2.png';
 const robot3 = '/assets/Robot1.png';
 const shadow = '/assets/Shadow.png';
 
-const steps = [
-    {
-        img: robot1,
-        title: 'Request a Quote',
-        desc: 'Schedule a quick call to discuss your goals, timeline, and vision.',
-        tag: 'Step 01',
-    },
-    {
-        img: robot2,
-        title: 'Get a Custom Plan',
-        desc: 'We analyze your needs and create a tailored execution strategy.',
-        tag: 'Step 02',
-    },
-    {
-        img: robot3,
-        title: 'Launch & Grow',
-        desc: 'We execute the plan seamlessly and support continuous scaling.',
-        tag: 'Step 03',
-    },
-];
-
 const workStyles = `
-/* ── workStyles (Process / Workflow Section) ── */
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
-/* Main Container - Flexible for both modes */
 .work-section {
   background-color: transparent;
   width: 100%;
   min-height: 100vh;
-  padding: clamp(40px, 6vh, 80px) 5%;
+  padding: clamp(30px, 8vh, 60px) 5%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -48,29 +25,52 @@ const workStyles = `
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Centered Header */
+.work-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(37, 99, 235, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.work-glow-orb {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, transparent 70%);
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(40px);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .work-header {
   text-align: center;
   position: relative;
   z-index: 5;
   max-width: 720px;
-  margin: 0 auto clamp(30px, 5vh, 50px);
-  flex-shrink: 0;
+  margin: 0 auto clamp(20px, 4vh, 40px);
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .work-title {
   font-family: 'Outfit', sans-serif;
-  font-size: clamp(42px, 5.5vw, 65px);
+  font-size: clamp(36px, 5.5vw, 50px);
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.01em;
   line-height: 0.95;
   margin: 0;
-}
-
-.work-title-main {
   color: var(--text-primary);
-  transition: color 0.3s ease;
 }
 
 .work-title-gradient {
@@ -82,34 +82,30 @@ const workStyles = `
 
 .work-subtitle {
   font-family: 'Outfit', sans-serif;
-  font-size: clamp(13px, 1.2vw, 15px);
+  font-size: clamp(14px, 1.2vw, 16px);
   color: var(--text-muted);
-  margin-top: 10px;
+  margin-top: 12px;
   margin-bottom: 0;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  transition: color 0.3s ease;
 }
 
-/* Viewport Canvas Container */
 .work-flow-container {
   position: relative;
-  max-width: 1240px;
+  max-width: 1300px;
   width: 100%;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 420px;
+  min-height: 620px;
+  z-index: 2;
 }
 
-/* SVG Gradient Flow Rope */
 .rope-svg {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 620px;
   pointer-events: none;
   z-index: 1;
 }
@@ -117,116 +113,71 @@ const workStyles = `
 .gradient-rope-path {
   fill: none;
   stroke: url(#ropeGradient);
-  stroke-width: 4;
+  stroke-width: 3;
   stroke-linecap: round;
-  stroke-dasharray: 10 10;
-  animation: ropeFlow 25s linear infinite;
-  filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.4));
+  stroke-dasharray: 8 8;
+  animation: ropeFlow 30s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(37, 99, 235, 0.3));
 }
 
 .arrow-head {
   fill: url(#ropeGradient);
-  filter: drop-shadow(0 0 6px rgba(37, 99, 235, 0.5));
 }
 
 @keyframes ropeFlow {
-  to {
-    stroke-dashoffset: -1000;
-  }
+  to { stroke-dashoffset: -1000; }
 }
 
-/* Cards Grid layout supporting both absolute desktop flow and fluid stack */
 .work-grid {
   width: 100%;
   position: relative;
   z-index: 2;
-  min-height: 400px;
+  min-height: 600px;
 }
 
 .work-card {
   position: absolute;
-  width: min(32%, 360px);
-  background: var(--card-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--card-border);
-  border-radius: 28px;
-  padding: clamp(24px, 3.2vh, 34px) clamp(22px, 2.2vw, 30px);
+  width: min(24%, 280px);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
   text-align: center;
   box-sizing: border-box;
-  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.08);
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
-              box-shadow 0.35s ease, 
-              border-color 0.35s ease,
-              background-color 0.3s ease;
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.work-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  border-color: rgba(37, 99, 235, 0.4);
-  box-shadow: 0 24px 50px rgba(37, 99, 235, 0.15), 0 0 30px rgba(37, 99, 235, 0.1);
+@media (min-width: 1000px) {
+  .card-pos-0 { top: 10px; left: 0%; }
+  .card-pos-1 { top: 280px; left: 26%; }
+  .card-pos-2 { top: 10px; left: 52%; }
+  .card-pos-3 { top: 280px; right: 0%; }
 }
 
-/* Desktop Staggered Positioning */
-@media (min-width: 900px) {
-  .card-pos-0 {
-    top: 0%;
-    left: 0%;
-  }
-  .card-pos-1 {
-    top: 22%;
-    left: 34%;
-  }
-  .card-pos-2 {
-    top: 45%;
-    right: 0%;
-  }
+@media (max-width: 999px) {
+  .work-section { height: auto; min-height: auto; padding: 60px 20px; }
+  .rope-svg { display: none; }
+  .work-grid { display: flex; flex-direction: column; gap: 60px; min-height: auto; }
+  .work-card { position: relative; width: 100%; top: auto !important; left: auto !important; right: auto !important; }
 }
 
-/* Responsive / Free Scroll Fallback Layout */
-@media (max-width: 899px) {
-  .work-section {
-    height: auto;
-    min-height: auto;
-    padding: 60px 20px;
-  }
-  .rope-svg {
-    display: none;
-  }
-  .work-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    min-height: auto;
-  }
-  .work-card {
-    position: relative;
-    width: 100%;
-    top: auto !important;
-    left: auto !important;
-    right: auto !important;
-  }
-}
-
-/* Card Contents */
 .step-number {
   font-family: 'Outfit', sans-serif;
-  font-size: clamp(56px, 7vh, 80px);
+  font-size: clamp(48px, 6vh, 70px);
   font-weight: 900;
   line-height: 0.8;
-  color: var(--step-num-color, rgba(37, 99, 235, 0.12));
+  color: rgba(37, 99, 235, 0.12);
   position: absolute;
-  top: 18px;
-  right: 22px;
+  top: -10px;
+  right: 10px;
   user-select: none;
-  transition: color 0.3s ease;
 }
 
 .robot-wrapper {
   position: relative;
-  width: clamp(95px, 12.5vh, 130px);
-  height: clamp(95px, 12.5vh, 130px);
-  margin: 4px auto 16px;
+  width: clamp(90px, 11vh, 120px);
+  height: clamp(90px, 11vh, 120px);
+  margin: 8px auto 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -247,7 +198,7 @@ const workStyles = `
 
 .shadow-img {
   position: absolute;
-  bottom: -14px;
+  bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
   width: 85%;
@@ -268,43 +219,144 @@ const workStyles = `
 
 .card-title {
   font-family: 'Outfit', sans-serif;
-  font-size: clamp(22px, 2.8vh, 28px);
+  font-size: clamp(17px, 2.1vh, 21px);
   font-weight: 800;
   text-transform: uppercase;
   color: var(--text-primary);
   margin: 0 0 6px 0;
-  letter-spacing: 0.01em;
-  transition: color 0.3s ease;
 }
 
 .card-desc {
   font-family: 'Outfit', sans-serif;
-  font-size: clamp(13px, 1.4vh, 14px);
+  font-size: clamp(12px, 1.3vh, 13px);
   font-weight: 400;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: 1.4;
   margin: 0;
-  transition: color 0.3s ease;
+}
+
+.small-floating-card {
+  background: var(--card-bg, rgba(255, 255, 255, 0.95));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border, rgba(37, 99, 235, 0.2));
+  border-radius: 10px;
+  padding: 6px 12px;
+  margin: 0 auto 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.small-floating-card:hover {
+  transform: translateY(-3px);
+}
+
+.card-svg-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.card-label-text {
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
 }
 `;
+
+const steps = [
+    {
+        id: '01',
+        posClass: 'card-pos-0',
+        delay: '0.1s',
+        label: 'Quotation',
+        labelColor: '#2563eb',
+        robot: robot1,
+        title: 'Request a Quote',
+        desc: 'Schedule a quick call to discuss your goals.',
+        stroke: '#2563eb',
+        iconPath: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    },
+    {
+        id: '02',
+        posClass: 'card-pos-1',
+        delay: '0.2s',
+        label: 'Custom Plan',
+        labelColor: '#d97706',
+        robot: robot2,
+        title: 'Custom Plan',
+        desc: 'We analyze requirements and build strategy.',
+        stroke: '#f59e0b',
+        iconPath: (
+            <>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </>
+        )
+    },
+    {
+        id: '03',
+        posClass: 'card-pos-2',
+        delay: '0.3s',
+        label: 'Development',
+        labelColor: '#3b82f6',
+        robot: robot1,
+        title: 'Development',
+        desc: 'Iterative building with clean code architecture.',
+        stroke: '#3b82f6',
+        iconPath: (
+            <>
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+            </>
+        )
+    },
+    {
+        id: '04',
+        posClass: 'card-pos-3',
+        delay: '0.4s',
+        label: 'Launch & Grow',
+        labelColor: '#10b981',
+        robot: robot3,
+        title: 'Launch & Grow',
+        desc: 'Deploy seamlessly and scale performance.',
+        stroke: '#10b981',
+        iconPath: (
+            <>
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <polyline points="9 12 11 14 15 10"></polyline>
+            </>
+        )
+    }
+];
 
 export default function Work() {
     return (
         <section id="how-we-work" className="work-section">
             <style>{workStyles}</style>
 
-            {/* Header */}
+            <div className="work-bg-grid" />
+            <div className="work-glow-orb" />
+
             <div className="work-header">
                 <h2 className="work-title">
                     <span className="work-title-main">How We </span>
                     <span className="work-title-gradient">Work</span>
                 </h2>
-                <p className="work-subtitle">Our simple 3-step continuous journey from start to launch.</p>
+                <p className="work-subtitle">Our seamless 4-step continuous journey from start to launch.</p>
             </div>
 
-            {/* Viewport Canvas Container */}
             <div className="work-flow-container">
-                <svg className="rope-svg" viewBox="0 0 1200 480" preserveAspectRatio="none">
+                <svg className="rope-svg" viewBox="0 0 1300 620" preserveAspectRatio="none">
                     <defs>
                         <linearGradient id="ropeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" stopColor="#d98e38" />
@@ -315,28 +367,42 @@ export default function Work() {
 
                     <path
                         className="gradient-rope-path"
-                        d="M 180 140 C 300 320, 310 190, 570 270 C 810 350, 860 230, 1030 360"
+                        d="M 140 180 C 270 180, 350 435, 435 435 C 610 480, 680 180, 810 180 C 940 180, 1030 440, 1160 440"
                     />
+
+                    <circle cx="140" cy="180" r="5" fill="#2563eb" />
+                    <circle cx="480" cy="440" r="5" fill="#f7c368" />
+                    <circle cx="810" cy="180" r="5" fill="#f7c368" />
+                    <circle cx="1160" cy="440" r="5" fill="#2563eb" />
 
                     <path
                         className="arrow-head"
-                        d="M 1015 348 L 1040 366 L 1014 374 Z"
+                        d="M 1145 416 L 1195 430 L 1145 454 Z"
                     />
                 </svg>
 
                 <div className="work-grid">
-                    {steps.map((s, i) => (
-                        <div key={i} className={`work-card card-pos-${i}`}>
-                            <span className="step-number">0{i + 1}</span>
-
-                            <div className="robot-wrapper">
-                                <img src={s.img} alt={s.title} className="robot-img" />
-                                <img src={shadow} alt="" className="shadow-img" />
+                    {steps.map((step) => (
+                        <div
+                            key={step.id}
+                            className={`work-card ${step.posClass}`}
+                            style={{ animationDelay: step.delay }}
+                        >
+                            <div className="small-floating-card">
+                                <svg className="card-svg-icon" viewBox="0 0 24 24" fill="none" stroke={step.stroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    {step.iconPath}
+                                </svg>
+                                <span className="card-label-text" style={{ color: step.labelColor }}>{step.label}</span>
                             </div>
 
-                            <span className="step-tag">{s.tag}</span>
-                            <h3 className="card-title">{s.title}</h3>
-                            <p className="card-desc">{s.desc}</p>
+                            <span className="step-number">{step.id}</span>
+                            <div className="robot-wrapper">
+                                <img src={step.robot} alt={step.title} className="robot-img" loading="lazy" />
+                                <img src={shadow} alt="" className="shadow-img" />
+                            </div>
+                            <span className="step-tag">Step {step.id}</span>
+                            <h3 className="card-title">{step.title}</h3>
+                            <p className="card-desc">{step.desc}</p>
                         </div>
                     ))}
                 </div>

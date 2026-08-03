@@ -64,14 +64,13 @@ const Model = memo(function Model({ mouseX, mouseY, isMobile, isHeroVisible }) {
     const baseY = isMobile ? -0.8 : -1.2;
     const lerpSpeed = isMobile ? 0.03 : 0.05;
 
-    // Optimize geometry/materials setup once on mount to prevent runtime calculations
-    useMemo(() => {
+    // Streamlined cleanup & material precision assignment
+    useEffect(() => {
         if (!scene) return;
         scene.traverse((child) => {
             if (child.isMesh) {
                 child.castShadow = false;
                 child.receiveShadow = false;
-                // Force low-cost material rendering if necessary
                 if (child.material) {
                     child.material.precision = "mediump";
                 }
@@ -116,16 +115,26 @@ export default function Robot3D({ isHeroVisible = true }) {
     const [isMobile, setIsMobile] = useState(false);
     const [elementInView, setElementInView] = useState(true);
 
-    // Responsive Mobile Matcher using standard media query list listener
+    // Responsive Mobile Matcher using media query list listener
     useEffect(() => {
         const mql = window.matchMedia("(max-width: 767px)");
         const update = (e) => setIsMobile(e.matches);
         setIsMobile(mql.matches);
-        mql.addEventListener ? mql.addEventListener("change", update) : mql.addListener(update);
-        return () => mql.removeEventListener ? mql.removeEventListener("change", update) : mql.removeListener(update);
+        if (mql.addEventListener) {
+            mql.addEventListener("change", update);
+        } else {
+            mql.addListener(update);
+        }
+        return () => {
+            if (mql.removeEventListener) {
+                mql.removeEventListener("change", update);
+            } else {
+                mql.removeListener(update);
+            }
+        };
     }, []);
 
-    // IntersectionObserver to track visibility without unmounting/hiding the markup
+    // IntersectionObserver to track view status accurately
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => setElementInView(entry.isIntersecting),
@@ -135,7 +144,7 @@ export default function Robot3D({ isHeroVisible = true }) {
         return () => observer.disconnect();
     }, []);
 
-    // Throttled RAF Mouse tracker to completely avoid React state triggers on move
+    // Optimized RAF Mouse tracker avoiding state triggers
     useEffect(() => {
         const el = containerRef.current;
         if (!el || isMobile) return;
@@ -159,12 +168,11 @@ export default function Robot3D({ isHeroVisible = true }) {
             mouseY.current = 0;
         };
 
-        // window.addEventListener("mousemove", handleMouseMove, { passive: true });
         el.addEventListener("mousemove", handleMouseMove, { passive: true });
         el.addEventListener("mouseleave", resetMouse);
 
         return () => {
-            window.removeEventListener("mousemove", handleMouseMove);
+            el.removeEventListener("mousemove", handleMouseMove);
             el.removeEventListener("mouseleave", resetMouse);
             if (rafId) cancelAnimationFrame(rafId);
         };
@@ -178,12 +186,11 @@ export default function Robot3D({ isHeroVisible = true }) {
             style={{
                 width: "100%", height: "100%",
                 position: "relative", overflow: "hidden",
-                transform: "translateZ(0)", // Force GPU layer creation
+                transform: "translateZ(0)",
             }}
         >
             <style>{robotStyles}</style>
 
-            {/* Desktop ambient glow - pauses CSS animation completely when out of view instead of disappearing */}
             {!isMobile && (
                 <div
                     className="robot-pure-glow"
@@ -191,7 +198,6 @@ export default function Robot3D({ isHeroVisible = true }) {
                 />
             )}
 
-            {/* Hardware-Accelerated Lightweight Canvas (Stays mounted, frameloop throttled to 'demand' to consume 0 CPU when inactive) */}
             <Canvas
                 camera={{
                     position: [0, 0, isMobile ? 6.5 : 5.2],
@@ -224,7 +230,6 @@ export default function Robot3D({ isHeroVisible = true }) {
                 />
             </Canvas>
 
-            {/* Pure CSS Ground Shadow - pauses CSS animation completely when out of view */}
             <div
                 className="robot-pure-shadow"
                 style={{ animationPlayState: isActive ? 'running' : 'paused' }}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 
 const defaultItems = [
     { image: 'https://picsum.photos/600/400?random=1', text: 'Card 1' },
@@ -40,12 +40,12 @@ const galleryStyles = `
     overflow: hidden;
     will-change: transform, opacity;
     cursor: pointer;
-    transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Removed CSS transition on transform to prevent layout jitter / micro-stutters during high-frequency loop updates */
+    transition: opacity 0.2s ease;
     
     width: min(33vw, 420px);
     height: 260px;
 
-    /* Center translation positioning with scale multiplier */
     transform: translate3d(
       calc(var(--sin-angle) * var(--radius) * var(--x-mult)), 
       0px, 
@@ -53,15 +53,15 @@ const galleryStyles = `
     ) scale(var(--scale));
   }
 
-  /* Hover scaling effect centered natively */
-  .simple-gallery-card:hover {
+  /* Active / Clicked scale state */
+  .simple-gallery-card.active-card {
     transform: translate3d(
       calc(var(--sin-angle) * var(--radius) * var(--x-mult)), 
       0px, 
       calc(var(--cos-angle) * var(--radius))
-    ) scale(calc(var(--scale) * 1.12)) !important;
+    ) scale(calc(var(--scale) * 1.35)) !important;
     z-index: 9999 !important;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
   }
 
   .simple-gallery-image {
@@ -91,21 +91,24 @@ const galleryStyles = `
   }
 `;
 
-export default function SimpleGallery({ items = defaultItems, speed = 0.005, isViewActive = true }) {
+export default function SimpleGallery({ items = defaultItems, speed = 0.005 }) {
     const [rotation, setRotation] = useState(0);
-    const [isHovered, setIsHovered] = useState(false);
+    const [selectedIndex, setSelectedIndex] = useState(null);
 
     const containerRef = useRef(null);
     const requestRef = useRef(null);
+    const lastTimeRef = useRef(null);
 
-    // Run animation loop strictly when isViewActive is true
-    useEffect(() => {
-        if (!isViewActive) return;
-
-        const animate = () => {
-            if (!isHovered) {
-                setRotation((prev) => (prev + speed) % (2 * Math.PI));
+    // Using useLayoutEffect to hook the animation frame synchronously before paint
+    useLayoutEffect(() => {
+        const animate = (time) => {
+            if (lastTimeRef.current !== null) {
+                const delta = time - lastTimeRef.current;
+                if (selectedIndex === null) {
+                    setRotation((prev) => (prev + speed * (delta / 16.67)) % (2 * Math.PI));
+                }
             }
+            lastTimeRef.current = time;
             requestRef.current = requestAnimationFrame(animate);
         };
 
@@ -113,7 +116,20 @@ export default function SimpleGallery({ items = defaultItems, speed = 0.005, isV
         return () => {
             if (requestRef.current) cancelAnimationFrame(requestRef.current);
         };
-    }, [isHovered, speed, isViewActive]);
+    }, [speed, selectedIndex]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setSelectedIndex(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const count = items.length;
 
@@ -121,10 +137,6 @@ export default function SimpleGallery({ items = defaultItems, speed = 0.005, isV
         <div
             ref={containerRef}
             className="simple-gallery-container"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            onTouchStart={() => setIsHovered(true)}
-            onTouchEnd={() => setIsHovered(false)}
         >
             <style>{galleryStyles}</style>
 
@@ -138,18 +150,24 @@ export default function SimpleGallery({ items = defaultItems, speed = 0.005, isV
                     const normZ = (cosVal + 1) / 2;
                     const scale = normZ * 0.3 + 0.7;
                     const opacity = normZ * 0.6 + 0.4;
-                    const zIndex = Math.round(normZ * 1000);
+                    const zIndex = selectedIndex === index ? 9999 : Math.round(normZ * 1000);
+
+                    const isSelected = selectedIndex === index;
 
                     return (
                         <div
                             key={index}
-                            className="simple-gallery-card"
+                            className={`simple-gallery-card ${isSelected ? 'active-card' : ''}`}
                             style={{
                                 '--sin-angle': sinVal,
                                 '--cos-angle': cosVal,
                                 '--scale': scale,
                                 opacity: opacity,
                                 zIndex: zIndex,
+                            }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedIndex(isSelected ? null : index);
                             }}
                         >
                             <img

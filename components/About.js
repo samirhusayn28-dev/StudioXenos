@@ -81,7 +81,7 @@ const aboutStyles = `
   text-transform: uppercase;
   line-height: 0.92;
   letter-spacing: 0.01em;
-  font-size: clamp(42px, 5.5vw, 76px);
+    font-size: clamp(36px, 5.5vw, 50px);
   margin: 0 0 24px 0;
 }
 

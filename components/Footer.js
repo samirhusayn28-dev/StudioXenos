@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import emailjs from '@emailjs/browser';
+import React, { useState, useCallback, useMemo } from 'react';
 const robot = '/assets/Footer Robot.png';
 const xLogo = '/assets/X Logo.png';
 import MailButton from './MailButton';
@@ -9,14 +8,7 @@ import WhatsAppButton from './WhatsAppButton';
 import InstagramButton from '../components/Instagrambutton';
 import FacebookButton from '../components/Facebookbutton';
 import LinkedInButton from '../components/Linkedinbutton';
-import Dither from '../components/Dither';
-
-const EMAILJS_SERVICE_ID = 'service_aimz3zm';
-const EMAILJS_PUBLIC_KEY = 'nBS7HLI2w7Zq5t3gI';
-const TEMPLATE_TO_COMPANY = 'template_wo2oyuf';
-const TEMPLATE_TO_USER = 'template_ub2mpjv';
-
-const DITHER_WAVE_COLOR = [0.08, 0.12, 0.28];
+import { useContactModal } from './ContactModal';
 
 const faqData = [
     {
@@ -41,6 +33,7 @@ const footerStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
   .footer-root {
+
     position: relative;
     overflow: hidden;
     display: flex;
@@ -98,33 +91,6 @@ const footerStyles = `
     margin-bottom: 32px;
   }
 
-  .faq-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-radius: 999px;
-    padding: 5px 14px 5px 10px;
-    margin-bottom: 16px;
-    font-family: 'Outfit', system-ui, sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    color: #2563eb;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-  }
-
-  .faq-badge-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #2563eb;
-    box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
-    flex-shrink: 0;
-  }
-
   .faq-title {
     font-family: 'Outfit', sans-serif;
     font-weight: 900;
@@ -132,7 +98,7 @@ const footerStyles = `
     line-height: 1.1;
     letter-spacing: -0.02em;
     margin: 0;
-    font-size: clamp(32px, 4.5vw, 52px);
+    font-size: clamp(36px, 5.5vw, 50px);
     color: #0f172a;
   }
 
@@ -140,39 +106,41 @@ const footerStyles = `
     color: #2563eb;
   }
 
-  .faq-wrapper-card {
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-radius: 24px;
-    padding: 24px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
-  }
-
   /* 2 COLUMN GRID FOR FAQ */
   .faq-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    align-items: start;
+    gap: 20px;
+    align-items: stretch;
   }
 
   .faq-item {
-    background: #f8fafc;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 20px;
     overflow: hidden;
-    transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .faq-item:hover {
+    transform: translateY(-4px);
+    border-color: rgba(37, 99, 235, 0.25);
+    box-shadow: 0 16px 36px rgba(37, 99, 235, 0.07);
   }
 
   .faq-item.active {
-    border-color: rgba(37, 99, 235, 0.3);
-    background: #eff6ff;
-    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.05);
+    border-color: rgba(37, 99, 235, 0.4);
+    background: #ffffff;
+    box-shadow: 0 16px 40px rgba(37, 99, 235, 0.09);
   }
 
   .faq-question-btn {
     width: 100%;
-    padding: 18px 20px;
+    padding: 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -180,16 +148,16 @@ const footerStyles = `
     border: none;
     color: #0f172a;
     font-family: 'Outfit', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 700;
     text-align: left;
     cursor: pointer;
-    gap: 12px;
+    gap: 16px;
   }
 
   .faq-icon {
-    width: 26px;
-    height: 26px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     background: rgba(37, 99, 235, 0.08);
     border: 1px solid rgba(37, 99, 235, 0.2);
@@ -198,7 +166,7 @@ const footerStyles = `
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-size: 15px;
+    font-size: 16px;
     transition: transform 0.3s ease, background 0.3s ease;
   }
 
@@ -211,21 +179,23 @@ const footerStyles = `
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s ease;
-    padding: 0 20px;
+    padding: 0 24px;
   }
 
   .faq-item.active .faq-answer {
-    max-height: 200px;
-    padding: 0 20px 18px 20px;
+    max-height: 250px;
+    padding: 0 24px 24px 24px;
   }
 
   .faq-answer-text {
     font-family: 'Outfit', sans-serif;
-    font-size: 13.5px;
+    font-size: 14px;
     font-weight: 400;
     color: #475569;
-    line-height: 1.6;
+    line-height: 1.65;
     margin: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding-top: 16px;
   }
 
   /* ── SEPARATOR LINE ABOVE FOOTER ── */
@@ -315,114 +285,7 @@ const footerStyles = `
     box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
   }
 
-  /* ── Modal backdrop ── */
-  .contact-modal-backdrop {
-    position: fixed; inset: 0; z-index: 1000;
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    display: flex; align-items: center; justify-content: center;
-    padding: 16px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.35s ease;
-  }
-  .contact-modal-backdrop.open {
-    opacity: 1;
-    pointer-events: all;
-  }
-
-  /* ── Modal box ── */
-  .contact-modal {
-    position: relative;
-    width: 100%; max-width: 680px;
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 28px;
-    padding: 48px 48px 40px;
-    box-sizing: border-box;
-    opacity: 0;
-    transform: scale(0.9) translateY(20px);
-    transition: opacity 0.42s cubic-bezier(0.34,1.56,0.64,1),
-                transform 0.42s cubic-bezier(0.34,1.56,0.64,1);
-    box-shadow: 0 32px 80px rgba(0,0,0,0.12);
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  .contact-modal-backdrop.open .contact-modal {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-
-  /* ── Close button ── */
-  .contact-modal-close {
-    position: absolute; top: 18px; right: 20px;
-    width: 36px; height: 36px; border-radius: 50%;
-    background: #f8fafc; border: 1px solid rgba(0, 0, 0, 0.06);
-    color: #64748b; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; line-height: 1;
-    transition: all 0.2s ease;
-  }
-  .contact-modal-close:hover {
-    background: #eff6ff; color: #2563eb;
-    transform: scale(1.08);
-  }
-
-  /* ── Modal inputs ── */
-  .modal-input {
-    width: 100%; background: #f8fafc;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 12px; padding: 14px 16px;
-    font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 400;
-    color: #0f172a; outline: none; box-sizing: border-box;
-    transition: border-color 0.25s ease, background 0.25s ease;
-    resize: none;
-  }
-  .modal-input::placeholder { color: #94a3b8; }
-  .modal-input:focus { border-color: #2563eb; background: #ffffff; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-  .modal-input.error { border-color: rgba(239,68,68,0.7) !important; }
-
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    20%      { transform: translateX(-6px); }
-    40%      { transform: translateX(6px); }
-    60%      { transform: translateX(-4px); }
-    80%      { transform: translateX(4px); }
-  }
-  .shake { animation: shake 0.4s ease; }
-
-  /* ── Submit button ── */
-  .modal-submit-btn {
-    font-family: 'Outfit', sans-serif; font-size: 14px;
-    font-weight: 700; letter-spacing: 0.04em;
-    padding: 14px 36px; border-radius: 999px; cursor: pointer;
-    border: none; background: #2563eb;
-    color: #fff;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 16px rgba(37,99,235,0.25);
-  }
-  .modal-submit-btn:hover {
-    transform: scale(1.04); 
-    background: #1d4ed8;
-    box-shadow: 0 6px 24px rgba(37,99,235,0.35);
-  }
-  .modal-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-  .modal-warning {
-    font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 500;
-    color: #ef4444; margin-top: 10px; text-align: center;
-    opacity: 0; transition: opacity 0.25s ease;
-  }
-  .modal-warning.show { opacity: 1; }
-
-  .modal-success {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 20px 0 10px; text-align: center;
-  }
-
-  /* ── Brand description (desktop only) ── */
+  /* ── Brand description (desktop only) ── */  /* ── Brand description (desktop only) ── */
   .footer-brand-desc {
     font-family: 'Outfit', sans-serif;
     font-size: 13px; font-weight: 400;
@@ -495,17 +358,14 @@ const footerStyles = `
     .faq-container {
       grid-template-columns: 1fr;
     }
-    .faq-wrapper-card {
-      padding: 16px;
-    }
   }
 
   /* ── MOBILE LARGE (700px) ── */
   @media (max-width: 700px) {
     .footer-root { padding: 40px 0 20px !important; }
     .faq-section { margin-bottom: 30px; }
-    .faq-question-btn { font-size: 14.5px; padding: 16px 18px; }
-    .faq-answer-text { font-size: 13px; }
+    .faq-question-btn { font-size: 15px; padding: 20px; }
+    .faq-answer-text { font-size: 13.5px; }
 
     .footer-main-grid {
       grid-template-columns: 1fr 1fr;
@@ -646,167 +506,10 @@ const styles = {
     footerRoot: { padding: '56px 0 24px' },
 };
 
-const ContactModal = memo(function ContactModal({ open, onClose }) {
-    const [form, setForm] = useState({ name: '', email: '', message: '' });
-    const [errors, setErrors] = useState({});
-    const [warning, setWarning] = useState('');
-    const [shaking, setShaking] = useState(false);
-    const [status, setStatus] = useState('idle');
-
-    useEffect(() => {
-        const onKey = e => { if (e.key === 'Escape') onClose(); };
-        if (open) window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [open, onClose]);
-
-    useEffect(() => {
-        if (open) {
-            setForm({ name: '', email: '', message: '' });
-            setErrors({});
-            setWarning('');
-            setStatus('idle');
-        }
-    }, [open]);
-
-    const handleChange = useCallback(e => {
-        const { name, value } = e.target;
-        setForm(prev => ({ ...prev, [name]: value }));
-        setErrors(prev => (prev[name] ? { ...prev, [name]: false } : prev));
-        setWarning('');
-    }, []);
-
-    const handleSubmit = useCallback(async () => {
-        setForm(currentForm => {
-            const newErrors = {
-                name: !currentForm.name.trim(),
-                email: !currentForm.email.trim() || !/\S+@\S+\.\S+/.test(currentForm.email),
-                message: !currentForm.message.trim(),
-            };
-            const hasError = Object.values(newErrors).some(Boolean);
-            if (hasError) {
-                setErrors(newErrors);
-                setWarning(
-                    !currentForm.name.trim() && !currentForm.email.trim() && !currentForm.message.trim()
-                        ? 'Please fill in all fields before submitting.'
-                        : newErrors.email && currentForm.email.trim()
-                            ? 'Please enter a valid email address.'
-                            : 'Please fill in all required fields.'
-                );
-                setShaking(true);
-                setTimeout(() => setShaking(false), 450);
-            } else {
-                setStatus('sending');
-                const templateParams = { from_name: currentForm.name, from_email: currentForm.email, message: currentForm.message };
-                (async () => {
-                    try {
-                        await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_TO_COMPANY, templateParams, EMAILJS_PUBLIC_KEY);
-                        await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_TO_USER, templateParams, EMAILJS_PUBLIC_KEY);
-                        setStatus('sent');
-                    } catch (err) {
-                        console.error('EmailJS error:', err);
-                        setWarning('Something went wrong. Please try again.');
-                        setStatus('idle');
-                    }
-                })();
-            }
-            return currentForm;
-        });
-    }, []);
-
-    const backdropClassName = useMemo(
-        () => `contact-modal-backdrop ${open ? 'open' : ''}`,
-        [open]
-    );
-    const modalClassName = useMemo(
-        () => `contact-modal ${shaking ? 'shake' : ''}`,
-        [shaking]
-    );
-    const nameClassName = useMemo(() => `modal-input ${errors.name ? 'error' : ''}`, [errors.name]);
-    const emailClassName = useMemo(() => `modal-input ${errors.email ? 'error' : ''}`, [errors.email]);
-    const messageClassName = useMemo(() => `modal-input ${errors.message ? 'error' : ''}`, [errors.message]);
-    const warningClassName = useMemo(() => `modal-warning ${warning ? 'show' : ''}`, [warning]);
-
-    const handleBackdropClick = useCallback(e => {
-        if (e.target === e.currentTarget) onClose();
-    }, [onClose]);
-
-    return (
-        <div className={backdropClassName} onClick={handleBackdropClick}>
-            <div className={modalClassName}>
-
-                <button className="contact-modal-close" onClick={onClose} aria-label="Close">✕</button>
-
-                {status === 'sent' ? (
-                    <div className="modal-success">
-                        <div style={styles.successIconWrap}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M5 12l5 5L19 7" stroke="#2563eb" strokeWidth="2.2"
-                                    strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                        </div>
-                        <div style={styles.successTitle}>Submitted!</div>
-                        <p style={styles.successBody}>
-                            Thanks for reaching out. We&apos;ll get back to you within 24 hours.
-                            Check your email for confirmation!
-                        </p>
-                    </div>
-                ) : (
-                    <>
-                        <div style={styles.headingWrap}>
-                            <div style={styles.headingTitle}>
-                                Get in{' '}
-                                <span style={styles.headingGradient}>Touch</span>
-                            </div>
-                            <p style={styles.headingSub}>
-                                Tell us about your project and we&apos;ll get back to you soon.
-                            </p>
-                        </div>
-
-                        <div className="modal-fields-grid" style={styles.fieldsGrid}>
-                            <input
-                                className={nameClassName}
-                                type="text" name="name" placeholder="Your name *"
-                                value={form.name} onChange={handleChange} autoComplete="off"
-                            />
-                            <input
-                                className={emailClassName}
-                                type="email" name="email" placeholder="Email address *"
-                                value={form.email} onChange={handleChange} autoComplete="off"
-                            />
-                        </div>
-                        <textarea
-                            className={messageClassName}
-                            name="message" placeholder="Tell us about your project... *"
-                            rows={4} value={form.message} onChange={handleChange}
-                            style={styles.textarea}
-                        />
-
-                        <div style={styles.footerRow}>
-                            <p className={warningClassName} style={styles.warning}>
-                                ⚠ {warning}
-                            </p>
-                            <button
-                                className="modal-submit-btn"
-                                onClick={handleSubmit}
-                                disabled={status === 'sending'}
-                                style={styles.submitBtn}
-                            >
-                                {status === 'sending' ? 'Sending…' : 'Submit Message →'}
-                            </button>
-                        </div>
-                    </>
-                )}
-            </div>
-        </div>
-    );
-});
-
 export default function Footer() {
-    const [modalOpen, setModalOpen] = useState(false);
+    const { openModal } = useContactModal();
     const [activeFaq, setActiveFaq] = useState(null);
 
-    const handleModalClose = useCallback(() => setModalOpen(false), []);
-    const handleModalOpen = useCallback(() => setModalOpen(true), []);
 
     const toggleFaq = useCallback((index) => {
         setActiveFaq(prev => (prev === index ? null : index));
@@ -834,42 +537,34 @@ export default function Footer() {
             <div className="footer-glow" />
             <div className="footer-divider-top" />
 
-            <ContactModal open={modalOpen} onClose={handleModalClose} />
-
             {/* ── SECTION 1: FREQUENTLY ASKED QUESTIONS ── */}
             <div className="faq-section">
                 <div className="faq-header">
-                    <div className="faq-badge">
-                        <span className="faq-badge-dot" />
-                        Got Questions?
-                    </div>
                     <h2 className="faq-title">
                         Frequently Asked <span className="faq-title-blue">Questions</span>
                     </h2>
                 </div>
 
-                {/* FAQ Grid with Card Background */}
-                <div className="faq-wrapper-card">
-                    <div className="faq-container">
-                        {faqData.map((item, index) => {
-                            const isActive = activeFaq === index;
-                            return (
-                                <div key={index} className={`faq-item ${isActive ? 'active' : ''}`}>
-                                    <button
-                                        className="faq-question-btn"
-                                        onClick={() => toggleFaq(index)}
-                                        aria-expanded={isActive}
-                                    >
-                                        <span>{item.question}</span>
-                                        <span className="faq-icon">+</span>
-                                    </button>
-                                    <div className="faq-answer">
-                                        <p className="faq-answer-text">{item.answer}</p>
-                                    </div>
+                {/* FAQ Grid with Individual Beautiful Cards */}
+                <div className="faq-container">
+                    {faqData.map((item, index) => {
+                        const isActive = activeFaq === index;
+                        return (
+                            <div key={index} className={`faq-item ${isActive ? 'active' : ''}`}>
+                                <button
+                                    className="faq-question-btn"
+                                    onClick={() => toggleFaq(index)}
+                                    aria-expanded={isActive}
+                                >
+                                    <span>{item.question}</span>
+                                    <span className="faq-icon">+</span>
+                                </button>
+                                <div className="faq-answer">
+                                    <p className="faq-answer-text">{item.answer}</p>
                                 </div>
-                            );
-                        })}
-                    </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 
@@ -905,7 +600,7 @@ export default function Footer() {
                         <div className="footer-robot-wrap">
                             <img src={robot} alt="Robot" style={styles.robotImg} />
                         </div>
-                        <button className="footer-contact-btn" onClick={handleModalOpen}>
+                        <button className="footer-contact-btn" onClick={openModal}>
                             Contact Us →
                         </button>
                     </div>
@@ -924,4 +619,4 @@ export default function Footer() {
             </div>
         </footer>
     );
-}
+}   

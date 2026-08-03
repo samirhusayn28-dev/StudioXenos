@@ -275,7 +275,7 @@ function Hero() {
     const sectionRef = useRef(null);
     const [isHeroVisible, setIsHeroVisible] = useState(true);
 
-    // Track intersection of the Hero section to control heavy animations/rendering globally
+    // Optimized Intersection Observer using discrete state toggling to prevent redundant updates
     useEffect(() => {
         const el = sectionRef.current;
         if (!el) return;

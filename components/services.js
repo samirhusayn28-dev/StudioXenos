@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+// src/components/Services.jsx
+import React, { memo } from 'react';
 
 const designImg = '/assets/Design.png';
 const webDevImg = '/assets/WebDev.png';
@@ -84,7 +85,7 @@ const servicesStyles = `
 
 .srv-header-title {
   font-family: 'Outfit', sans-serif;
-  font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+  font-size: clamp(36px, 5.5vw, 50px);
   font-weight: 900;
   text-transform: uppercase;
   color: var(--text-primary);
@@ -120,19 +121,18 @@ const servicesStyles = `
   border-radius: 20px;
   padding: 28px 22px;
   border: 1px solid var(--card-border);
-  /* Restored explicit crisp ambient shadow */
   box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease, box-shadow 0.35s ease;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  will-change: transform;
 }
 
 .srv-card:hover {
   transform: translate3d(0, -8px, 0);
   border-color: rgba(37, 99, 235, 0.3);
-  /* Restored rich pronounced shadow on hover */
   box-shadow: 0 20px 40px rgba(37, 99, 235, 0.12), 0 8px 16px rgba(15, 23, 42, 0.08);
 }
 
@@ -231,6 +231,7 @@ const servicesStyles = `
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  will-change: transform;
   transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
   z-index: 1;
@@ -265,6 +266,19 @@ const servicesStyles = `
 .srv-book-btn:hover .txt-hover {
   transform: translate3d(0, 0, 0);
   opacity: 1;
+}
+
+/* ── Reduced Motion Support ── */
+@media (prefers-reduced-motion: reduce) {
+  .srv-card {
+    transition: none !important;
+  }
+  .srv-card:hover {
+    transform: none !important;
+  }
+  .srv-book-btn, .srv-book-btn:hover {
+    transform: none !important;
+  }
 }
 
 /* ── Mobile Layout Adjustments ── */
@@ -391,7 +405,7 @@ const servicesStyles = `
 }
 `;
 
-export default function Services() {
+function Services() {
     return (
         <section id="services" className="srv-section">
             <style>{servicesStyles}</style>
@@ -441,3 +455,5 @@ export default function Services() {
         </section>
     );
 }
+
+export default memo(Services);

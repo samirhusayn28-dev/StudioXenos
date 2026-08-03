@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 
 const phtsImg = 'assets/PHTS.png';
 const mp1Img = 'assets/MP1.png';
@@ -79,14 +79,14 @@ const MIN_IMG_W = 35;
 const MAX_IMG_W = 75;
 const DEBOUNCE_MS = 400;
 
-const GithubIcon = () => (
+const GithubIcon = memo(() => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.17 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 013-.4c1.02.005 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.65.24 2.87.12 3.17.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58C20.56 21.8 24 17.3 24 12 24 5.37 18.63 0 12 0z" />
     </svg>
-);
+));
+GithubIcon.displayName = 'GithubIcon';
 
 const css = `
- /* ── pjStyles (Projects Section) ── */
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Outfit:wght@300;400;500;600&family=Poppins:wght@500;600&display=swap');
 
 .pj-section {
@@ -101,7 +101,7 @@ const css = `
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  transform: translateZ(0); /* Hardware Acceleration Layer */
+  transform: translateZ(0);
 }
 
 .pj-desktop-layout {
@@ -110,9 +110,10 @@ const css = `
   height: 100%;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
-.pj-grid {
+.pj-transition-container {
   display: flex;
   align-items: stretch;
   gap: 16px;
@@ -122,14 +123,72 @@ const css = `
   margin: 0 auto;
   position: relative;
   z-index: 10;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
 }
+
+.pj-transition-container.slide-left {
+  animation: slideLeftAnim 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.pj-transition-container.slide-right {
+  animation: slideRightAnim 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideLeftAnim {
+  0% { opacity: 0; transform: translateX(40px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideRightAnim {
+  0% { opacity: 0; transform: translateX(-40px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.pj-big-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 40;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--card-bg, rgba(255, 255, 255, 0.85));
+  border: 1px solid var(--card-border, rgba(0,0,0,0.1));
+  color: var(--text-primary, #0f172a);
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pj-big-arrow:hover:not(:disabled) {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 14px 36px rgba(37, 99, 235, 0.3);
+}
+
+.pj-big-arrow:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.pj-big-arrow.left { left: 32px; }
+.pj-big-arrow.right { right: 32px; }
 
 .pj-img-col {
   position: relative;
   flex-shrink: 0;
   display: flex;
   align-items: stretch;
-  will-change: width; /* Optimize layout calculation painting */
+  will-change: width;
 }
 
 .pj-img-card {
@@ -328,6 +387,64 @@ const css = `
   font-family: 'Outfit', sans-serif; font-size: 9px;
   font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase;
   color: var(--text-muted);
+  display: flex; align-items: center; gap: 8px;
+}
+
+.pj-desktop-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pj-mode-toggle {
+  font-family: 'Outfit', sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.pj-mode-toggle:hover {
+  background: rgba(37, 99, 235, 0.2);
+}
+
+.pj-desktop-arrows {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.pj-arrow-btn-d {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 0;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.pj-arrow-btn-d:hover:not(:disabled) {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.pj-arrow-btn-d:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .pj-lightbox-backdrop {
@@ -493,11 +610,13 @@ const css = `
 }
 `;
 
-export default function Projects() {
+function Projects() {
     const [current, setCurrent] = useState(0);
     const [isInView, setIsInView] = useState(false);
     const [lightbox, setLightbox] = useState(false);
     const [imgColPercent, setImgColPercent] = useState(DEFAULT_IMG_W_PERCENT);
+    const [scrollType, setScrollType] = useState('horizontal');
+    const [animDirection, setAnimDirection] = useState('slide-left');
 
     const currentRef = useRef(0);
     const isInViewRef = useRef(false);
@@ -512,38 +631,38 @@ export default function Projects() {
     useEffect(() => { currentRef.current = current; }, [current]);
     useEffect(() => { isInViewRef.current = isInView; }, [isInView]);
 
-    const goTo = useCallback((idx) => {
+    const goTo = useCallback((idx, dir = 'slide-left') => {
         const boundedIdx = Math.min(projects.length - 1, Math.max(0, idx));
         if (boundedIdx === currentRef.current || isNavigatingRef.current) return;
 
         isNavigatingRef.current = true;
+        setAnimDirection(dir);
         currentRef.current = boundedIdx;
         setCurrent(boundedIdx);
 
         setTimeout(() => {
             isNavigatingRef.current = false;
-        }, 300);
+        }, 400);
     }, []);
 
-    const scrollToMobileProject = (index) => {
+    const scrollToMobileProject = useCallback((index) => {
         if (!mobileSliderRef.current) return;
         const width = mobileSliderRef.current.querySelector('.pj-mobile-slide-item')?.offsetWidth || mobileSliderRef.current.offsetWidth;
         mobileSliderRef.current.scrollTo({
             left: index * width,
             behavior: 'smooth'
         });
-    };
+    }, []);
 
-    const handleMobileScroll = () => {
+    const handleMobileScroll = useCallback(() => {
         if (!mobileSliderRef.current) return;
         const itemWidth = mobileSliderRef.current.querySelector('.pj-mobile-slide-item')?.offsetWidth || mobileSliderRef.current.offsetWidth;
         const index = Math.round(mobileSliderRef.current.scrollLeft / itemWidth);
-        if (index !== current && index >= 0 && index < projects.length) {
+        if (index !== currentRef.current && index >= 0 && index < projects.length) {
             setCurrent(index);
         }
-    };
+    }, []);
 
-    // Optimized Dragging using requestAnimationFrame throttling to prevent layout thrashing
     const onDragStart = useCallback((e) => {
         e.preventDefault();
         const containerWidth = sectionRef.current?.offsetWidth || window.innerWidth;
@@ -580,8 +699,7 @@ export default function Projects() {
 
         const io = new IntersectionObserver(
             ([entry]) => {
-                const inView = entry.isIntersecting && entry.intersectionRatio > 0.4;
-                setIsInView(inView);
+                setIsInView(entry.isIntersecting && entry.intersectionRatio > 0.4);
             },
             { threshold: [0.1, 0.4, 0.8] }
         );
@@ -591,25 +709,27 @@ export default function Projects() {
             if (window.innerWidth <= 900) return;
             if (!isInViewRef.current || Math.abs(e.deltaY) < 5) return;
 
-            const isDown = e.deltaY > 0;
-            const isTopBoundary = currentRef.current === 0;
-            const isBottomBoundary = currentRef.current === projects.length - 1;
+            if (scrollType === 'vertical') {
+                const isDown = e.deltaY > 0;
+                const isTopBoundary = currentRef.current === 0;
+                const isBottomBoundary = currentRef.current === projects.length - 1;
 
-            if ((isDown && isBottomBoundary) || (!isDown && isTopBoundary)) {
-                return;
-            }
+                if ((isDown && isBottomBoundary) || (!isDown && isTopBoundary)) {
+                    return;
+                }
 
-            e.preventDefault();
-            e.stopPropagation();
+                e.preventDefault();
+                e.stopPropagation();
 
-            const now = Date.now();
-            if (now - lastScrollAtRef.current < DEBOUNCE_MS || isNavigatingRef.current) return;
-            lastScrollAtRef.current = now;
+                const now = Date.now();
+                if (now - lastScrollAtRef.current < DEBOUNCE_MS || isNavigatingRef.current) return;
+                lastScrollAtRef.current = now;
 
-            if (isDown) {
-                goTo(currentRef.current + 1);
-            } else {
-                goTo(currentRef.current - 1);
+                if (isDown) {
+                    goTo(currentRef.current + 1, 'slide-left');
+                } else {
+                    goTo(currentRef.current - 1, 'slide-right');
+                }
             }
         };
 
@@ -619,7 +739,7 @@ export default function Projects() {
             io.disconnect();
             section.removeEventListener('wheel', onWheel);
         };
-    }, [goTo]);
+    }, [goTo, scrollType]);
 
     const project = projects[current];
 
@@ -627,12 +747,32 @@ export default function Projects() {
         <section id="projects" ref={sectionRef} className="pj-section">
             <style>{css}</style>
 
-            {/* DESKTOP LAYOUT */}
             <div className="pj-desktop-layout">
-                <div className="pj-grid">
+                {scrollType === 'horizontal' && (
+                    <>
+                        <button
+                            className="pj-big-arrow left"
+                            disabled={current === 0}
+                            onClick={() => goTo(current - 1, 'slide-right')}
+                            aria-label="Previous Project"
+                        >
+                            ❮
+                        </button>
+                        <button
+                            className="pj-big-arrow right"
+                            disabled={current === projects.length - 1}
+                            onClick={() => goTo(current + 1, 'slide-left')}
+                            aria-label="Next Project"
+                        >
+                            ❯
+                        </button>
+                    </>
+                )}
+
+                <div className={`pj-transition-container ${animDirection}`} key={current}>
                     <div className="pj-img-col" style={{ width: `${imgColPercent}%` }}>
                         <div className="pj-img-card" onClick={() => setLightbox(true)}>
-                            <img src={project.img} alt={project.title} className="pj-img" />
+                            <img src={project.img} alt={project.title} className="pj-img" loading="lazy" />
                             <div className="pj-img-overlay" />
 
                             <div className="pj-img-counter">
@@ -715,12 +855,38 @@ export default function Projects() {
                                                 key={i}
                                                 className={`pj-dot ${i === current ? 'active' : ''}`}
                                                 style={{ background: i === current ? project.accent : 'var(--pj-card-border)' }}
-                                                onClick={() => goTo(i)}
+                                                onClick={() => goTo(i, i > current ? 'slide-left' : 'slide-right')}
                                             />
                                         ))}
                                     </div>
                                     <div className="pj-scroll-hint">
-                                        {current < projects.length - 1 ? 'Swipe ↓ Next' : 'Swipe ↓ Next Section'}
+                                        <div className="pj-desktop-controls">
+                                            <button
+                                                className="pj-mode-toggle"
+                                                onClick={() => setScrollType(prev => prev === 'horizontal' ? 'vertical' : 'horizontal')}
+                                                title="Toggle scroll interaction mode"
+                                            >
+                                                Mode: {scrollType}
+                                            </button>
+                                        </div>
+                                        <div className="pj-desktop-arrows">
+                                            <button
+                                                className="pj-arrow-btn-d"
+                                                disabled={current === 0}
+                                                onClick={() => goTo(current - 1, 'slide-right')}
+                                                aria-label="Previous Project"
+                                            >
+                                                ←
+                                            </button>
+                                            <button
+                                                className="pj-arrow-btn-d"
+                                                disabled={current === projects.length - 1}
+                                                onClick={() => goTo(current + 1, 'slide-left')}
+                                                aria-label="Next Project"
+                                            >
+                                                →
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -729,7 +895,6 @@ export default function Projects() {
                 </div>
             </div>
 
-            {/* MOBILE HORIZONTAL SLIDER */}
             <div
                 className="pj-mobile-slider"
                 ref={mobileSliderRef}
@@ -798,13 +963,11 @@ export default function Projects() {
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* FLOATING MOBILE ARROW CONTROLS */}
             <div className="pj-floating-arrows-mobile">
                 <button
                     className="pj-arrow-btn-m"
@@ -824,11 +987,10 @@ export default function Projects() {
                 </button>
             </div>
 
-            {/* LIGHTBOX (DESKTOP) */}
             {lightbox && (
                 <div className="pj-lightbox-backdrop" onClick={() => setLightbox(false)}>
                     <div className="pj-lightbox-inner" onClick={e => e.stopPropagation()}>
-                        <img src={projects[current].img} alt={projects[current].title} />
+                        <img src={projects[current].img} alt={projects[current].title} loading="lazy" />
                         <button className="pj-lightbox-close" onClick={() => setLightbox(false)}>✕</button>
                     </div>
                 </div>
@@ -836,3 +998,5 @@ export default function Projects() {
         </section>
     );
 }
+
+export default memo(Projects);

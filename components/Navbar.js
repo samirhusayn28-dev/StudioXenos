@@ -3,14 +3,14 @@
 import React, { useState, memo, useCallback } from 'react';
 
 const navLinks = [
-    { label: 'Home', id: 'home' },
+    // { label: 'Home', id: 'home' },
     { label: 'Services', id: 'services' },
     { label: 'How we work', id: 'how-we-work' },
     { label: 'Projects', id: 'projects' },
     { label: 'Gallery', id: 'art-gallery' },
-    { label: 'Team', id: 'our-team' },
+    { label: 'What People Say', id: 'testimonials' },
     { label: 'About', id: 'about' },
-    { label: 'Contact', id: 'contact' },
+    // { label: 'Contact', id: 'contact' },
 ];
 
 const navbarStyles = `
@@ -212,7 +212,7 @@ function Navbar() {
     }, []);
 
     return (
-        <header className="hero-nav-container">
+        <header className="hero-nav-container animate-slide-down">
             <style>{navbarStyles}</style>
 
             <div className="hero-nav-inner">

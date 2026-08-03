@@ -31,6 +31,20 @@ const testimonials = [
         rating: 5,
         avatar: 'MV'
     },
+    {
+        quote: 'The level of creativity and technical execution they brought to our web platform was truly exceptional.',
+        name: 'SOPHIA CHEN',
+        role: 'Head of Product, Lumina',
+        rating: 5,
+        avatar: 'SC'
+    },
+    {
+        quote: 'An incredible partner from day one. They understood our vision immediately and delivered beyond par.',
+        name: 'LIAM O’CONNOR',
+        role: 'CEO, FinPulse',
+        rating: 5,
+        avatar: 'LO'
+    },
 ];
 
 const css = `
@@ -38,7 +52,7 @@ const css = `
 
   .t-section {
     background: transparent;
-    padding: 80px 24px;
+    padding: 40px 24px;
     font-family: 'Outfit', system-ui, -apple-system, sans-serif;
     width: 100%;
     box-sizing: border-box;
@@ -46,7 +60,7 @@ const css = `
 
   .t-header {
     text-align: center;
-    margin-bottom: 48px;
+    margin-bottom: 56px;
   }
 
   .t-badge {
@@ -56,9 +70,9 @@ const css = `
     background: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 999px;
-    padding: 5px 14px 5px 10px;
+    padding: 6px 16px 6px 12px;
     margin-bottom: 16px;
-    font-size: 11px;
+    font-size: 11.5px;
     font-weight: 700;
     color: #2563eb;
     letter-spacing: 0.12em;
@@ -78,10 +92,10 @@ const css = `
   .t-title {
     font-weight: 900;
     text-transform: uppercase;
-    line-height: 1.1;
+    line-height: 1.05;
     letter-spacing: -0.02em;
     margin: 0;
-    font-size: clamp(32px, 4.5vw, 52px);
+    font-size: clamp(36px, 5.5vw, 50px);
     color: #0f172a;
   }
 
@@ -90,27 +104,27 @@ const css = `
   }
 
   .t-divider {
-    width: 40px;
-    height: 2px;
+    width: 48px;
+    height: 3px;
     background: #2563eb;
     border-radius: 2px;
-    margin: 16px auto 0;
+    margin: 18px auto 0;
   }
 
-  /* 4-Column Grid matching the theme style */
+  /* 3-Column Grid (2 rows of 3 cards) */
   .t-wrap {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
     width: 100%;
-    max-width: 1280px;
+    max-width: 1320px;
     margin: 0 auto;
     box-sizing: border-box;
   }
 
   .t-card {
     position: relative;
-    padding: 24px 20px;
+    padding: 28px 24px;
     border-radius: 20px;
     background: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.06);
@@ -120,7 +134,7 @@ const css = `
     justify-content: space-between;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
     box-sizing: border-box;
-    min-height: 240px;
+    min-height: 250px;
   }
 
   .t-card:hover {
@@ -133,14 +147,14 @@ const css = `
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
 
   .t-stars {
     display: flex;
     gap: 3px;
     color: #f59e0b;
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .t-quote-symbol {
@@ -152,11 +166,11 @@ const css = `
   }
 
   .t-quote {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 400;
-    line-height: 1.55;
+    line-height: 1.6;
     color: #475569;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
     flex-grow: 1;
   }
 
@@ -165,16 +179,16 @@ const css = `
     align-items: center;
     gap: 12px;
     border-top: 1px solid rgba(0, 0, 0, 0.05);
-    padding-top: 12px;
+    padding-top: 14px;
   }
 
   .t-avatar {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: #eff6ff;
     color: #2563eb;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -190,7 +204,7 @@ const css = `
   }
 
   .t-name {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 800;
     color: #0f172a;
     text-transform: uppercase;
@@ -201,7 +215,7 @@ const css = `
   }
 
   .t-role {
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 400;
     color: #64748b;
     white-space: nowrap;
@@ -218,10 +232,10 @@ const css = `
 
   @media (max-width: 640px) {
     .t-section {
-      padding: 50px 16px;
+      padding: 60px 16px;
     }
     .t-header {
-      margin-bottom: 32px;
+      margin-bottom: 36px;
     }
     .t-wrap {
       grid-template-columns: 1fr;
@@ -229,7 +243,7 @@ const css = `
     }
     .t-card {
       min-height: auto;
-      padding: 20px;
+      padding: 22px 18px;
     }
   }
 `;
@@ -276,12 +290,12 @@ export default function Testimonials() {
             <GlobalStyle />
 
             <div className="t-header">
-                <div className="t-badge">
-                    <span className="t-badge-dot" />
-                    Client Feedback
-                </div>
+                {/* <div className="t-badge">
+                        <span className="t-badge-dot" />
+                        Client Feedback
+                    </div> */}
                 <h2 className="t-title">
-                    Trusted <span className="t-title-blue">Testimonials</span>
+                    What <span className="t-title-blue">People Say About Us</span>
                 </h2>
                 <div className="t-divider" />
             </div>

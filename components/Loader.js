@@ -8,8 +8,8 @@ export default function Loader({ onComplete }) {
     useEffect(() => {
         const timer = setTimeout(() => {
             setFadeOut(true);
-            setTimeout(onComplete, 600);
-        }, 10);
+            setTimeout(onComplete, 100);
+        }, 1500);
 
         return () => clearTimeout(timer);
     }, [onComplete]);

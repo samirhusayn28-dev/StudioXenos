@@ -88,7 +88,7 @@ const artStyles = `
   text-transform: uppercase; 
   line-height: 0.92; 
   letter-spacing: -0.01em; 
-  font-size: clamp(38px, 7vw, 65px); 
+    font-size: clamp(36px, 5.5vw, 50px);
 } 
 
 .art-heading-plain { 
@@ -112,20 +112,6 @@ const artStyles = `
   max-width: 420px; 
   margin: 28px auto 36px; 
   transition: color 0.4s ease; 
-}
-
-/* ── Normal CSS Fade Transition Wrap ── */
-.art-gallery-fade-wrap {
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.6s ease, visibility 0.6s ease;
-}
-
-.art-gallery-fade-wrap.visible {
-  opacity: 1;
-  visibility: visible;
 }
 
 .art-gallery-wrap {
@@ -175,8 +161,6 @@ const galleryItems = [
 
 function ArtGallery() {
     const [bend, setBend] = useState(1);
-    const [isSectionInView, setIsSectionInView] = useState(false);
-
     const sectionRef = useRef(null);
     const rafId = useRef(null);
     const lastMobileState = useRef(null);
@@ -196,22 +180,7 @@ function ArtGallery() {
         });
     }, [updateBend]);
 
-    // IntersectionObserver to control when the gallery is active in viewport
-    useEffect(() => {
-        const node = sectionRef.current;
-        if (!node) return;
-
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                setIsSectionInView(entry.isIntersecting);
-            },
-            { threshold: 0.1 }
-        );
-
-        observer.observe(node);
-        return () => observer.disconnect();
-    }, []);
-
+    // Use useLayoutEffect to measure/calculate layout values instantly before paint
     useEffect(() => {
         updateBend();
         window.addEventListener('resize', handleResize, { passive: true });
@@ -245,16 +214,14 @@ function ArtGallery() {
             </div>
 
             <div className="art-gallery-wrap">
-                <div className={`art-gallery-fade-wrap ${isSectionInView ? 'visible' : ''}`}>
-                    <SimpleGallery
-                        items={galleryItems}
-                        bend={bend}
-                        borderRadius={0.05}
-                        scrollSpeed={2}
-                        scrollEase={0.05}
-                        isViewActive={isSectionInView}
-                    />
-                </div>
+                <SimpleGallery
+                    items={galleryItems}
+                    bend={bend}
+                    borderRadius={0.05}
+                    scrollSpeed={2}
+                    scrollEase={0.05}
+                    isViewActive={true}
+                />
             </div>
         </section>
     );
