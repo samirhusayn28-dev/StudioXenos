@@ -423,6 +423,7 @@ function Services() {
 
                             {/* Icon & Heading Wrapper */}
                             <div className="srv-card-top-row">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={s.img}
                                     alt={s.title}

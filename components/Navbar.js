@@ -216,6 +216,7 @@ function Navbar() {
             <style>{navbarStyles}</style>
 
             <div className="hero-nav-inner">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                     src="/assets/StudioX.png"
                     alt="StudioX Logo"

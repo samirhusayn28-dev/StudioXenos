@@ -121,7 +121,7 @@ const CardSwap = ({
   const childArr = useMemo(() => Children.toArray(children), [children]);
   const refs = useMemo(
     () => childArr.map(() => React.createRef()),
-    [childArr.length]
+    [childArr]
   );
 
   const order = useRef(Array.from({ length: childArr.length }, (_, i) => i));
@@ -158,6 +158,7 @@ const CardSwap = ({
 
   const breakpoint = useMemo(
     () => getBreakpointConfig(typeof window !== 'undefined' ? window.innerWidth : 1200),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [breakpointKey]
   );
 

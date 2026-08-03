@@ -397,7 +397,9 @@ export default function Work() {
 
                             <span className="step-number">{step.id}</span>
                             <div className="robot-wrapper">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={step.robot} alt={step.title} className="robot-img" loading="lazy" />
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={shadow} alt="" className="shadow-img" />
                             </div>
                             <span className="step-tag">Step {step.id}</span>

@@ -772,6 +772,7 @@ function Projects() {
                 <div className={`pj-transition-container ${animDirection}`} key={current}>
                     <div className="pj-img-col" style={{ width: `${imgColPercent}%` }}>
                         <div className="pj-img-card" onClick={() => setLightbox(true)}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={project.img} alt={project.title} className="pj-img" loading="lazy" />
                             <div className="pj-img-overlay" />
 
@@ -990,6 +991,7 @@ function Projects() {
             {lightbox && (
                 <div className="pj-lightbox-backdrop" onClick={() => setLightbox(false)}>
                     <div className="pj-lightbox-inner" onClick={e => e.stopPropagation()}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={projects[current].img} alt={projects[current].title} loading="lazy" />
                         <button className="pj-lightbox-close" onClick={() => setLightbox(false)}>✕</button>
                     </div>
