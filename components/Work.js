@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { memo } from 'react';
 import Image from 'next/image';
 
 const robot1 = '/assets/Robot.png';
@@ -24,6 +24,7 @@ const workStyles = `
   position: relative;
   overflow: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
+  contain: layout paint style;
 }
 
 .work-bg-grid {
@@ -134,6 +135,7 @@ const workStyles = `
   position: relative;
   z-index: 2;
   min-height: 600px;
+  contain: layout paint style;
 }
 
 .work-card {
@@ -146,6 +148,8 @@ const workStyles = `
   text-align: center;
   box-sizing: border-box;
   animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+  transform: translateZ(0);
 }
 
 @media (min-width: 1000px) {
@@ -249,6 +253,8 @@ const workStyles = `
   gap: 8px;
   box-shadow: 0 6px 18px rgba(37, 99, 235, 0.1);
   transition: transform 0.3s ease;
+  will-change: transform, opacity;
+  transform: translateZ(0);
 }
 
 .small-floating-card:hover {
@@ -268,6 +274,24 @@ const workStyles = `
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-header,
+  .work-card,
+  .small-floating-card,
+  .robot-img {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .gradient-rope-path {
+    animation: none !important;
+  }
+
+  .work-card:hover .robot-img {
+    transform: none !important;
+  }
 }
 `;
 
@@ -340,6 +364,31 @@ const steps = [
     }
 ];
 
+const StepCard = memo(function StepCard({ step }) {
+    return (
+        <div
+            className={`work-card ${step.posClass}`}
+            style={{ animationDelay: step.delay }}
+        >
+            <div className="small-floating-card">
+                <svg className="card-svg-icon" viewBox="0 0 24 24" fill="none" stroke={step.stroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    {step.iconPath}
+                </svg>
+                <span className="card-label-text" style={{ color: step.labelColor }}>{step.label}</span>
+            </div>
+
+            <span className="step-number">{step.id}</span>
+            <div className="robot-wrapper">
+                <Image src={step.robot} alt={step.title} className="robot-img" width={120} height={120} sizes="(max-width: 999px) 60vw, 120px" />
+                <Image src={shadow} alt="" className="shadow-img" width={102} height={102} sizes="102px" />
+            </div>
+            <span className="step-tag">Step {step.id}</span>
+            <h3 className="card-title">{step.title}</h3>
+            <p className="card-desc">{step.desc}</p>
+        </div>
+    );
+});
+
 export default function Work() {
     return (
         <section id="how-we-work" className="work-section">
@@ -384,27 +433,7 @@ export default function Work() {
 
                 <div className="work-grid">
                     {steps.map((step) => (
-                        <div
-                            key={step.id}
-                            className={`work-card ${step.posClass}`}
-                            style={{ animationDelay: step.delay }}
-                        >
-                            <div className="small-floating-card">
-                                <svg className="card-svg-icon" viewBox="0 0 24 24" fill="none" stroke={step.stroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    {step.iconPath}
-                                </svg>
-                                <span className="card-label-text" style={{ color: step.labelColor }}>{step.label}</span>
-                            </div>
-
-                            <span className="step-number">{step.id}</span>
-                            <div className="robot-wrapper">
-                                <Image src={step.robot} alt={step.title} className="robot-img" width={120} height={120} />
-                                <Image src={shadow} alt="" className="shadow-img" width={102} height={102} />
-                            </div>
-                            <span className="step-tag">Step {step.id}</span>
-                            <h3 className="card-title">{step.title}</h3>
-                            <p className="card-desc">{step.desc}</p>
-                        </div>
+                        <StepCard key={step.id} step={step} />
                     ))}
                 </div>
             </div>

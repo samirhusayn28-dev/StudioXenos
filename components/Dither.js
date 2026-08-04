@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 const Mesh = 'mesh';
 const PlaneGeometry = 'planeGeometry';
 const ShaderMaterial = 'shaderMaterial';
-const MeshBasicMaterial = 'meshBasicMaterial';import { EffectComposer, wrapEffect } from '@react-three/postprocessing';
+const MeshBasicMaterial = 'meshBasicMaterial'; import { EffectComposer, wrapEffect } from '@react-three/postprocessing';
 import { Effect } from 'postprocessing';
 import * as THREE from 'three';
 
@@ -331,6 +331,8 @@ export default function Dither({
                 camera={{ position: [0, 0, 6] }}
                 dpr={isMobile ? 0.6 : 1}
                 gl={glProps}
+                frameloop={isVisible && !isMobile ? 'always' : 'demand'}
+                style={{ contain: 'paint' }}
             >
                 <MemoizedDitheredWaves
                     waveSpeed={waveSpeed}

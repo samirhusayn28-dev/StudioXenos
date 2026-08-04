@@ -10,6 +10,11 @@ function lerp(a, b, t) {
 }
 
 const robotStyles = `
+  @keyframes robotFloatContainer {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%      { transform: translate3d(0, -14px, 0); }
+  }
+
   @keyframes robotFloatGlow {
     0%, 100% { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 0.65; }
     50%      { transform: translate3d(-50%, -50%, 0) scale(1.08); opacity: 0.85; }
@@ -18,6 +23,16 @@ const robotStyles = `
   @keyframes robotFloatShadow {
     0%, 100% { transform: translate3d(-50%, 0, 0) scale(1); opacity: 0.60; }
     50%      { transform: translate3d(-50%, 0, 0) scale(0.82); opacity: 0.40; }
+  }
+
+  .robot-wrapper-anim {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    transform: translateZ(0);
+    will-change: transform;
+    animation: robotFloatContainer 4s ease-in-out infinite;
   }
 
   .robot-pure-glow {
@@ -62,9 +77,8 @@ const Model = memo(function Model({ mouseX, mouseY, isMobile, isHeroVisible }) {
 
     const modelScale = isMobile ? 1.0 : 1.5;
     const baseY = isMobile ? -0.8 : -1.2;
-    const lerpSpeed = isMobile ? 0.03 : 0.05;
+    const lerpSpeed = isMobile ? 0.03 : 0.06;
 
-    // Streamlined cleanup & material precision assignment
     useEffect(() => {
         if (!scene) return;
         scene.traverse((child) => {
@@ -78,6 +92,7 @@ const Model = memo(function Model({ mouseX, mouseY, isMobile, isHeroVisible }) {
         });
     }, [scene]);
 
+    // Lightweight frame handler focused purely on mouse interaction and minor stabilization
     useFrame((state) => {
         if (!groupRef.current || !isHeroVisible) return;
         const t = state.clock.getElapsedTime();
@@ -85,16 +100,13 @@ const Model = memo(function Model({ mouseX, mouseY, isMobile, isHeroVisible }) {
         smoothX.current = lerp(smoothX.current, mouseX.current, lerpSpeed);
         smoothY.current = lerp(smoothY.current, mouseY.current, lerpSpeed);
 
-        const floatY = Math.sin(t * 1.2) * 0.12;
-
         groupRef.current.position.x = isMobile ? 0 : smoothX.current * 0.5;
-        groupRef.current.position.y = floatY + baseY + smoothY.current * 0.08;
+        groupRef.current.position.y = baseY + smoothY.current * 0.08;
 
         groupRef.current.rotation.y = isMobile
             ? Math.sin(t * 0.4) * 0.12
             : Math.sin(t * 0.4) * 0.15 + smoothX.current * 0.3;
         groupRef.current.rotation.x = isMobile ? 0 : smoothY.current * 0.08;
-        groupRef.current.rotation.z = Math.sin(t * 0.6) * 0.02;
     });
 
     return (
@@ -104,7 +116,6 @@ const Model = memo(function Model({ mouseX, mouseY, isMobile, isHeroVisible }) {
     );
 });
 
-// Preload the GLB model chunk for seamless assembly
 useGLTF.preload("/robot.glb");
 
 export default function Robot3D({ isHeroVisible = true }) {
@@ -115,7 +126,6 @@ export default function Robot3D({ isHeroVisible = true }) {
     const [isMobile, setIsMobile] = useState(false);
     const [elementInView, setElementInView] = useState(true);
 
-    // Responsive Mobile Matcher using media query list listener
     useEffect(() => {
         const mql = window.matchMedia("(max-width: 767px)");
         const update = (e) => setIsMobile(e.matches);
@@ -134,7 +144,6 @@ export default function Robot3D({ isHeroVisible = true }) {
         };
     }, []);
 
-    // IntersectionObserver to track view status accurately
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => setElementInView(entry.isIntersecting),
@@ -144,7 +153,6 @@ export default function Robot3D({ isHeroVisible = true }) {
         return () => observer.disconnect();
     }, []);
 
-    // Optimized RAF Mouse tracker avoiding state triggers
     useEffect(() => {
         const el = containerRef.current;
         if (!el || isMobile) return;
@@ -179,61 +187,64 @@ export default function Robot3D({ isHeroVisible = true }) {
     }, [isMobile]);
 
     const isActive = isHeroVisible && elementInView;
+    const cameraConfig = useMemo(() => ({
+        position: [0, 0, isMobile ? 6.5 : 5.2],
+        fov: isMobile ? 44 : 50,
+    }), [isMobile]);
+    const canvasStyle = useMemo(() => ({
+        width: "100%",
+        height: "100%",
+        position: "relative",
+        zIndex: 1,
+        pointerEvents: "none",
+        transform: "translateZ(0)",
+    }), []);
 
     return (
-        <div
-            ref={containerRef}
-            style={{
-                width: "100%", height: "100%",
-                position: "relative", overflow: "hidden",
-                transform: "translateZ(0)",
-            }}
-        >
+        <div ref={containerRef} style={{ width: "100%", height: "100%", position: "relative" }}>
             <style>{robotStyles}</style>
 
-            {!isMobile && (
+            <div
+                className="robot-wrapper-anim"
+                style={{ animationPlayState: isActive ? 'running' : 'paused' }}
+            >
+                {!isMobile && (
+                    <div
+                        className="robot-pure-glow"
+                        style={{ animationPlayState: isActive ? 'running' : 'paused' }}
+                    />
+                )}
+
+                <Canvas
+                    camera={cameraConfig}
+                    dpr={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, isMobile ? 1.0 : 1.1) : 1}
+                    frameloop={isActive ? "always" : "demand"}
+                    gl={{
+                        antialias: false,
+                        powerPreference: "high-performance",
+                        alpha: true,
+                        stencil: false,
+                        depth: true,
+                    }}
+                    style={canvasStyle}
+                >
+                    <ambientLight intensity={isMobile ? 1.6 : 1.2} />
+                    <directionalLight position={[4, 6, 4]} intensity={1.8} />
+                    {!isMobile && <directionalLight position={[-3, 1, -2]} intensity={0.5} />}
+
+                    <Model
+                        mouseX={mouseX}
+                        mouseY={mouseY}
+                        isMobile={isMobile}
+                        isHeroVisible={isActive}
+                    />
+                </Canvas>
+
                 <div
-                    className="robot-pure-glow"
+                    className="robot-pure-shadow"
                     style={{ animationPlayState: isActive ? 'running' : 'paused' }}
                 />
-            )}
-
-            <Canvas
-                camera={{
-                    position: [0, 0, isMobile ? 6.5 : 5.2],
-                    fov: isMobile ? 44 : 50,
-                }}
-                dpr={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 1.1) : 1}
-                frameloop={isActive ? "always" : "demand"}
-                gl={{
-                    antialias: false,
-                    powerPreference: "high-performance",
-                    alpha: true,
-                    stencil: false,
-                    depth: true,
-                }}
-                style={{
-                    width: "100%", height: "100%",
-                    position: "relative", zIndex: 1,
-                    pointerEvents: "none",
-                }}
-            >
-                <ambientLight intensity={isMobile ? 1.6 : 1.2} />
-                <directionalLight position={[4, 6, 4]} intensity={1.8} />
-                {!isMobile && <directionalLight position={[-3, 1, -2]} intensity={0.5} />}
-
-                <Model
-                    mouseX={mouseX}
-                    mouseY={mouseY}
-                    isMobile={isMobile}
-                    isHeroVisible={isActive}
-                />
-            </Canvas>
-
-            <div
-                className="robot-pure-shadow"
-                style={{ animationPlayState: isActive ? 'running' : 'paused' }}
-            />
+            </div>
         </div>
     );
 }

@@ -236,6 +236,7 @@ const styles = `
     position: relative !important;
     background-color: var(--bg-primary, #040610);
     color: var(--text-primary, #e8ddd0);
+    -webkit-overflow-scrolling: touch;
   }
 
   .section-slider-shell {
@@ -254,6 +255,7 @@ const styles = `
     height: auto !important;
     transform: none !important;
     transition: none !important;
+    overflow: visible !important;
   }
 
   .section-slider-page {
@@ -266,7 +268,7 @@ const styles = `
     background-color: transparent;
   }
 
-  /* Force child sections to allow natural vertical expansion */
+  /* Force child sections to allow natural vertical expansion and scrolling */
   .section-slider-page > section {
     height: auto !important;
     min-height: 100vh !important;

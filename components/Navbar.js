@@ -20,7 +20,7 @@ const navbarStyles = `
   .hero-nav-container {
     width: 100%;
     max-width: 1200px;
-    margin: 30px auto;
+    margin: 0px auto;
     padding: 20px 24px 0;
     box-sizing: border-box;
     position: relative;
@@ -45,7 +45,7 @@ const navbarStyles = `
   }
 
   .nav-logo {
-    height: 30px;
+    height: 35px;
     width: auto;
     background: var(--btn-bg, #2563eb); padding: 5px 20px;
     border-radius: 999px;
