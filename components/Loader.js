@@ -23,7 +23,7 @@ export default function Loader({ onComplete }) {
                 if (!isMounted) return;
                 setFadeOut(true);
                 timeoutRef.current = setTimeout(() => onComplete && onComplete(), 10);
-            }, 1000);
+            }, 400);
         }).catch(() => {
             if (!isMounted) return;
             setFadeOut(true);

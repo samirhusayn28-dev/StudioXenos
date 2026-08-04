@@ -237,6 +237,7 @@ const styles = `
     background-color: var(--bg-primary, #040610);
     color: var(--text-primary, #e8ddd0);
     -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
 
   .section-slider-shell {
@@ -268,7 +269,7 @@ const styles = `
     background-color: transparent;
   }
 
-  /* Force child sections to allow natural vertical expansion and scrolling */
+  /* Force all child sections to allow natural vertical expansion and scrolling */
   .section-slider-page > section {
     height: auto !important;
     min-height: 100vh !important;
