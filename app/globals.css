@@ -9,9 +9,11 @@ html {
 
 html,
 body {
-    overflow: hidden !important;
-    height: 100%;
-    touch-action: none;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    min-height: 100%;
+    touch-action: pan-y;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
 }
