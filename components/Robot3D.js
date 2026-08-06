@@ -12,17 +12,17 @@ function lerp(a, b, t) {
 const robotStyles = `
   @keyframes robotFloatContainer {
     0%, 100% { transform: translate3d(0, 0, 0); }
-    50%      { transform: translate3d(0, -14px, 0); }
+    50%      { transform: translate3d(0, -10px, 0); }
   }
 
   @keyframes robotFloatGlow {
-    0%, 100% { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 0.65; }
-    50%      { transform: translate3d(-50%, -50%, 0) scale(1.08); opacity: 0.85; }
+    0%, 100% { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 0.5; }
+    50%      { transform: translate3d(-50%, -50%, 0) scale(1.04); opacity: 0.7; }
   }
 
   @keyframes robotFloatShadow {
-    0%, 100% { transform: translate3d(-50%, 0, 0) scale(1); opacity: 0.60; }
-    50%      { transform: translate3d(-50%, 0, 0) scale(0.82); opacity: 0.40; }
+    0%, 100% { transform: translate3d(-50%, 0, 0) scale(1); opacity: 0.50; }
+    50%      { transform: translate3d(-50%, 0, 0) scale(0.85); opacity: 0.30; }
   }
 
   .robot-wrapper-anim {
@@ -35,17 +35,18 @@ const robotStyles = `
     animation: robotFloatContainer 4s ease-in-out infinite;
   }
 
+  /* Optimized: Smaller footprint and simplified gradient to prevent GPU lag */
   .robot-pure-glow {
     position: absolute;
     top: 45%;
     left: 50%;
-    width: 600px;
-    height: 600px;
+    width: 400px;
+    height: 400px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(49,92,253,0.45) 0%, rgba(90,50,220,0.2) 40%, transparent 70%);
+    background: radial-gradient(circle, rgba(49,92,253,0.3) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
-    will-change: transform, opacity;
+    will-change: opacity;
     animation: robotFloatGlow 4s ease-in-out infinite;
   }
 
@@ -53,22 +54,22 @@ const robotStyles = `
     position: absolute;
     bottom: 8%;
     left: 50%;
-    width: 240px;
-    height: 20px;
+    width: 200px;
+    height: 16px;
     border-radius: 50%;
-    background: radial-gradient(ellipse at center, rgba(0,0,0,0.6) 0%, transparent 75%);
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.5) 0%, transparent 75%);
     pointer-events: none;
     z-index: 2;
-    will-change: transform, opacity;
+    will-change: opacity;
     animation: robotFloatShadow 4s ease-in-out infinite;
   }
 
   @media (max-width: 767px) {
-    .robot-pure-shadow { width: 140px; bottom: 4%; }
+    .robot-pure-shadow { width: 120px; bottom: 4%; }
   }
 `;
 
-const Model = memo(function Model({ mouseX, mouseY, isMobile, isHeroVisible }) {
+const Model = memo(function Model({ mouseX, mouseY, isMobile, isHovered }) {
     const { scene } = useGLTF("/robot.glb");
     const groupRef = useRef();
 
@@ -77,7 +78,7 @@ const Model = memo(function Model({ mouseX, mouseY, isMobile, isHeroVisible }) {
 
     const modelScale = isMobile ? 1.0 : 1.5;
     const baseY = isMobile ? -0.8 : -1.2;
-    const lerpSpeed = isMobile ? 0.03 : 0.06;
+    const lerpSpeed = isMobile ? 0.03 : 0.08;
 
     useEffect(() => {
         if (!scene) return;
@@ -92,13 +93,15 @@ const Model = memo(function Model({ mouseX, mouseY, isMobile, isHeroVisible }) {
         });
     }, [scene]);
 
-    // Lightweight frame handler focused purely on mouse interaction and minor stabilization
     useFrame((state) => {
-        if (!groupRef.current || !isHeroVisible) return;
+        if (!groupRef.current) return;
         const t = state.clock.getElapsedTime();
 
-        smoothX.current = lerp(smoothX.current, mouseX.current, lerpSpeed);
-        smoothY.current = lerp(smoothY.current, mouseY.current, lerpSpeed);
+        const targetX = isHovered ? mouseX.current : 0;
+        const targetY = isHovered ? mouseY.current : 0;
+
+        smoothX.current = lerp(smoothX.current, targetX, lerpSpeed);
+        smoothY.current = lerp(smoothY.current, targetY, lerpSpeed);
 
         groupRef.current.position.x = isMobile ? 0 : smoothX.current * 0.5;
         groupRef.current.position.y = baseY + smoothY.current * 0.08;
@@ -111,46 +114,27 @@ const Model = memo(function Model({ mouseX, mouseY, isMobile, isHeroVisible }) {
 
     return (
         <group ref={groupRef}>
-            <primitive object={scene} scale={modelScale} />
+            <object3D object={scene} scale={modelScale} />
         </group>
     );
 });
 
 useGLTF.preload("/robot.glb");
 
-export default function Robot3D({ isHeroVisible = true }) {
+export default function Robot3D() {
     const mouseX = useRef(0);
     const mouseY = useRef(0);
     const containerRef = useRef(null);
 
     const [isMobile, setIsMobile] = useState(false);
-    const [elementInView, setElementInView] = useState(true);
+    const [isHovered, setIsHovered] = useState(false);
 
     useEffect(() => {
         const mql = window.matchMedia("(max-width: 767px)");
         const update = (e) => setIsMobile(e.matches);
         setIsMobile(mql.matches);
-        if (mql.addEventListener) {
-            mql.addEventListener("change", update);
-        } else {
-            mql.addListener(update);
-        }
-        return () => {
-            if (mql.removeEventListener) {
-                mql.removeEventListener("change", update);
-            } else {
-                mql.removeListener(update);
-            }
-        };
-    }, []);
-
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => setElementInView(entry.isIntersecting),
-            { threshold: 0.05 }
-        );
-        if (containerRef.current) observer.observe(containerRef.current);
-        return () => observer.disconnect();
+        mql.addEventListener("change", update);
+        return () => mql.removeEventListener("change", update);
     }, []);
 
     useEffect(() => {
@@ -171,26 +155,18 @@ export default function Robot3D({ isHeroVisible = true }) {
             });
         };
 
-        const resetMouse = () => {
-            mouseX.current = 0;
-            mouseY.current = 0;
-        };
-
         el.addEventListener("mousemove", handleMouseMove, { passive: true });
-        el.addEventListener("mouseleave", resetMouse);
-
         return () => {
             el.removeEventListener("mousemove", handleMouseMove);
-            el.removeEventListener("mouseleave", resetMouse);
             if (rafId) cancelAnimationFrame(rafId);
         };
     }, [isMobile]);
 
-    const isActive = isHeroVisible && elementInView;
     const cameraConfig = useMemo(() => ({
         position: [0, 0, isMobile ? 6.5 : 5.2],
         fov: isMobile ? 44 : 50,
     }), [isMobile]);
+
     const canvasStyle = useMemo(() => ({
         width: "100%",
         height: "100%",
@@ -201,24 +177,22 @@ export default function Robot3D({ isHeroVisible = true }) {
     }), []);
 
     return (
-        <div ref={containerRef} style={{ width: "100%", height: "100%", position: "relative" }}>
+        <div
+            ref={containerRef}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            style={{ width: "100%", height: "100%", position: "relative" }}
+        >
             <style>{robotStyles}</style>
 
-            <div
-                className="robot-wrapper-anim"
-                style={{ animationPlayState: isActive ? 'running' : 'paused' }}
-            >
-                {!isMobile && (
-                    <div
-                        className="robot-pure-glow"
-                        style={{ animationPlayState: isActive ? 'running' : 'paused' }}
-                    />
-                )}
+            <div className="robot-wrapper-anim">
+                {!isMobile && <div className="robot-pure-glow" />}
 
                 <Canvas
                     camera={cameraConfig}
-                    dpr={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, isMobile ? 1.0 : 1.1) : 1}
-                    frameloop={isActive ? "always" : "demand"}
+                    /* Capped DPR prevents heavy rendering lag on high-res displays */
+                    dpr={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 1.0) : 1}
+                    frameloop="always"
                     gl={{
                         antialias: false,
                         powerPreference: "high-performance",
@@ -236,14 +210,11 @@ export default function Robot3D({ isHeroVisible = true }) {
                         mouseX={mouseX}
                         mouseY={mouseY}
                         isMobile={isMobile}
-                        isHeroVisible={isActive}
+                        isHovered={isHovered}
                     />
                 </Canvas>
 
-                <div
-                    className="robot-pure-shadow"
-                    style={{ animationPlayState: isActive ? 'running' : 'paused' }}
-                />
+                <div className="robot-pure-shadow" />
             </div>
         </div>
     );

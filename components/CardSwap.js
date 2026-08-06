@@ -1,291 +1,182 @@
-import React, {
-  Children,
-  cloneElement,
-  forwardRef,
-  isValidElement,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import gsap from 'gsap';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import Image from 'next/image';
 
-export const Card = memo(
-  forwardRef(({ style, onClick, children, ...rest }, ref) => (
-    <div
-      ref={ref}
-      onClick={onClick}
-      style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        borderRadius: '12px',
-        border: '1px solid rgba(255,255,255,0.15)',
-        background: '#000',
-        transformStyle: 'preserve-3d',
-        willChange: 'transform',
-        backfaceVisibility: 'hidden',
-        overflow: 'hidden',
-        ...style,
-      }}
-      {...rest}
-    >
-      {children}
-    </div>
-  ))
-);
-Card.displayName = 'Card';
+const defaultItems = [
+    { image: 'https://picsum.photos/600/400?random=1', text: 'Card 1' },
+    { image: 'https://picsum.photos/600/400?random=2', text: 'Card 2' },
+    { image: 'https://picsum.photos/600/400?random=3', text: 'Card 3' },
+    { image: 'https://picsum.photos/600/400?random=4', text: 'Card 4' },
+    { image: 'https://picsum.photos/600/400?random=5', text: 'Card 5' },
+];
 
-const makeSlot = (i, distX, distY, total) => ({
-  x: i * distX,
-  y: -i * distY,
-  z: -i * distX * 1.5,
-  zIndex: total - i,
-});
-
-const placeNow = (el, slot, skew) =>
-  gsap.set(el, {
-    x: slot.x,
-    y: slot.y,
-    z: slot.z,
-    xPercent: -50,
-    yPercent: -50,
-    skewY: skew,
-    transformOrigin: 'center center',
-    zIndex: slot.zIndex,
-    force3D: true,
-  });
-
-// Returns scale + card-distance multiplier based on current width
-const getBreakpointConfig = (key) => {
-  if (key === 'sm') {
-    return {
-      scale: 0.55,
-      transform: 'translateX(-25%) translateY(25%) scale(0.55)',
-      transformOrigin: 'bottom left',
-    };
+const galleryStyles = `
+  .simple-gallery-container {
+    width: 100%;
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    position: relative;
+    touch-action: pan-y;
   }
-  if (key === 'md') {
-    return {
-      scale: 0.75,
-      transform: 'translateX(-25%) translateY(25%) scale(0.75)',
-      transformOrigin: 'bottom left',
-    };
+
+  .simple-gallery-stage {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-style: preserve-3d;
+    position: relative;
+    overflow: visible;
+    perspective: 1200px;
+    --radius: 350px;
+    --x-mult: 1.3;
   }
-  return {
-    scale: 1,
-    transform: 'translateX(-5%) translateY(20%)',
-    transformOrigin: 'bottom left',
-  };
-};
 
-// Bucket width into a breakpoint key so state only updates on real category change
-const getBreakpointKey = (w) => (w <= 480 ? 'sm' : w <= 768 ? 'md' : 'lg');
+  .simple-gallery-card {
+    position: absolute;
+    border-radius: 16px;
+    overflow: hidden;
+    will-change: transform, opacity;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    width: min(33vw, 420px);
+    height: 260px;
+    transform: translateZ(0);
+  }
 
-const CardSwap = ({
-  width = 500,
-  height = 400,
-  cardDistance = 60,
-  verticalDistance = 70,
-  delay = 5000,
-  pauseOnHover = false,
-  onCardClick,
-  skewAmount = 6,
-  easing = 'elastic',
-  children,
-}) => {
-  const config = useMemo(
-    () =>
-      easing === 'elastic'
-        ? {
-            ease: 'elastic.out(0.6,0.9)',
-            durDrop: 2,
-            durMove: 2,
-            durReturn: 2,
-            promoteOverlap: 0.9,
-            returnDelay: 0.05,
-          }
-        : {
-            ease: 'power1.inOut',
-            durDrop: 0.8,
-            durMove: 0.8,
-            durReturn: 0.8,
-            promoteOverlap: 0.45,
-            returnDelay: 0.2,
-          },
-    [easing]
-  );
+  .simple-gallery-card.active-card {
+    z-index: 9999 !important;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
+  }
 
-  const childArr = useMemo(() => Children.toArray(children), [children]);
-  const refs = useMemo(
-    () => childArr.map(() => React.createRef()),
-    [childArr]
-  );
+  .simple-gallery-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+  }
 
-  const order = useRef(Array.from({ length: childArr.length }, (_, i) => i));
-  const tlRef = useRef(null);
-  const intervalRef = useRef();
-  const container = useRef(null);
-  const rafId = useRef(null);
-  const bpKeyRef = useRef(
-    getBreakpointKey(typeof window !== 'undefined' ? window.innerWidth : 1200)
-  );
-
-  // Track only the breakpoint bucket, not raw width - avoids re-render on every px
-  const [breakpointKey, setBreakpointKey] = useState(bpKeyRef.current);
-
-  const handleResize = useCallback(() => {
-    if (rafId.current) return;
-    rafId.current = requestAnimationFrame(() => {
-      rafId.current = null;
-      const key = getBreakpointKey(window.innerWidth);
-      if (key !== bpKeyRef.current) {
-        bpKeyRef.current = key;
-        setBreakpointKey(key);
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('resize', handleResize, { passive: true });
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      if (rafId.current) cancelAnimationFrame(rafId.current);
-    };
-  }, [handleResize]);
-
-  const breakpoint = useMemo(
-    () => getBreakpointConfig(breakpointKey),
-    [breakpointKey]
-  );
-
-  const swap = useCallback(() => {
-    if (order.current.length < 2) return;
-
-    const [front, ...rest] = order.current;
-    const elFront = refs[front].current;
-    const tl = gsap.timeline();
-    tlRef.current = tl;
-
-    tl.to(elFront, {
-      y: '+=500',
-      duration: config.durDrop,
-      ease: config.ease,
-    });
-
-    tl.addLabel('promote', `-=${config.durDrop * config.promoteOverlap}`);
-    rest.forEach((idx, i) => {
-      const el = refs[idx].current;
-      const slot = makeSlot(i, cardDistance, verticalDistance, refs.length);
-      tl.set(el, { zIndex: slot.zIndex }, 'promote');
-      tl.to(
-        el,
-        {
-          x: slot.x,
-          y: slot.y,
-          z: slot.z,
-          duration: config.durMove,
-          ease: config.ease,
-        },
-        `promote+=${i * 0.15}`
-      );
-    });
-
-    const backSlot = makeSlot(refs.length - 1, cardDistance, verticalDistance, refs.length);
-    tl.addLabel('return', `promote+=${config.durMove * config.returnDelay}`);
-    tl.call(
-      () => { gsap.set(elFront, { zIndex: backSlot.zIndex }); },
-      undefined,
-      'return'
-    );
-    tl.to(
-      elFront,
-      {
-        x: backSlot.x,
-        y: backSlot.y,
-        z: backSlot.z,
-        duration: config.durReturn,
-        ease: config.ease,
-      },
-      'return'
-    );
-
-    tl.call(() => {
-      order.current = [...rest, front];
-    });
-  }, [refs, cardDistance, verticalDistance, config]);
-
-  useEffect(() => {
-    const total = refs.length;
-    refs.forEach((r, i) =>
-      placeNow(r.current, makeSlot(i, cardDistance, verticalDistance, total), skewAmount)
-    );
-
-    swap();
-    intervalRef.current = window.setInterval(swap, delay);
-
-    if (pauseOnHover) {
-      const node = container.current;
-      const pause = () => {
-        tlRef.current?.pause();
-        clearInterval(intervalRef.current);
-      };
-      const resume = () => {
-        tlRef.current?.play();
-        intervalRef.current = window.setInterval(swap, delay);
-      };
-      node.addEventListener('mouseenter', pause);
-      node.addEventListener('mouseleave', resume);
-      return () => {
-        node.removeEventListener('mouseenter', pause);
-        node.removeEventListener('mouseleave', resume);
-        clearInterval(intervalRef.current);
-      };
+  @media (max-width: 768px) {
+    .simple-gallery-container {
+      min-height: 38vh;
     }
 
-    return () => clearInterval(intervalRef.current);
-  }, [refs, cardDistance, verticalDistance, delay, pauseOnHover, skewAmount, swap]);
+    .simple-gallery-stage {
+      perspective: 700px;
+      --radius: 150px;
+      --x-mult: 1.0;
+    }
 
-  const rendered = useMemo(
-    () =>
-      childArr.map((child, i) =>
-        isValidElement(child)
-          ? cloneElement(child, {
-              key: i,
-              ref: refs[i],
-              style: { width, height, ...(child.props.style ?? {}) },
-              onClick: (e) => {
-                child.props.onClick?.(e);
-                onCardClick?.(i);
-              },
-            })
-          : child
-      ),
-    [childArr, refs, width, height, onCardClick]
-  );
+    .simple-gallery-card {
+      width: min(72vw, 260px);
+      height: 180px;
+      border-radius: 12px;
+    }
+  }
+`;
 
-  const containerStyle = useMemo(
-    () => ({
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      width,
-      height,
-      perspective: '900px',
-      overflow: 'visible',
-      transform: breakpoint.transform,
-      transformOrigin: breakpoint.transformOrigin,
-    }),
-    [width, height, breakpoint]
-  );
+export default function SimpleGallery({ items = defaultItems, speed = 0.005 }) {
+    const [selectedIndex, setSelectedIndex] = useState(null);
 
-  return (
-    <div ref={container} style={containerStyle}>
-      {rendered}
-    </div>
-  );
-};
+    const containerRef = useRef(null);
+    const cardRefs = useRef([]);
+    const rotationRef = useRef(0);
+    const requestRef = useRef(null);
+    const lastTimeRef = useRef(null);
 
-export default memo(CardSwap);
+    cardRefs.current = cardRefs.current.slice(0, items.length);
+
+    // Direct DOM updates via requestAnimationFrame - zero React re-renders during loop
+    useLayoutEffect(() => {
+        const count = items.length;
+
+        const animate = (time) => {
+            if (lastTimeRef.current !== null) {
+                const delta = time - lastTimeRef.current;
+                if (selectedIndex === null) {
+                    rotationRef.current = (rotationRef.current + speed * (delta / 16.67)) % (2 * Math.PI);
+
+                    for (let i = 0; i < count; i++) {
+                        const cardEl = cardRefs.current[i];
+                        if (cardEl) {
+                            const angle = rotationRef.current + (i * (2 * Math.PI / count));
+                            const sinVal = Math.sin(angle);
+                            const cosVal = Math.cos(angle);
+                            const normZ = (cosVal + 1) / 2;
+                            const scale = normZ * 0.3 + 0.7;
+                            const opacity = normZ * 0.6 + 0.4;
+                            const zIndex = selectedIndex === i ? 9999 : Math.round(normZ * 1000);
+
+                            cardEl.style.opacity = opacity;
+                            cardEl.style.zIndex = zIndex;
+
+                            const isSelected = selectedIndex === i;
+                            const finalScale = isSelected ? scale * 1.35 : scale;
+                            cardEl.style.transform = `translate3d(calc(${sinVal} * var(--radius) * var(--x-mult)), 0px, calc(${cosVal} * var(--radius))) scale(${finalScale})`;
+                        }
+                    }
+                }
+            }
+            lastTimeRef.current = time;
+            requestRef.current = requestAnimationFrame(animate);
+        };
+
+        requestRef.current = requestAnimationFrame(animate);
+        return () => {
+            if (requestRef.current) cancelAnimationFrame(requestRef.current);
+        };
+    }, [speed, selectedIndex, items.length]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setSelectedIndex(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    return (
+        <div
+            ref={containerRef}
+            className="simple-gallery-container"
+        >
+            <style>{galleryStyles}</style>
+
+            <div className="simple-gallery-stage">
+                {items.map((item, index) => {
+                    const isSelected = selectedIndex === index;
+
+                    return (
+                        <div
+                            key={index}
+                            ref={(el) => (cardRefs.current[index] = el)}
+                            className={`simple-gallery-card ${isSelected ? 'active-card' : ''}`}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedIndex(isSelected ? null : index);
+                            }}
+                        >
+                            <Image
+                                src={item.image}
+                                alt={item.text}
+                                className="simple-gallery-image"
+                                fill
+                                sizes="(max-width: 768px) 72vw, 420px"
+                                unoptimized
+                            />
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}

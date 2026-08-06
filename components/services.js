@@ -47,7 +47,7 @@ const servicesStyles = `
 .srv-section {
   position: relative;
   width: 100%;
-  gap: 15px;
+  gap: 50px;
   height: 100vh;
   padding: 40px 5%;
   box-sizing: border-box;
@@ -70,9 +70,10 @@ const servicesStyles = `
   transform: translate(-50%, -50%);
   width: 80vw;
   height: 50vh;
-  background: radial-gradient(ellipse, rgba(37, 99, 235, 0.10) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(37, 99, 235, 0.06) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
+  will-change: transform;
 }
 
 /* ── Header Titles ── */
@@ -116,25 +117,25 @@ const servicesStyles = `
 
 .srv-card {
   position: relative;
-  background: var(--card-bg);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  /* Backdrop filter removed completely for instant rendering speed */
+  background: #ffffff;
   border-radius: 20px;
   padding: 28px 22px;
   border: 1px solid var(--card-border);
-  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease, box-shadow 0.35s ease;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   will-change: transform;
+  transform: translateZ(0);
 }
 
 .srv-card:hover {
-  transform: translate3d(0, -8px, 0);
+  transform: translate3d(0, -6px, 0);
   border-color: rgba(37, 99, 235, 0.3);
-  box-shadow: 0 20px 40px rgba(37, 99, 235, 0.12), 0 8px 16px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 16px 30px rgba(37, 99, 235, 0.08), 0 6px 12px rgba(15, 23, 42, 0.05);
 }
 
 .srv-card-num {
@@ -145,7 +146,7 @@ const servicesStyles = `
   font-size: 4.5rem;
   font-weight: 900;
   color: var(--text-muted);
-  opacity: 0.25;
+  opacity: 0.15;
   pointer-events: none;
   line-height: 1;
 }
@@ -158,7 +159,7 @@ const servicesStyles = `
 
 .srv-card-icon {
   background: var(--card-bg);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
   border: 1px solid var(--card-border);
   border-radius: 8px;
   padding: 6px;
@@ -207,7 +208,7 @@ const servicesStyles = `
   font-weight: 500;
   padding: 4px 8px;
   border-radius: 6px;
-  background: rgba(37, 99, 235, 0.08);
+  background: rgba(37, 99, 235, 0.06);
   color: #2563eb;
   border: 1px solid var(--card-border);
 }
@@ -234,20 +235,20 @@ const servicesStyles = `
   justify-content: center;
   will-change: transform;
   transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);
   z-index: 1;
 }
 
 .srv-book-btn:hover {
   transform: translate3d(0, -2px, 0);
   background: #1d4ed8;
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
 }
 
 .srv-book-btn .txt-default,
 .srv-book-btn .txt-hover {
   display: block;
-  transition: transform 0.25s ease, opacity 0.25s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease;
   will-change: transform, opacity;
 }
 
@@ -430,6 +431,7 @@ function Services() {
                                     className="srv-card-icon"
                                     width={44}
                                     height={44}
+                                    loading="lazy"
                                     onError={(e) => {
                                         e.currentTarget.src = webDevImg;
                                     }}

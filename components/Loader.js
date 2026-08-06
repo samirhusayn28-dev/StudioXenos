@@ -20,14 +20,22 @@ export default function Loader({ onComplete }) {
 
         preloadAssets(manifest, handleProgress).then(() => {
             setTimeout(() => {
-                if (!isMounted) return;
-                setFadeOut(true);
-                timeoutRef.current = setTimeout(() => onComplete && onComplete(), 10);
+                // Change this inside Loader.js:
+                setTimeout(() => {
+                    if (!isMounted) return;
+                    setFadeOut(true);
+                    // Align this timeout closer to the CSS transition duration (e.g., 400ms - 500ms)
+                    timeoutRef.current = setTimeout(() => onComplete && onComplete(), 500);
+                }, 400);
             }, 400);
         }).catch(() => {
-            if (!isMounted) return;
-            setFadeOut(true);
-            timeoutRef.current = setTimeout(() => onComplete && onComplete(), 400);
+            // Change this inside Loader.js:
+            setTimeout(() => {
+                if (!isMounted) return;
+                setFadeOut(true);
+                // Align this timeout closer to the CSS transition duration (e.g., 400ms - 500ms)
+                timeoutRef.current = setTimeout(() => onComplete && onComplete(), 500);
+            }, 400);
         });
 
         return () => {

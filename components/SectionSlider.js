@@ -237,7 +237,7 @@ const styles = `
     background-color: var(--bg-primary, #040610);
     color: var(--text-primary, #e8ddd0);
     -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
+    /* Removed scroll-behavior: smooth to prevent layout jank */
   }
 
   .section-slider-shell {
@@ -267,6 +267,10 @@ const styles = `
     overflow: visible !important;
     flex-shrink: 0;
     background-color: transparent;
+    
+    /* PERFORMANCE OPTIMIZATION: Skips layout/paint for off-screen sections */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 100vh;
   }
 
   /* Force all child sections to allow natural vertical expansion and scrolling */

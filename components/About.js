@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 
 const aboutStyles = `
 /* ── aboutStyles (About Section) ── */
@@ -23,9 +23,10 @@ const aboutStyles = `
   width: 500px;
   height: 500px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
+  will-change: transform;
 }
 
 .about-container {
@@ -63,7 +64,7 @@ const aboutStyles = `
   color: var(--about-accent, #2563eb);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
 }
 
 .about-badge-dot {
@@ -71,7 +72,7 @@ const aboutStyles = `
   height: 6px;
   border-radius: 50%;
   background: var(--about-accent, #2563eb);
-  box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
+  box-shadow: 0 0 6px rgba(37, 99, 235, 0.4);
 }
 
 /* Typography */
@@ -81,7 +82,7 @@ const aboutStyles = `
   text-transform: uppercase;
   line-height: 0.92;
   letter-spacing: 0.01em;
-    font-size: clamp(36px, 5.5vw, 50px);
+  font-size: clamp(36px, 5.5vw, 50px);
   margin: 0 0 24px 0;
 }
 
@@ -190,17 +191,19 @@ const aboutStyles = `
   display: flex;
   flex-direction: column;
   gap: 14px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.03);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.25s ease;
   position: relative;
   overflow: hidden;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .persona-card:hover {
-  background: var(--about-card-hover, rgba(255, 255, 255, 0.95));
-  transform: translateY(-4px);
+  background: var(--about-card-hover, #ffffff);
+  transform: translate3d(0, -4px, 0);
   border-color: var(--about-accent, #2563eb);
-  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.08);
 }
 
 .persona-card-featured {
@@ -214,7 +217,7 @@ const aboutStyles = `
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: rgba(37, 99, 235, 0.1);
+  background: rgba(37, 99, 235, 0.08);
   color: var(--about-accent, #2563eb);
   display: flex;
   align-items: center;
@@ -238,27 +241,25 @@ const aboutStyles = `
   line-height: 1.5;
 }
 
-/* Modal Sheet Overlay */
+/* Modal Sheet Overlay (Backdrop Filter Removed for performance) */
 .about-expand-overlay {
   position: fixed;
   inset: 0;
   z-index: 999;
   background: rgba(0, 0, 0, 0);
-  backdrop-filter: blur(0px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
   pointer-events: none;
   opacity: 0;
-  transition: all 0.3s ease;
+  transition: opacity 0.25s ease, background 0.25s ease;
 }
 
 .about-expand-overlay.visible {
   pointer-events: auto;
   opacity: 1;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.75);
 }
 
 .about-expand-box {
@@ -269,7 +270,8 @@ const aboutStyles = `
   border-radius: 24px;
   padding: 28px;
   position: relative;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+  transform: translateZ(0);
 }
 
 .about-close-btn {
@@ -296,7 +298,7 @@ const stats = [
     { number: '4+', label: 'Years Experience' },
 ];
 
-export default function AboutUs() {
+function AboutUs() {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -449,3 +451,5 @@ export default function AboutUs() {
         </section>
     );
 }
+
+export default memo(AboutUs);

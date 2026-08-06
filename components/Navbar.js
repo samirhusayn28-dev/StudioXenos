@@ -4,14 +4,12 @@ import React, { useState, memo, useCallback } from 'react';
 import Image from 'next/image';
 
 const navLinks = [
-    // { label: 'Home', id: 'home' },
     { label: 'Services', id: 'services' },
     { label: 'How we work', id: 'how-we-work' },
     { label: 'Projects', id: 'projects' },
     { label: 'Gallery', id: 'art-gallery' },
     { label: 'What People Say', id: 'testimonials' },
     { label: 'About', id: 'about' },
-    // { label: 'Contact', id: 'contact' },
 ];
 
 const navbarStyles = `
@@ -47,7 +45,8 @@ const navbarStyles = `
   .nav-logo {
     height: 35px;
     width: auto;
-    background: var(--btn-bg, #2563eb); padding: 5px 20px;
+    background: var(--btn-bg, #2563eb); 
+    padding: 5px 20px;
     border-radius: 999px;
     object-fit: contain;
     cursor: pointer;
@@ -112,19 +111,17 @@ const navbarStyles = `
   }
 
   .book-btn .txt-default {
-   color : var(--btn-bg, #2563eb);
-  },
-  .book-btn .txt-hover {
-    display: block;
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    color: var(--btn-bg, #2563eb);
   }
 
   .book-btn .txt-hover {
+    display: block;
     position: absolute;
     transform: translate3d(0, 100%, 0);
     opacity: 0;
     font-weight: 700;
     letter-spacing: 0.1em;
+    transition: transform 0.2s ease, opacity 0.2s ease;
   }
 
   .book-btn:hover .txt-default {
@@ -203,13 +200,8 @@ function Navbar() {
         const el = document.getElementById(id);
         if (!el) return;
 
-        const targetPosition = el.getBoundingClientRect().top + window.pageYOffset;
-        const currentPosition = window.pageYOffset;
-
-        // Condition: Website can go down, but not up when navigating to sections
-        if (targetPosition > currentPosition) {
-            el.scrollIntoView({ behavior: 'smooth' });
-        }
+        // Fixed: Allows smooth scrolling in both directions (up and down)
+        el.scrollIntoView({ behavior: 'smooth' });
     }, []);
 
     return (

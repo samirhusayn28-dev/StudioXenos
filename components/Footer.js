@@ -34,7 +34,6 @@ const footerStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
   .footer-root {
-
     position: relative;
     overflow: hidden;
     display: flex;
@@ -44,6 +43,7 @@ const footerStyles = `
     min-height: 100vh;
     box-sizing: border-box;
     background: transparent;
+    contain: paint style;
   }
 
   .footer-divider-top {
@@ -60,17 +60,19 @@ const footerStyles = `
   }
 
   .footer-content { 
-    background: rgba(255, 255, 255, 0.4); 
-    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.85); 
     padding-top: 40px; 
     position: relative; 
     z-index: 2; 
     width: 100%; 
     border-top: 1px solid rgba(0, 0, 0, 0.05);
+    will-change: transform;
+    transform: translateZ(0);
+    contain: paint style;
   }
 
   .footer-glow {
-    position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+    position: absolute; top: -100px; left: 50%; transform: translateX(-50%) translateZ(0);
     width: 700px; height: 300px;
     background: radial-gradient(circle, rgba(37,99,235,0.06) 0%, transparent 70%);
     pointer-events: none; z-index: 1;
@@ -85,6 +87,7 @@ const footerStyles = `
     width: 100%;
     padding: 0 16px;
     box-sizing: border-box;
+    contain: paint style;
   }
 
   .faq-header {
@@ -107,7 +110,6 @@ const footerStyles = `
     color: #2563eb;
   }
 
-  /* 2 COLUMN GRID FOR FAQ */
   .faq-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -121,14 +123,17 @@ const footerStyles = `
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   .faq-item:hover {
-    transform: translateY(-4px);
+    transform: translateY(-4px) translateZ(0);
     border-color: rgba(37, 99, 235, 0.25);
     box-shadow: 0 16px 36px rgba(37, 99, 235, 0.07);
   }
@@ -168,7 +173,7 @@ const footerStyles = `
     justify-content: center;
     flex-shrink: 0;
     font-size: 16px;
-    transition: transform 0.3s ease, background 0.3s ease;
+    transition: transform 0.25s ease, background 0.25s ease;
   }
 
   .faq-item.active .faq-icon {
@@ -179,7 +184,7 @@ const footerStyles = `
   .faq-answer {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s ease;
+    transition: max-height 0.3s ease, padding 0.3s ease;
     padding: 0 24px;
   }
 
@@ -199,7 +204,6 @@ const footerStyles = `
     padding-top: 16px;
   }
 
-  /* ── SEPARATOR LINE ABOVE FOOTER ── */
   .faq-footer-divider {
     max-width: 1200px;
     margin: 0 auto 40px;
@@ -208,7 +212,6 @@ const footerStyles = `
     background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.08) 50%, transparent 100%);
   }
 
-  /* ── FOOTER STYLES ── */
   .footer-col-title {
     font-family: 'Outfit', sans-serif;
     font-size: 12px; 
@@ -218,7 +221,6 @@ const footerStyles = `
     color: #0f172a; 
     margin-bottom: 20px; 
     margin-top: 0;
-    transition: color 0.4s ease;
   }
 
   .footer-nav-btn {
@@ -235,8 +237,9 @@ const footerStyles = `
     transition: color 0.2s ease, transform 0.2s ease; 
     line-height: 1;
     will-change: transform;
+    transform: translateZ(0);
   }
-  .footer-nav-btn:hover { color: #2563eb; transform: translateX(4px); }
+  .footer-nav-btn:hover { color: #2563eb; transform: translateX(4px) translateZ(0); }
 
   .footer-divider-bottom {
     border: none; 
@@ -244,26 +247,25 @@ const footerStyles = `
     margin: 0; 
   }
 
-  /* ── Robot ── */
   .footer-robot-wrap {
     position: relative; display: flex;
     align-items: flex-end; justify-content: center;
   }
   .footer-robot-wrap::before {
     content: ''; position: absolute; bottom: 0; left: 50%;
-    transform: translateX(-50%); width: 100px; height: 36px;
+    transform: translateX(-50%) translateZ(0); width: 100px; height: 36px;
     background: radial-gradient(ellipse, rgba(37,99,235,0.2) 0%, transparent 70%);
     filter: blur(8px);
   }
   .footer-robot-wrap img {
     position: relative; z-index: 1;
     filter: drop-shadow(0 8px 28px rgba(37,99,235,0.25));
-    transition: transform 0.4s ease;
+    transition: transform 0.3s ease;
     will-change: transform;
+    transform: translateZ(0);
   }
-  .footer-robot-wrap:hover img { transform: translateY(-8px); }
+  .footer-robot-wrap:hover img { transform: translateY(-8px) translateZ(0); }
 
-  /* ── Contact Button ── */
   .footer-contact-btn {
     font-family: 'Outfit', sans-serif;
     font-size: 13px; 
@@ -275,18 +277,19 @@ const footerStyles = `
     border: 1px solid rgba(37, 99, 235, 0.2);
     background: #eff6ff;
     color: #2563eb;
-    transition: all 0.25s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     white-space: nowrap;
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+    will-change: transform;
+    transform: translateZ(0);
   }
   .footer-contact-btn:hover {
     background: #2563eb;
     color: #ffffff;
-    transform: scale(1.04);
+    transform: scale(1.04) translateZ(0);
     box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
   }
 
-  /* ── Brand description (desktop only) ── */  /* ── Brand description (desktop only) ── */
   .footer-brand-desc {
     font-family: 'Outfit', sans-serif;
     font-size: 13px; font-weight: 400;
@@ -294,7 +297,6 @@ const footerStyles = `
     max-width: 220px; margin-bottom: 20px;
   }
 
-  /* ── DESKTOP GRID ── */
   .footer-main-grid {
     display: grid;
     grid-template-columns: 1.4fr 1fr 1fr 1fr 160px;
@@ -331,7 +333,6 @@ const footerStyles = `
     gap: 16px;
   }
 
-  /* ── TABLET (1100px) ── */
   @media (max-width: 1100px) {
     .footer-main-grid {
       grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -354,14 +355,12 @@ const footerStyles = `
     .footer-brand-desc { display: none; }
   }
 
-  /* ── MOBILE LARGE (768px) ── */
   @media (max-width: 768px) {
     .faq-container {
       grid-template-columns: 1fr;
     }
   }
 
-  /* ── MOBILE LARGE (700px) ── */
   @media (max-width: 700px) {
     .footer-root { padding: 40px 0 20px !important; }
     .faq-section { margin-bottom: 30px; }
@@ -400,7 +399,6 @@ const footerStyles = `
     .footer-area-brand > img { width: 32px !important; height: 32px !important; margin-bottom: 14px !important; }
   }
 
-  /* ── MOBILE SMALL (480px) ── */
   @media (max-width: 480px) {
     .footer-root { padding: 32px 0 16px !important; }
 
@@ -429,7 +427,6 @@ const footerStyles = `
     .modal-warning { text-align: left; font-size: 12px; }
   }
 
-  /* ── VERY SMALL (360px) ── */
   @media (max-width: 360px) {
     .footer-main-grid {
       grid-template-columns: 1fr;
@@ -511,7 +508,6 @@ export default function Footer() {
     const { openModal } = useContactModal();
     const [activeFaq, setActiveFaq] = useState(null);
 
-
     const toggleFaq = useCallback((index) => {
         setActiveFaq(prev => (prev === index ? null : index));
     }, []);
@@ -532,7 +528,7 @@ export default function Footer() {
 
     return (
         <footer className="footer-root" style={styles.footerRoot}>
-            <style>{footerStyles}</style>
+            <style dangerouslySetInnerHTML={{ __html: footerStyles }} />
 
             <div className="footer-dither-overlay" />
             <div className="footer-glow" />
@@ -611,7 +607,7 @@ export default function Footer() {
                 <hr className="footer-divider-bottom" />
                 <div className="footer-bottom-bar" style={styles.bottomBar}>
                     <p style={styles.copyright}>
-                        © 2026 Studioxenos.com — All Rights Reserved
+                        © 2026 Studioxenos.com — All Rights Reserved[cite: 9]
                     </p>
                     <p style={styles.crafted}>
                         Crafted with precision
@@ -620,4 +616,4 @@ export default function Footer() {
             </div>
         </footer>
     );
-}   
+}

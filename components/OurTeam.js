@@ -56,6 +56,7 @@ const css = `
     font-family: 'Outfit', system-ui, -apple-system, sans-serif;
     width: 100%;
     box-sizing: border-box;
+    contain: paint style;
   }
 
   .t-header {
@@ -132,13 +133,16 @@ const css = `
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
     box-sizing: border-box;
     min-height: 250px;
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   .t-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-5px) translateZ(0);
     border-color: rgba(37, 99, 235, 0.3);
     box-shadow: 0 20px 40px rgba(37, 99, 235, 0.08);
   }
@@ -290,10 +294,6 @@ export default function Testimonials() {
             <GlobalStyle />
 
             <div className="t-header">
-                {/* <div className="t-badge">
-                        <span className="t-badge-dot" />
-                        Client Feedback
-                    </div> */}
                 <h2 className="t-title">
                     What <span className="t-title-blue">People Say About Us</span>
                 </h2>

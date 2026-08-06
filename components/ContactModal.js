@@ -21,14 +21,13 @@ export function useContactModal() {
 const contactModalStyles = `
   .contact-modal-backdrop {
     position: fixed; inset: 0; z-index: 1000;
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(15, 23, 42, 0.6);
     display: flex; align-items: center; justify-content: center;
     padding: 16px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.35s ease;
+    transition: opacity 0.25s ease;
+    will-change: opacity;
   }
   .contact-modal-backdrop.open {
     opacity: 1;
@@ -44,16 +43,16 @@ const contactModalStyles = `
     padding: 48px 48px 40px;
     box-sizing: border-box;
     opacity: 0;
-    transform: scale(0.9) translateY(20px);
-    transition: opacity 0.42s cubic-bezier(0.34,1.56,0.64,1),
-                transform 0.42s cubic-bezier(0.34,1.56,0.64,1);
-    box-shadow: 0 32px 80px rgba(0,0,0,0.12);
+    transform: scale(0.95) translateY(10px) translateZ(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     max-height: 90vh;
     overflow-y: auto;
+    will-change: transform, opacity;
   }
   .contact-modal-backdrop.open .contact-modal {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1) translateY(0) translateZ(0);
   }
 
   .contact-modal-close {
@@ -63,11 +62,10 @@ const contactModalStyles = `
     color: #64748b; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     font-size: 16px; line-height: 1;
-    transition: all 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease;
   }
   .contact-modal-close:hover {
     background: #eff6ff; color: #2563eb;
-    transform: scale(1.08);
   }
 
   .modal-input {
@@ -76,11 +74,11 @@ const contactModalStyles = `
     border-radius: 12px; padding: 14px 16px;
     font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 400;
     color: #0f172a; outline: none; box-sizing: border-box;
-    transition: border-color 0.25s ease, background 0.25s ease;
+    transition: border-color 0.2s ease, background 0.2s ease;
     resize: none;
   }
   .modal-input::placeholder { color: #94a3b8; }
-  .modal-input:focus { border-color: #2563eb; background: #ffffff; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  .modal-input:focus { border-color: #2563eb; background: #ffffff; }
   .modal-input.error { border-color: rgba(239,68,68,0.7) !important; }
 
   @keyframes shake {
@@ -98,20 +96,17 @@ const contactModalStyles = `
     padding: 14px 36px; border-radius: 999px; cursor: pointer;
     border: none; background: #2563eb;
     color: #fff;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 16px rgba(37,99,235,0.25);
+    transition: background 0.2s ease;
   }
   .modal-submit-btn:hover {
-    transform: scale(1.04);
     background: #1d4ed8;
-    box-shadow: 0 6px 24px rgba(37,99,235,0.35);
   }
-  .modal-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .modal-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .modal-warning {
     font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 500;
     color: #ef4444; margin-top: 10px; text-align: center;
-    opacity: 0; transition: opacity 0.25s ease;
+    opacity: 0; transition: opacity 0.2s ease;
   }
   .modal-warning.show { opacity: 1; }
 `;
@@ -240,7 +235,7 @@ const ContactModal = memo(function ContactModal({ open, onClose }) {
 
     return (
         <>
-            <style>{contactModalStyles}</style>
+            <style dangerouslySetInnerHTML={{ __html: contactModalStyles }} />
             <div className={backdropClassName} onClick={handleBackdropClick}>
                 <div className={modalClassName}>
                     <button className="contact-modal-close" onClick={onClose} aria-label="Close">✕</button>

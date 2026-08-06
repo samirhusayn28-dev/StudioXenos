@@ -28,12 +28,10 @@ const artStyles = `
   font-family: 'Poppins', sans-serif; 
   position: relative; 
   overflow: hidden; 
-  background: var(--btn-bg); 
-  backdrop-filter: blur(12px); 
-  -webkit-backdrop-filter: blur(12px); 
-  border: 1px solid var(--btn-border); 
+  background: var(--btn-bg, #2563eb); 
+  border: 1px solid var(--btn-border, rgba(37, 99, 235, 0.3)); 
   border-radius: 999px; 
-  color: var(--btn-color); 
+  color: var(--btn-color, #fff); 
   font-size: 0.82rem; 
   font-weight: 600; 
   letter-spacing: 0.07em; 
@@ -41,22 +39,22 @@ const artStyles = `
   cursor: pointer; 
   white-space: nowrap; 
   will-change: transform; 
-  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.3s ease, border-color 0.3s ease, color 0.3s ease; 
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25), inset 0 1px 0 rgba(255,255,255,0.2); 
+  transform: translateZ(0);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease; 
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); 
 } 
 
 .art-explore-btn:hover { 
-  transform: scale(1.05); 
+  transform: translate3d(0, -2px, 0) scale(1.03); 
   background: #1d4ed8; 
-  border-color: rgba(37, 99, 235, 0.5); 
-  color: #fff; 
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35), inset 0 1px 0 rgba(255,255,255,0.3); 
+  border-color: rgba(37, 99, 235, 0.6); 
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3); 
 } 
 
 .art-explore-btn .txt-default, 
 .art-explore-btn .txt-hover { 
   display: block; 
-  transition: transform 0.3s ease, opacity 0.3s ease; 
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease; 
 } 
 
 .art-explore-btn .txt-hover { 
@@ -88,7 +86,7 @@ const artStyles = `
   text-transform: uppercase; 
   line-height: 0.92; 
   letter-spacing: -0.01em; 
-    font-size: clamp(36px, 5.5vw, 50px);
+  font-size: clamp(36px, 5.5vw, 50px);
 } 
 
 .art-heading-plain { 
@@ -122,6 +120,7 @@ const artStyles = `
   display: flex;
   justify-content: center;
   align-items: center;
+  transform: translateZ(0);
 }
 
 @media (max-width: 1024px) and (min-width: 768px) {
@@ -180,7 +179,6 @@ function ArtGallery() {
         });
     }, [updateBend]);
 
-    // Use useLayoutEffect to measure/calculate layout values instantly before paint
     useEffect(() => {
         updateBend();
         window.addEventListener('resize', handleResize, { passive: true });

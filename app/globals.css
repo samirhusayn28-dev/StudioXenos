@@ -2,11 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
-html {
-    scroll-behavior: smooth;
-}
-
 html,
 body {
     overflow-y: auto !important;
@@ -209,23 +204,28 @@ body {
     }
 }
 
-/* Reusable Animation Utility Classes */
+/* Reusable Animation Utility Classes with GPU Layer Acceleration */
 .animate-fade {
     animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: opacity;
 }
 
 .animate-slide-up {
     animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
 }
 
 .animate-slide-down {
     animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
 }
 
 .animate-slide-left {
     animation: slideLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
 }
 
 .animate-slide-right {
     animation: slideRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
 }

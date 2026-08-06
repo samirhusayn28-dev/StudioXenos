@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+'use client';
+
+import React from 'react';
 import Image from 'next/image';
 
 const defaultItems = [
@@ -12,57 +14,60 @@ const defaultItems = [
 const galleryStyles = `
   .simple-gallery-container {
     width: 100%;
-    min-height: 50vh;
+    overflow: hidden;
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;
-    overflow: visible;
-    position: relative;
-    touch-action: pan-y;
+    box-sizing: border-box;
+    padding: 20px 0;
+    contain: paint layout;
+    transform: translateZ(0);
   }
 
-  .simple-gallery-stage {
-    width: 100%;
-    height: 100%;
+  .simple-gallery-track {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    gap: 24px;
+    width: max-content;
+    animation: marquee-scroll 35s linear infinite;
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
     transform-style: preserve-3d;
-    position: relative;
-    overflow: visible;
-    perspective: 1200px;
-    --radius: 350px;
-    --x-mult: 1.3;
+  }
+
+  .simple-gallery-track:hover {
+    animation-play-state: paused;
+  }
+
+  @keyframes marquee-scroll {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(-50%, 0, 0);
+    }
   }
 
   .simple-gallery-card {
-    position: absolute;
+    flex-shrink: 0;
     border-radius: 16px;
     overflow: hidden;
-    will-change: transform, opacity;
-    cursor: pointer;
-    /* Removed CSS transition on transform to prevent layout jitter / micro-stutters during high-frequency loop updates */
-    transition: opacity 0.2s ease;
-    
-    width: min(33vw, 420px);
+    position: relative;
+    width: 400px;
     height: 260px;
-
-    transform: translate3d(
-      calc(var(--sin-angle) * var(--radius) * var(--x-mult)), 
-      0px, 
-      calc(var(--cos-angle) * var(--radius))
-    ) scale(var(--scale));
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
   }
 
-  /* Active / Clicked scale state */
-  .simple-gallery-card.active-card {
-    transform: translate3d(
-      calc(var(--sin-angle) * var(--radius) * var(--x-mult)), 
-      0px, 
-      calc(var(--cos-angle) * var(--radius))
-    ) scale(calc(var(--scale) * 1.35)) !important;
-    z-index: 9999 !important;
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
+  .simple-gallery-card:hover {
+    border-color: rgba(37, 99, 235, 0.3);
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.08);
   }
 
   .simple-gallery-image {
@@ -74,114 +79,38 @@ const galleryStyles = `
   }
 
   @media (max-width: 768px) {
-    .simple-gallery-container {
-      min-height: 38vh;
+    .simple-gallery-track {
+      animation-duration: 25s;
+      gap: 16px;
     }
-
-    .simple-gallery-stage {
-      perspective: 700px;
-      --radius: 150px;
-      --x-mult: 1.0;
-    }
-
     .simple-gallery-card {
-      width: min(72vw, 260px);
+      width: 280px;
       height: 180px;
       border-radius: 12px;
     }
   }
 `;
 
-export default function SimpleGallery({ items = defaultItems, speed = 0.005 }) {
-    const [rotation, setRotation] = useState(0);
-    const [selectedIndex, setSelectedIndex] = useState(null);
-
-    const containerRef = useRef(null);
-    const requestRef = useRef(null);
-    const lastTimeRef = useRef(null);
-
-    // Using useLayoutEffect to hook the animation frame synchronously before paint
-    useLayoutEffect(() => {
-        const animate = (time) => {
-            if (lastTimeRef.current !== null) {
-                const delta = time - lastTimeRef.current;
-                if (selectedIndex === null) {
-                    setRotation((prev) => (prev + speed * (delta / 16.67)) % (2 * Math.PI));
-                }
-            }
-            lastTimeRef.current = time;
-            requestRef.current = requestAnimationFrame(animate);
-        };
-
-        requestRef.current = requestAnimationFrame(animate);
-        return () => {
-            if (requestRef.current) cancelAnimationFrame(requestRef.current);
-        };
-    }, [speed, selectedIndex]);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (containerRef.current && !containerRef.current.contains(event.target)) {
-                setSelectedIndex(null);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
-
-    const count = items.length;
+export default function SimpleGallery({ items = defaultItems }) {
+    const duplicatedItems = [...items, ...items];
 
     return (
-        <div
-            ref={containerRef}
-            className="simple-gallery-container"
-        >
+        <div className="simple-gallery-container">
             <style>{galleryStyles}</style>
 
-            <div className="simple-gallery-stage">
-                {items.map((item, index) => {
-                    const angle = rotation + (index * (2 * Math.PI / count));
-
-                    const sinVal = Math.sin(angle);
-                    const cosVal = Math.cos(angle);
-
-                    const normZ = (cosVal + 1) / 2;
-                    const scale = normZ * 0.3 + 0.7;
-                    const opacity = normZ * 0.6 + 0.4;
-                    const zIndex = selectedIndex === index ? 9999 : Math.round(normZ * 1000);
-
-                    const isSelected = selectedIndex === index;
-
-                    return (
-                        <div
-                            key={index}
-                            className={`simple-gallery-card ${isSelected ? 'active-card' : ''}`}
-                            style={{
-                                '--sin-angle': sinVal,
-                                '--cos-angle': cosVal,
-                                '--scale': scale,
-                                opacity: opacity,
-                                zIndex: zIndex,
-                            }}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedIndex(isSelected ? null : index);
-                            }}
-                        >
-                            <Image
-                                src={item.image}
-                                alt={item.text}
-                                className="simple-gallery-image"
-                                fill
-                                sizes="(max-width: 768px) 72vw, 420px"
-                                unoptimized
-                            />
-                        </div>
-                    );
-                })}
+            <div className="simple-gallery-track">
+                {duplicatedItems.map((item, index) => (
+                    <div key={index} className="simple-gallery-card">
+                        <Image
+                            src={item.image}
+                            alt={item.text}
+                            className="simple-gallery-image"
+                            fill
+                            sizes="(max-width: 768px) 280px, 400px"
+                            unoptimized
+                        />
+                    </div>
+                ))}
             </div>
         </div>
     );

@@ -17,35 +17,34 @@ const suggestedQuestions = [
 
 const WELCOME = "Hey! 👋 Welcome to StudioXenos. I'm here to help. What can I do for you today?";
 
-// Standardized Blue & White Theme Tokens
 const THEME = {
     light: {
         window: "#ffffff",
-        header: "linear-gradient(135deg, #f0f4ff, #e6efff)",
-        headerBorder: "rgba(0, 82, 255, 0.1)",
+        header: "#f8fafc",
+        headerBorder: "rgba(0, 82, 255, 0.08)",
         titleColor: "#0f172a",
-        closeBg: "rgba(0, 82, 255, 0.06)",
+        closeBg: "rgba(0, 82, 255, 0.04)",
         closeColor: "#2563eb",
-        closeHoverBg: "rgba(0, 82, 255, 0.12)",
-        msgsBg: "#f8fafc",
-        assistantBg: "#ffffff",
-        assistantBorder: "rgba(0, 82, 255, 0.1)",
+        closeHoverBg: "rgba(0, 82, 255, 0.1)",
+        msgsBg: "#ffffff",
+        assistantBg: "#f8fafc",
+        assistantBorder: "rgba(0, 82, 255, 0.08)",
         assistantText: "#1e293b",
         inputAreaBg: "#ffffff",
-        inputAreaBorder: "rgba(0, 82, 255, 0.1)",
+        inputAreaBorder: "rgba(0, 82, 255, 0.08)",
         textareaBg: "#f8fafc",
-        textareaBorder: "rgba(0, 82, 255, 0.15)",
+        textareaBorder: "rgba(0, 82, 255, 0.12)",
         textareaColor: "#0f172a",
         placeholder: "#94a3b8",
-        windowBorder: "rgba(0, 82, 255, 0.15)",
-        windowShadow: "0 24px 80px rgba(0, 82, 255, 0.15)",
-        fabBg: "linear-gradient(135deg, #2563eb, #1d4ed8)",
-        fabBorder: "rgba(255, 255, 255, 0.3)",
-        fabShadow: "0 8px 32px rgba(37, 99, 235, 0.35)",
+        windowBorder: "rgba(0, 82, 255, 0.1)",
+        windowShadow: "0 10px 30px rgba(15, 23, 42, 0.08)", // Lighter shadow for speed
+        fabBg: "#2563eb",
+        fabBorder: "rgba(255, 255, 255, 0.2)",
+        fabShadow: "0 4px 16px rgba(37, 99, 235, 0.3)", // Lighter shadow
         userBubbleBg: "#2563eb",
         userBubbleText: "#ffffff",
-        chipBg: "rgba(37, 99, 235, 0.06)",
-        chipBorder: "rgba(37, 99, 235, 0.15)",
+        chipBg: "rgba(37, 99, 235, 0.04)",
+        chipBorder: "rgba(37, 99, 235, 0.1)",
         chipColor: "#2563eb",
     }
 };
@@ -60,9 +59,8 @@ const MessageBubble = memo(function MessageBubble({ msg, t }) {
                     background: t.userBubbleBg,
                     color: t.userBubbleText, fontSize: 13.5, lineHeight: 1.55,
                     alignSelf: "flex-end",
-                    boxShadow: "0 4px 16px rgba(37, 99, 235, 0.25)",
-                    animation: "xenosIn .25s ease",
                     wordBreak: "break-word",
+                    transform: "translateZ(0)",
                 }
                 : {
                     maxWidth: "82%", padding: "10px 14px",
@@ -72,9 +70,8 @@ const MessageBubble = memo(function MessageBubble({ msg, t }) {
                     color: t.assistantText,
                     fontSize: 13.5, lineHeight: 1.55,
                     alignSelf: "flex-start",
-                    animation: "xenosIn .25s ease",
-                    transition: "background .3s,color .3s",
                     wordBreak: "break-word",
+                    transform: "translateZ(0)",
                 },
         [msg.role, t]
     );
@@ -89,6 +86,7 @@ const TypingDots = memo(function TypingDots({ t }) {
             background: t.assistantBg, border: `1px solid ${t.assistantBorder}`,
             borderRadius: "14px 14px 14px 3px",
             alignSelf: "flex-start", width: "fit-content",
+            transform: "translateZ(0)",
         }}>
             {[1, 2, 3].map(n => (
                 <span key={n} className={`sx-d${n}`} style={{
@@ -195,7 +193,6 @@ export default function ChatBot() {
             const data = await res.json();
 
             if (!res.ok) {
-                console.error("Groq API Error:", data);
                 throw new Error(data?.error?.message || "API error");
             }
 
@@ -239,31 +236,29 @@ export default function ChatBot() {
         <>
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700&family=DM+Sans:wght@300;400;500&display=swap');
-                @keyframes xenosUp   { from{opacity:0;transform:scale(.85) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
-                @keyframes xenosIn   { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-                @keyframes xenosPulse{ 0%,100%{opacity:1} 50%{opacity:.4} }
-                @keyframes xenosBounce{ 0%,80%,100%{transform:translateY(0);opacity:.5} 40%{transform:translateY(-5px);opacity:1} }
+                
+                @keyframes xenosBounce{ 0%,80%,100%{transform:translateY(0);opacity:.5} 40%{transform:translateY(-4px);opacity:1} }
                 .sx-d1{animation:xenosBounce 1.2s infinite}
                 .sx-d2{animation:xenosBounce 1.2s infinite .15s}
                 .sx-d3{animation:xenosBounce 1.2s infinite .3s}
-                .sx-pulse{animation:xenosPulse 2s infinite}
+                
                 .sx-msgs::-webkit-scrollbar{width:4px}
                 .sx-msgs::-webkit-scrollbar-thumb{background:rgba(37,99,235,.2);border-radius:2px}
 
-                .sx-fab{ will-change:transform; transition:transform .25s cubic-bezier(.34,1.56,.64,1); }
-                .sx-fab:hover{ transform:scale(1.1); }
+                .sx-fab{ will-change:transform; transition:transform .2s ease; transform: translateZ(0); }
+                .sx-fab:hover{ transform:scale(1.05); }
 
                 .sx-close{ transition:background .2s; }
                 .sx-close:hover{ background:var(--sx-close-hover); }
 
                 .sx-chip{ transition:background .2s; will-change:background; }
-                .sx-chip:hover{ background:rgba(37,99,235,0.15)!important; }
+                .sx-chip:hover{ background:rgba(37,99,235,0.1)!important; }
 
-                .sx-textarea{ transition:border-color .2s,background .3s,color .3s; }
-                .sx-textarea:focus{ border-color:rgba(37,99,235,0.6)!important; }
+                .sx-textarea{ transition:border-color .2s; overflow:hidden }
+                .sx-textarea:focus{ border-color:rgba(37,99,235,0.5)!important; }
 
                 .sx-send{ will-change:transform,opacity; transition:opacity .2s,transform .15s; }
-                .sx-send:not(:disabled):hover{ transform:scale(1.08); }
+                .sx-send:not(:disabled):hover{ transform:scale(1.05); }
 
                 @media(max-width:768px){
                   .sx-win{width:340px!important;height:500px!important;}
@@ -284,10 +279,6 @@ export default function ChatBot() {
                     right:16px!important;
                     bottom:18px!important;
                   }
-                }
-
-                @media(max-height:600px){
-                  .sx-win{height:min(62vh,420px)!important;bottom:74px!important;}
                 }
             `}</style>
 
@@ -321,8 +312,7 @@ export default function ChatBot() {
                         borderRadius: 20, boxShadow: t.windowShadow,
                         display: "flex", flexDirection: "column", overflow: "hidden",
                         zIndex: 9998, transformOrigin: "bottom right",
-                        animation: "xenosUp .3s cubic-bezier(.34,1.36,.64,1)",
-                        transition: "background .3s,border-color .3s",
+                        transform: "translateZ(0)",
                         fontFamily: "'DM Sans',sans-serif",
                         "--sx-close-hover": t.closeHoverBg,
                     }}
@@ -333,19 +323,21 @@ export default function ChatBot() {
                         borderBottom: `1px solid ${t.headerBorder}`,
                         display: "flex", alignItems: "center", gap: 12,
                     }}>
-                        <div style={{
+                        <img src="/assets/X Logo.png" style={{
                             width: 38, height: 38, borderRadius: 12, flexShrink: 0,
-                            background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+                            background: "#2563eb",
+                            objectFit: 'contain',
+                            padding: 5,
                             display: "flex", alignItems: "center", justifyContent: "center",
-                            fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 14, color: "#ffffff",
-                        }}>SX</div>
+                            // fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 14, color: "#ffffff",
+                        }} />
 
                         <div>
                             <div style={{ margin: 0, fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 14, color: t.titleColor }}>
                                 StudioXenos Support
                             </div>
                             <div style={{ fontSize: 11, color: "#16a34a", display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
-                                <span className="sx-pulse" style={{ width: 6, height: 6, background: "#16a34a", borderRadius: "50%", display: "inline-block" }} />
+                                <span style={{ width: 6, height: 6, background: "#16a34a", borderRadius: "50%", display: "inline-block" }} />
                                 Online — replies instantly
                             </div>
                         </div>
@@ -369,7 +361,7 @@ export default function ChatBot() {
                     <div className="sx-msgs" style={{
                         flex: 1, overflowY: "auto", padding: 16,
                         display: "flex", flexDirection: "column", gap: 10,
-                        background: t.msgsBg, transition: "background .3s",
+                        background: t.msgsBg,
                     }}>
                         {displayMsgs.map((msg, i) => (
                             <MessageBubble key={i} msg={msg} t={t} />
@@ -391,9 +383,9 @@ export default function ChatBot() {
 
                     {/* Input */}
                     <div style={{
+                        overflowY: "hidden",
                         padding: "12px 16px 16px", display: "flex", gap: 8, alignItems: "flex-end",
                         background: t.inputAreaBg, borderTop: `1px solid ${t.inputAreaBorder}`,
-                        transition: "background .3s",
                     }}>
                         <textarea
                             ref={textareaRef}
@@ -421,7 +413,7 @@ export default function ChatBot() {
                                 border: "none", cursor: sendDisabled ? "not-allowed" : "pointer",
                                 display: "flex", alignItems: "center", justifyContent: "center",
                                 flexShrink: 0, opacity: sendDisabled ? 0.4 : 1,
-                                boxShadow: "0 4px 14px rgba(37, 99, 235, 0.3)",
+                                boxShadow: "0 2px 8px rgba(37, 99, 235, 0.2)",
                             }}
                         >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="white">

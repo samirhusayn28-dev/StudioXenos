@@ -1,6 +1,6 @@
 'use client';
 
-import React, { memo } from 'react';
+import React, { memo, useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 
 const robot1 = '/assets/Robot.png';
@@ -24,7 +24,7 @@ const workStyles = `
   position: relative;
   overflow: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
-  contain: layout paint style;
+  contain: paint style;
 }
 
 .work-bg-grid {
@@ -50,9 +50,26 @@ const workStyles = `
   filter: blur(40px);
 }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes sequentialFadeIn {
+  from { 
+    opacity: 0; 
+    transform: translate3d(0, 15px, 0); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translate3d(0, 0, 0); 
+  }
+}
+
+@keyframes ropeDraw {
+  from {
+    stroke-dashoffset: 1500;
+    opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
 }
 
 .work-header {
@@ -61,7 +78,11 @@ const workStyles = `
   z-index: 5;
   max-width: 720px;
   margin: 0 auto clamp(20px, 4vh, 40px);
-  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  opacity: 0;
+}
+
+.work-section.has-animated .work-header {
+  animation: sequentialFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .work-title {
@@ -117,17 +138,24 @@ const workStyles = `
   stroke: url(#ropeGradient);
   stroke-width: 3;
   stroke-linecap: round;
-  stroke-dasharray: 8 8;
-  animation: ropeFlow 30s linear infinite;
-  filter: drop-shadow(0 0 6px rgba(37, 99, 235, 0.3));
+  stroke-dasharray: 1500;
+  stroke-dashoffset: 1500;
+  opacity: 0;
+  will-change: stroke-dashoffset, opacity;
+}
+
+.work-section.has-animated .gradient-rope-path {
+  animation: ropeDraw 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.3s;
 }
 
 .arrow-head {
   fill: url(#ropeGradient);
+  opacity: 0;
 }
 
-@keyframes ropeFlow {
-  to { stroke-dashoffset: -1000; }
+.work-section.has-animated .arrow-head {
+  animation: sequentialFadeIn 0.4s ease 1.2s both;
 }
 
 .work-grid {
@@ -135,7 +163,7 @@ const workStyles = `
   position: relative;
   z-index: 2;
   min-height: 600px;
-  contain: layout paint style;
+  contain: paint style;
 }
 
 .work-card {
@@ -147,9 +175,14 @@ const workStyles = `
   padding: 0;
   text-align: center;
   box-sizing: border-box;
-  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-  will-change: transform, opacity;
+  opacity: 0;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
   transform: translateZ(0);
+}
+
+.work-section.has-animated .work-card {
+  animation: sequentialFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @media (min-width: 1000px) {
@@ -242,8 +275,6 @@ const workStyles = `
 
 .small-floating-card {
   background: var(--card-bg, rgba(255, 255, 255, 0.95));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--card-border, rgba(37, 99, 235, 0.2));
   border-radius: 10px;
   padding: 6px 12px;
@@ -253,7 +284,7 @@ const workStyles = `
   gap: 8px;
   box-shadow: 0 6px 18px rgba(37, 99, 235, 0.1);
   transition: transform 0.3s ease;
-  will-change: transform, opacity;
+  will-change: transform;
   transform: translateZ(0);
 }
 
@@ -280,13 +311,13 @@ const workStyles = `
   .work-header,
   .work-card,
   .small-floating-card,
-  .robot-img {
+  .robot-img,
+  .gradient-rope-path,
+  .arrow-head {
     animation: none !important;
     transition: none !important;
-  }
-
-  .gradient-rope-path {
-    animation: none !important;
+    stroke-dashoffset: 0 !important;
+    opacity: 1 !important;
   }
 
   .work-card:hover .robot-img {
@@ -299,7 +330,7 @@ const steps = [
     {
         id: '01',
         posClass: 'card-pos-0',
-        delay: '0.1s',
+        delay: '0.15s',
         label: 'Quotation',
         labelColor: '#2563eb',
         robot: robot1,
@@ -311,7 +342,7 @@ const steps = [
     {
         id: '02',
         posClass: 'card-pos-1',
-        delay: '0.2s',
+        delay: '0.3s',
         label: 'Custom Plan',
         labelColor: '#d97706',
         robot: robot2,
@@ -331,7 +362,7 @@ const steps = [
     {
         id: '03',
         posClass: 'card-pos-2',
-        delay: '0.3s',
+        delay: '0.45s',
         label: 'Development',
         labelColor: '#3b82f6',
         robot: robot1,
@@ -348,7 +379,7 @@ const steps = [
     {
         id: '04',
         posClass: 'card-pos-3',
-        delay: '0.4s',
+        delay: '0.6s',
         label: 'Launch & Grow',
         labelColor: '#10b981',
         robot: robot3,
@@ -390,8 +421,36 @@ const StepCard = memo(function StepCard({ step }) {
 });
 
 export default function Work() {
+    const sectionRef = useRef(null);
+    const [hasAnimated, setHasAnimated] = useState(false);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setHasAnimated(true);
+
+                    if (sectionRef.current) {
+                        observer.unobserve(sectionRef.current);
+                    }
+                }
+            },
+            { threshold: 0.5 }
+        );
+
+        if (sectionRef.current) {
+            observer.observe(sectionRef.current);
+        }
+
+        return () => {
+            if (sectionRef.current) {
+                observer.unobserve(sectionRef.current);
+            }
+        };
+    }, []);
+
     return (
-        <section id="how-we-work" className="work-section">
+        <section ref={sectionRef} id="how-we-work" className={`work-section ${hasAnimated ? 'has-animated' : ''}`}>
             <style>{workStyles}</style>
 
             <div className="work-bg-grid" />
