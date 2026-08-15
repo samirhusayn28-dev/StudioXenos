@@ -1,38 +1,40 @@
 'use client';
 
-import React, { useState, memo, useCallback } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 
 const navLinks = [
     { label: 'Services', id: 'services' },
-    { label: 'How we work', id: 'how-we-work' },
     { label: 'Projects', id: 'projects' },
-    { label: 'Gallery', id: 'art-gallery' },
-    { label: 'What People Say', id: 'testimonials' },
+    { label: 'How we work', id: 'how-we-work' },
     { label: 'About', id: 'about' },
+    { label: 'What People Say', id: 'testimonials' },
 ];
 
 const navbarStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap');
 
   .hero-nav-container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0px auto;
-    padding: 20px 24px 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
     box-sizing: border-box;
-    position: relative;
-    z-index: 50;
-    transform: translateZ(0);
-    will-change: transform;
+    z-index: 9999;
   }
 
   .hero-nav-inner {
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 64px;
     height: 65px;
-    padding: 0 20px;
+    padding: 0 44px 0 18px;
     border-radius: 999px;
     background: var(--glass-bg, rgba(255, 255, 255, 0.05));
     backdrop-filter: blur(12px);
@@ -77,61 +79,6 @@ const navbarStyles = `
   .nav-link:hover {
     color: var(--text-on-primary, #ffffff);
     background: var(--accent-blue-overlay, rgba(37, 99, 235, 0.15));
-  }
-
-  .book-btn {
-    font-family: 'Outfit', sans-serif;
-    position: relative;
-    overflow: hidden;
-    background: var(--surface-faint-strong, rgba(255, 255, 255, 0.08));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
-    border-radius: 999px;
-    color: var(--text-on-primary, #ffffff);
-    font-size: 0.82rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    padding: 0 20px;
-    height: 38px;
-    min-width: 120px;
-    cursor: pointer;
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-  }
-
-  .book-btn:hover {
-    background: var(--btn-bg, #2563eb);
-    border-color: var(--btn-bg, #2563eb);
-    transform: translate3d(0, -1px, 0);
-    box-shadow: 0 4px 18px var(--accent-blue-shadow, rgba(37, 99, 235, 0.3));
-  }
-
-  .book-btn .txt-default {
-    color: var(--btn-bg, #2563eb);
-  }
-
-  .book-btn .txt-hover {
-    display: block;
-    position: absolute;
-    transform: translate3d(0, 100%, 0);
-    opacity: 0;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-  }
-
-  .book-btn:hover .txt-default {
-    transform: translate3d(0, -100%, 0);
-    opacity: 0;
-  }
-
-  .book-btn:hover .txt-hover {
-    transform: translate3d(0, 0, 0);
-    opacity: 1;
   }
 
   .hamburger-btn {
@@ -189,22 +136,30 @@ const navbarStyles = `
     .nav-desktop-group { display: none !important; }
     .nav-mobile-group  { display: flex !important; align-items: center; gap: 10px; }
     .hero-nav-container { padding: 12px 16px 0; }
+    .hero-nav-inner { width: 100%; justify-content: space-between; gap: 0; padding: 0 18px; height: 56px; }
+    .mobile-dropdown { align-self: flex-end; width: auto; min-width: 190px; max-width: 240px; }
   }
 `;
 
 function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const scrollTo = useCallback((id) => {
         setMenuOpen(false);
         const el = document.getElementById(id);
         if (!el) return;
 
-        // Fixed: Allows smooth scrolling in both directions (up and down)
         el.scrollIntoView({ behavior: 'smooth' });
     }, []);
 
-    return (
+    if (!mounted) return null;
+
+    return createPortal(
         <header className="hero-nav-container animate-slide-down">
             <style>{navbarStyles}</style>
 
@@ -234,13 +189,6 @@ function Navbar() {
                         </li>
                     ))}
                 </ul>
-
-                <div className="nav-desktop-group">
-                    <button onClick={() => scrollTo('contact')} className="book-btn">
-                        <span className="txt-default">Book a Call</span>
-                        <span className="txt-hover">GO</span>
-                    </button>
-                </div>
 
                 <div className="nav-mobile-group">
                     <button
@@ -279,16 +227,10 @@ function Navbar() {
                             {link.label}
                         </a>
                     ))}
-                    <button
-                        onClick={() => scrollTo('contact')}
-                        className="book-btn"
-                        style={{ marginTop: '6px', width: '100%' }}
-                    >
-                        Book a Call
-                    </button>
                 </div>
             )}
-        </header>
+        </header>,
+        document.body
     );
 }
 

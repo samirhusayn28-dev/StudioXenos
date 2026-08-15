@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 import manifest from './assetManifest';
 import preloadAssets from './Preloader';
 
+const MAX_WAIT_MS = 4000;
+
 export default function Loader({ onComplete }) {
     const [progress, setProgress] = useState({ loaded: 0, total: 1, percent: 0 });
     const [fadeOut, setFadeOut] = useState(false);
@@ -11,6 +13,14 @@ export default function Loader({ onComplete }) {
 
     useEffect(() => {
         let isMounted = true;
+        let finished = false;
+
+        const finish = () => {
+            if (finished || !isMounted) return;
+            finished = true;
+            setFadeOut(true);
+            timeoutRef.current = setTimeout(() => onComplete && onComplete(), 500);
+        };
 
         const handleProgress = (loaded, total, detail = {}) => {
             if (!isMounted) return;
@@ -18,23 +28,13 @@ export default function Loader({ onComplete }) {
             setProgress({ loaded, total, percent, detail });
         };
 
-        preloadAssets(manifest, handleProgress).then(() => {
-            if (!isMounted) return;
-            setFadeOut(true);
-            // Align this timeout closer to the CSS transition duration (e.g., 400ms - 500ms)
-            timeoutRef.current = setTimeout(() => onComplete && onComplete(), 500);
+        preloadAssets(manifest, handleProgress).then(finish).catch(finish);
 
-        }).catch(() => {
-            // Change this inside Loader.js:
-
-            if (!isMounted) return;
-            setFadeOut(true);
-            // Align this timeout closer to the CSS transition duration (e.g., 400ms - 500ms)
-            timeoutRef.current = setTimeout(() => onComplete && onComplete(), 500);
-        });
+        const maxWaitTimer = setTimeout(finish, MAX_WAIT_MS);
 
         return () => {
             isMounted = false;
+            clearTimeout(maxWaitTimer);
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current);
             }
@@ -65,25 +65,59 @@ export default function Loader({ onComplete }) {
       from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    @keyframes sxShiningMotion {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
 
     .sx-loader-logo { animation: sxFadeUp 0.6s ease forwards; }
 
-    .sx-shining-text {
-      background: linear-gradient(90deg, #2563eb 0%, #93c5fd 40%, #ffffff 50%, #93c5fd 60%, #2563eb 100%);
-      background-size: 200% auto;
-      color: transparent;
-      -webkit-background-clip: text;
-      background-clip: text;
-      animation: sxShiningMotion 2.2s linear infinite;
-      will-change: background-position;
+    .sx-text-wrap {
+      position: relative;
+      display: inline-block;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 32px;
+      letter-spacing: 0.08em;
+      line-height: 1.15;
+      text-align: center;
+      max-width: 90vw;
     }
 
-    .sx-progress { margin-top: 18px; font-family: 'Outfit', sans-serif; color: #374151; }
-    .sx-progress-bar { will-change: width; transform: translateZ(0); }
+    .sx-text-base {
+      display: block;
+      color: transparent;
+      -webkit-text-stroke: 1px transparent;
+      user-select: none;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    .sx-text-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      color: #2563eb;
+      will-change: clip-path;
+      -webkit-clip-path: inset(0 0 0 0);
+      clip-path: inset(0 0 0 0);
+      transition: clip-path 200ms ease-out;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    /* Mobile: allow the studio name to wrap onto 2 lines instead of overflowing */
+    @media (max-width: 480px) {
+      .sx-text-wrap {
+        font-size: 24px;
+        max-width: 80vw;
+      }
+      .sx-text-base,
+      .sx-text-fill {
+        white-space: normal;
+        word-break: normal;
+        overflow-wrap: break-word;
+      }
+    }
     `}</style>
 
             {/* Ambient blue glow */}
@@ -95,20 +129,23 @@ export default function Loader({ onComplete }) {
                 pointerEvents: "none",
             }} />
 
-            {/* Studio name with continuous shining motion */}
-            <div className="sx-loader-logo" style={{
-                fontFamily: "'Syne', sans-serif", fontWeight: 700,
-                fontSize: 32, letterSpacing: "0.08em",
-            }}>
-                <span className="sx-shining-text">STUDIO XENOS</span>
+            {/* Studio name — text fills left-to-right (and wraps on mobile) with load progress */}
+            <div className="sx-loader-logo sx-text-wrap">
+                <span className="sx-text-base" aria-hidden="true">STUDIO XENOS</span>
+                <span
+                    className="sx-text-fill"
+                    style={{ clipPath: `inset(0 ${100 - progress.percent}% 0 0)` }}
+                    aria-hidden="true"
+                >
+                    STUDIO XENOS
+                </span>
+                <span style={{
+                    position: 'absolute', width: 1, height: 1, padding: 0, margin: -1,
+                    overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0,
+                }}>
+                    STUDIO XENOS loading, {progress.percent}%
+                </span>
             </div>
-
-            {/* <div className="sx-progress" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <div style={{ width: 180, height: 8, background: '#eef2ff', borderRadius: 999, overflow: 'hidden' }}>
-                    <div className="sx-progress-bar" style={{ width: `${progress.percent}%`, height: '100%', background: '#2563eb', transition: 'width 180ms linear' }} />
-                </div>
-                <div style={{ minWidth: 48, textAlign: 'right', fontWeight: 700 }}>{progress.percent}%</div>
-            </div> */}
         </div>
     );
 }

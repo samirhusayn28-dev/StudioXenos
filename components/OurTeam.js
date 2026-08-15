@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, memo } from 'react';
+import React, { useMemo, useRef, useEffect, useState, useCallback, memo } from 'react';
 
 const testimonials = [
     {
@@ -52,7 +52,7 @@ const css = `
 
   .t-section {
     background: transparent;
-    padding: 40px 24px;
+    padding: 40px 0;
     font-family: 'Outfit', system-ui, -apple-system, sans-serif;
     width: 100%;
     box-sizing: border-box;
@@ -62,6 +62,7 @@ const css = `
   .t-header {
     text-align: center;
     margin-bottom: 56px;
+    padding: 0 24px;
   }
 
   .t-badge {
@@ -96,7 +97,7 @@ const css = `
     line-height: 1.05;
     letter-spacing: -0.02em;
     margin: 0;
-    font-size: clamp(36px, 5.5vw, 50px);
+    font-size: clamp(28px, 5.5vw, 50px);
     color: #0f172a;
   }
 
@@ -112,57 +113,81 @@ const css = `
     margin: 18px auto 0;
   }
 
-  /* 3-Column Grid (2 rows of 3 cards) */
-  .t-wrap {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+  .t-marquee-wrap {
+    display: flex;
+    flex-direction: column;
     gap: 24px;
+  }
+
+  .t-marquee {
+    position: relative;
     width: 100%;
-    max-width: 1320px;
-    margin: 0 auto;
-    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .t-marquee::before,
+  .t-marquee::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: clamp(40px, 10%, 160px);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .t-marquee::before {
+    left: 0;
+    background: linear-gradient(to right, #ffffff 0%, rgba(255,255,255,0) 100%);
+  }
+
+  .t-marquee::after {
+    right: 0;
+    background: linear-gradient(to left, #ffffff 0%, rgba(255,255,255,0) 100%);
+  }
+
+  .t-track {
+    display: flex;
+    flex-wrap: nowrap;
+    width: max-content;
+    will-change: transform;
   }
 
   .t-card {
     position: relative;
-    padding: 28px 24px;
-    border-radius: 20px;
+    flex: 0 0 auto;
+    width: 400px;
+    padding: 36px 32px;
+    margin-right: 28px;
+    border-radius: 24px;
     background: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.06);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
     box-sizing: border-box;
-    min-height: 250px;
-    will-change: transform;
+    min-height: 300px;
     transform: translateZ(0);
     backface-visibility: hidden;
-  }
-
-  .t-card:hover {
-    transform: translateY(-5px) translateZ(0);
-    border-color: rgba(37, 99, 235, 0.3);
-    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.08);
   }
 
   .t-card-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 14px;
+    margin-bottom: 18px;
   }
 
   .t-stars {
     display: flex;
-    gap: 3px;
+    gap: 4px;
     color: #f59e0b;
-    font-size: 14px;
+    font-size: 17px;
   }
 
   .t-quote-symbol {
-    font-size: 32px;
+    font-size: 40px;
     font-weight: 900;
     line-height: 1;
     color: #94a3b8;
@@ -170,29 +195,29 @@ const css = `
   }
 
   .t-quote {
-    font-size: 14px;
+    font-size: 17px;
     font-weight: 400;
-    line-height: 1.6;
+    line-height: 1.65;
     color: #475569;
-    margin-bottom: 20px;
+    margin-bottom: 26px;
     flex-grow: 1;
   }
 
   .t-footer {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     border-top: 1px solid rgba(0, 0, 0, 0.05);
-    padding-top: 14px;
+    padding-top: 18px;
   }
 
   .t-avatar {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     background: #eff6ff;
     color: #2563eb;
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -208,7 +233,7 @@ const css = `
   }
 
   .t-name {
-    font-size: 13px;
+    font-size: 14.5px;
     font-weight: 800;
     color: #0f172a;
     text-transform: uppercase;
@@ -219,7 +244,7 @@ const css = `
   }
 
   .t-role {
-    font-size: 11px;
+    font-size: 12.5px;
     font-weight: 400;
     color: #64748b;
     white-space: nowrap;
@@ -227,28 +252,74 @@ const css = `
     text-overflow: ellipsis;
   }
 
-  /* Responsive Adjustments */
-  @media (max-width: 1024px) {
-    .t-wrap {
-      grid-template-columns: repeat(2, 1fr);
+  /* ── TABLET ── */
+  @media (max-width: 900px) {
+    .t-section { padding: 36px 0; }
+    .t-header { margin-bottom: 44px; }
+    .t-card {
+      width: 340px;
+      padding: 30px 26px;
+      margin-right: 22px;
+      min-height: 270px;
     }
+    .t-quote { font-size: 16px; margin-bottom: 22px; }
   }
 
+  /* ── MOBILE ── */
   @media (max-width: 640px) {
-    .t-section {
-      padding: 60px 16px;
-    }
+    .t-section { padding: 32px 0; }
     .t-header {
-      margin-bottom: 36px;
+      margin-bottom: 30px;
+      padding: 0 16px;
     }
-    .t-wrap {
-      grid-template-columns: 1fr;
-      gap: 16px;
+    .t-badge {
+      font-size: 10.5px;
+      padding: 5px 14px 5px 10px;
+      margin-bottom: 12px;
+    }
+    .t-divider { margin-top: 14px; }
+    .t-marquee-wrap { gap: 16px; }
+    .t-marquee::before,
+    .t-marquee::after {
+      width: clamp(20px, 8%, 60px);
     }
     .t-card {
-      min-height: auto;
-      padding: 22px 18px;
+      width: 270px;
+      padding: 22px 20px;
+      margin-right: 14px;
+      min-height: 235px;
+      border-radius: 18px;
     }
+    .t-card-top { margin-bottom: 12px; }
+    .t-stars { font-size: 14px; gap: 3px; }
+    .t-quote-symbol { font-size: 30px; }
+    .t-quote {
+      font-size: 13.5px;
+      line-height: 1.55;
+      margin-bottom: 18px;
+    }
+    .t-footer {
+      gap: 10px;
+      padding-top: 14px;
+    }
+    .t-avatar {
+      width: 38px;
+      height: 38px;
+      font-size: 13px;
+    }
+    .t-name { font-size: 12.5px; }
+    .t-role { font-size: 11px; }
+  }
+
+  /* ── SMALL MOBILE ── */
+  @media (max-width: 380px) {
+    .t-card {
+      width: 235px;
+      padding: 18px 16px;
+      margin-right: 12px;
+      min-height: 220px;
+    }
+    .t-quote { font-size: 12.5px; }
   }
 `;
 
@@ -283,11 +354,112 @@ const GlobalStyle = memo(function GlobalStyle() {
     return <style>{css}</style>;
 });
 
-export default function Testimonials() {
-    const cards = useMemo(
-        () => testimonials.map((item, i) => <TestimonialCard key={i} item={item} />),
-        []
+function useMarquee(speed = 45, direction = 1, sharedHover) {
+    const trackRef = useRef(null);
+    const seqRef = useRef(null);
+    const [seqWidth, setSeqWidth] = useState(0);
+    const [copyCount, setCopyCount] = useState(2);
+    const [localHovered, setLocalHovered] = useState(false);
+    const isHovered = sharedHover !== undefined ? sharedHover : localHovered;
+    const offsetRef = useRef(0);
+    const rafRef = useRef(null);
+    const lastTsRef = useRef(null);
+
+    const measure = useCallback(() => {
+        const containerWidth = trackRef.current?.parentElement?.clientWidth ?? 0;
+        const width = seqRef.current?.getBoundingClientRect?.().width ?? 0;
+        if (width > 0) {
+            setSeqWidth(Math.ceil(width));
+            const copiesNeeded = Math.ceil(containerWidth / width) + 2;
+            setCopyCount(Math.max(2, copiesNeeded));
+        }
+    }, []);
+
+    useEffect(() => {
+        measure();
+        window.addEventListener('resize', measure);
+        return () => window.removeEventListener('resize', measure);
+    }, [measure]);
+
+    useEffect(() => {
+        const track = trackRef.current;
+        if (!track || seqWidth === 0) return;
+
+        const prefersReduced =
+            typeof window !== 'undefined' &&
+            window.matchMedia &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (prefersReduced) {
+            track.style.transform = 'translate3d(0,0,0)';
+            return;
+        }
+
+        const animate = (timestamp) => {
+            if (lastTsRef.current === null) lastTsRef.current = timestamp;
+            const dt = Math.max(0, timestamp - lastTsRef.current) / 1000;
+            lastTsRef.current = timestamp;
+
+            if (!isHovered) {
+                let next = offsetRef.current + speed * direction * dt;
+                next = ((next % seqWidth) + seqWidth) % seqWidth;
+                offsetRef.current = next;
+                track.style.transform = `translate3d(${-offsetRef.current}px,0,0)`;
+            }
+
+            rafRef.current = requestAnimationFrame(animate);
+        };
+
+        rafRef.current = requestAnimationFrame(animate);
+        return () => {
+            if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+            lastTsRef.current = null;
+        };
+    }, [seqWidth, speed, isHovered]);
+
+    return { trackRef, seqRef, copyCount, setIsHovered: setLocalHovered };
+}
+
+function MarqueeRow({ items, speed, direction, hovered, onEnter, onLeave }) {
+    const { trackRef, seqRef, copyCount } = useMarquee(speed, direction, hovered);
+
+    const copies = useMemo(
+        () =>
+            Array.from({ length: copyCount }, (_, copyIndex) => (
+                <div key={copyIndex} ref={copyIndex === 0 ? seqRef : undefined} style={{ display: 'flex' }}>
+                    {items.map((item, i) => (
+                        <TestimonialCard key={`${copyIndex}-${i}`} item={item} />
+                    ))}
+                </div>
+            )),
+        [copyCount, seqRef, items]
     );
+
+    return (
+        <div className="t-marquee" onMouseEnter={onEnter} onMouseLeave={onLeave}>
+            <div className="t-track" ref={trackRef}>
+                {copies}
+            </div>
+        </div>
+    );
+}
+
+const rowOne = testimonials.slice(0, 3);
+const rowTwo = testimonials.slice(3, 6);
+
+export default function Testimonials() {
+    const [hovered, setHovered] = useState(false);
+    const [speed, setSpeed] = useState(50);
+
+    const handleEnter = useCallback(() => setHovered(true), []);
+    const handleLeave = useCallback(() => setHovered(false), []);
+
+    useEffect(() => {
+        const updateSpeed = () => setSpeed(window.innerWidth <= 640 ? 32 : 50);
+        updateSpeed();
+        window.addEventListener('resize', updateSpeed);
+        return () => window.removeEventListener('resize', updateSpeed);
+    }, []);
 
     return (
         <section id="testimonials" className="t-section">
@@ -300,8 +472,23 @@ export default function Testimonials() {
                 <div className="t-divider" />
             </div>
 
-            <div className="t-wrap">
-                {cards}
+            <div className="t-marquee-wrap">
+                <MarqueeRow
+                    items={rowOne}
+                    speed={speed}
+                    direction={1}
+                    hovered={hovered}
+                    onEnter={handleEnter}
+                    onLeave={handleLeave}
+                />
+                <MarqueeRow
+                    items={rowTwo}
+                    speed={speed}
+                    direction={-1}
+                    hovered={hovered}
+                    onEnter={handleEnter}
+                    onLeave={handleLeave}
+                />
             </div>
         </section>
     );

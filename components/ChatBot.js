@@ -170,34 +170,27 @@ export default function ChatBot() {
         ];
 
         try {
-            const API_KEY = process.env.NEXT_PUBLIC_GROQ_API_KEY || process.env.REACT_APP_GROQ_API_KEY || "";
-            const url = "https://api.groq.com/openai/v1/chat/completions";
-
-            const res = await fetch(url, {
+            const res = await fetch("/api/chat", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${API_KEY}`,
                 },
                 body: JSON.stringify({
-                    model: "llama-3.3-70b-versatile",
                     messages: [
                         { role: "system", content: SYSTEM_PROMPT },
                         ...newHistory,
                     ],
-                    max_tokens: 1024,
-                    temperature: 0.7,
                 }),
             });
 
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data?.error?.message || "API error");
+                throw new Error(data?.error || "API error");
             }
 
             const reply =
-                data?.choices?.[0]?.message?.content ||
+                data?.reply ||
                 "Sorry, I couldn't process that. Please try again.";
 
             setHistoryMsgs([

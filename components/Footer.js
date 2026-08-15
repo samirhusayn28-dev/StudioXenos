@@ -27,6 +27,14 @@ const faqData = [
     {
         question: 'How can we kick off a new project with you?',
         answer: 'Simply click the "Contact Us" button in the footer below or send us an email. We will schedule a discovery call to discuss your goals, timeline, and budget.'
+    },
+    {
+        question: 'Which technologies do you work with?',
+        answer: 'Our stack centers on React, Next.js, and modern backend frameworks, paired with cloud infrastructure like AWS and Vercel for scalable, production-ready deployments.'
+    },
+    {
+        question: 'Can you redesign an existing website or app?',
+        answer: 'Absolutely. We audit your current product, identify friction points, and rebuild the experience with improved performance, accessibility, and a refreshed visual identity.'
     }
 ];
 
@@ -92,7 +100,32 @@ const footerStyles = `
 
   .faq-header {
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 40px;
+  }
+
+  .faq-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.07);
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    border-radius: 999px;
+    padding: 6px 16px;
+    margin-bottom: 18px;
+  }
+
+  .faq-eyebrow-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #2563eb;
+    flex-shrink: 0;
   }
 
   .faq-title {
@@ -101,8 +134,8 @@ const footerStyles = `
     text-transform: uppercase;
     line-height: 1.1;
     letter-spacing: -0.02em;
-    margin: 0;
-    font-size: clamp(36px, 5.5vw, 50px);
+    margin: 0 0 10px;
+    font-size: clamp(32px, 5vw, 46px);
     color: #0f172a;
   }
 
@@ -110,19 +143,30 @@ const footerStyles = `
     color: #2563eb;
   }
 
+  .faq-subtitle {
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #64748b;
+    margin: 0 auto;
+    max-width: 420px;
+    line-height: 1.6;
+  }
+
   .faq-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    align-items: stretch;
+    gap: 16px;
+    align-items: start;
   }
 
   .faq-item {
+    position: relative;
     background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-radius: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.03);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
     display: flex;
     flex-direction: column;
@@ -132,21 +176,36 @@ const footerStyles = `
     backface-visibility: hidden;
   }
 
+  .faq-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 3px;
+    background: #2563eb;
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .faq-item.active::before {
+    transform: scaleY(1);
+  }
+
   .faq-item:hover {
-    transform: translateY(-4px) translateZ(0);
-    border-color: rgba(37, 99, 235, 0.25);
-    box-shadow: 0 16px 36px rgba(37, 99, 235, 0.07);
+    transform: translateY(-3px) translateZ(0);
+    border-color: rgba(37, 99, 235, 0.22);
+    box-shadow: 0 14px 32px rgba(37, 99, 235, 0.06);
   }
 
   .faq-item.active {
-    border-color: rgba(37, 99, 235, 0.4);
-    background: #ffffff;
-    box-shadow: 0 16px 40px rgba(37, 99, 235, 0.09);
+    border-color: rgba(37, 99, 235, 0.3);
+    background: linear-gradient(180deg, rgba(37,99,235,0.03) 0%, #ffffff 60%);
+    box-shadow: 0 16px 36px rgba(37, 99, 235, 0.08);
   }
 
   .faq-question-btn {
     width: 100%;
-    padding: 24px;
+    padding: 22px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -154,54 +213,81 @@ const footerStyles = `
     border: none;
     color: #0f172a;
     font-family: 'Outfit', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 600;
     text-align: left;
     cursor: pointer;
     gap: 16px;
   }
 
-  .faq-icon {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: rgba(37, 99, 235, 0.08);
-    border: 1px solid rgba(37, 99, 235, 0.2);
+  .faq-question-text {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .faq-number {
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(37, 99, 235, 0.35);
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+
+  .faq-item.active .faq-number {
     color: #2563eb;
+  }
+
+  .faq-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.04);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    color: #475569;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-size: 16px;
-    transition: transform 0.25s ease, background 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+  }
+
+  .faq-icon svg {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .faq-item.active .faq-icon {
-    transform: rotate(45deg);
-    background: rgba(37, 99, 235, 0.18);
+    transform: rotate(180deg);
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
   }
 
   .faq-answer {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease, padding 0.3s ease;
+    transition: max-height 0.35s ease, padding 0.35s ease;
     padding: 0 24px;
   }
 
   .faq-item.active .faq-answer {
     max-height: 250px;
-    padding: 0 24px 24px 24px;
+    padding: 0 24px 22px 24px;
   }
 
   .faq-answer-text {
     font-family: 'Outfit', sans-serif;
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 400;
-    color: #475569;
-    line-height: 1.65;
+    color: #64748b;
+    line-height: 1.7;
     margin: 0;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    padding-top: 16px;
+    padding-top: 14px;
+    padding-left: 24px;
+    border-top: 1px solid rgba(15, 23, 42, 0.06);
   }
 
   .faq-footer-divider {
@@ -364,8 +450,10 @@ const footerStyles = `
   @media (max-width: 700px) {
     .footer-root { padding: 40px 0 20px !important; }
     .faq-section { margin-bottom: 30px; }
-    .faq-question-btn { font-size: 15px; padding: 20px; }
-    .faq-answer-text { font-size: 13.5px; }
+    .faq-question-btn { font-size: 14.5px; padding: 18px 20px; }
+    .faq-answer-text { font-size: 13px; padding-left: 20px; }
+    .faq-answer { padding: 0 20px; }
+    .faq-item.active .faq-answer { padding: 0 20px 20px 20px; }
 
     .footer-main-grid {
       grid-template-columns: 1fr 1fr;
@@ -537,12 +625,18 @@ export default function Footer() {
             {/* ── SECTION 1: FREQUENTLY ASKED QUESTIONS ── */}
             <div className="faq-section">
                 <div className="faq-header">
+                    <span className="faq-eyebrow">
+                        <span className="faq-eyebrow-dot" />
+                        Got Questions?
+                    </span>
                     <h2 className="faq-title">
                         Frequently Asked <span className="faq-title-blue">Questions</span>
                     </h2>
+                    <p className="faq-subtitle">
+                        Everything you need to know about working with Studio Xenos, answered.
+                    </p>
                 </div>
 
-                {/* FAQ Grid with Individual Beautiful Cards */}
                 <div className="faq-container">
                     {faqData.map((item, index) => {
                         const isActive = activeFaq === index;
@@ -553,8 +647,15 @@ export default function Footer() {
                                     onClick={() => toggleFaq(index)}
                                     aria-expanded={isActive}
                                 >
-                                    <span>{item.question}</span>
-                                    <span className="faq-icon">+</span>
+                                    <span className="faq-question-text">
+                                        <span className="faq-number">{String(index + 1).padStart(2, '0')}</span>
+                                        <span>{item.question}</span>
+                                    </span>
+                                    <span className="faq-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    </span>
                                 </button>
                                 <div className="faq-answer">
                                     <p className="faq-answer-text">{item.answer}</p>
@@ -584,9 +685,9 @@ export default function Footer() {
                         </div>
                         <p className="footer-col-title" style={styles.socialTitle}>Social Media</p>
                         <div style={styles.socialRow}>
-                            <InstagramButton href="https://instagram.com" />
-                            <FacebookButton href="https://facebook.com" />
-                            <LinkedInButton href="https://linkedin.com" />
+                            <InstagramButton href="https://www.instagram.com/develloop?igsh=OXluOWx2YTdkM2Ex&igsi=OXluOWx2YTdkM2Ex" />
+                            <FacebookButton href="https://www.facebook.com/profile.php?id=61592492623869" />
+                            <LinkedInButton href="https://www.linkedin.com/company/studio-xenos/" />
                         </div>
                     </div>
 
@@ -607,7 +708,7 @@ export default function Footer() {
                 <hr className="footer-divider-bottom" />
                 <div className="footer-bottom-bar" style={styles.bottomBar}>
                     <p style={styles.copyright}>
-                        © 2026 Studioxenos.com — All Rights Reserved[cite: 9]
+                        © 2026 Studioxenos.com — All Rights Reserved
                     </p>
                     <p style={styles.crafted}>
                         Crafted with precision
