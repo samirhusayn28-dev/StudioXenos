@@ -66,10 +66,10 @@ const navbarStyles = `
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 16px;
+    padding-top: 30px;
     box-sizing: border-box;
     z-index: 9999;
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
     will-change: transform, opacity;
   }
 
@@ -83,10 +83,10 @@ const navbarStyles = `
     position: relative;
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 50px;
     height: 58px;
     padding: 0 24px 0 14px;
-    border-radius: 12px;
+    border-radius: 999px;
     background: var(--glass-bg, rgba(255, 255, 255, 0.85));
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
@@ -100,7 +100,7 @@ const navbarStyles = `
     width: auto;
     background: var(--btn-bg, #2563eb); 
     padding: 4px 16px;
-    border-radius: 8px;
+    border-radius: 999px;
     object-fit: contain;
     cursor: pointer;
   }
@@ -219,12 +219,21 @@ const navbarStyles = `
 function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [isReady, setIsReady] = useState(false); // Controls the initial load delay
     const [visible, setVisible] = useState(true);
     const lastScrollY = useRef(0);
     const ticking = useRef(false);
 
     useEffect(() => {
         setMounted(true);
+
+        // Adjust the delay time (in milliseconds) here. 
+        // For example, 500ms will wait half a second before sliding/fading the navbar down.
+        const timer = setTimeout(() => {
+            setIsReady(true);
+        }, 700);
+
+        return () => clearTimeout(timer);
     }, []);
 
     useEffect(() => {
@@ -265,7 +274,7 @@ function Navbar() {
     if (!mounted) return null;
 
     return createPortal(
-        <header className={`hero-nav-container ${visible ? '' : 'nav-hidden'}`}>
+        <header className={`hero-nav-container ${(!isReady || !visible) ? 'nav-hidden' : ''}`}>
             <style>{navbarStyles}</style>
 
             <div className="hero-nav-inner">

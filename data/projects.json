@@ -1,68 +1,112 @@
 [
-  {
-    "img": "/assets/PHTS.png",
-    "title": "PHTS",
-    "tag": "Web App",
-    "year": "2025",
-    "accent": "#c47a30",
-    "desc": "A full-featured web application built with modern technologies. Clean UI, smooth interactions, and a seamless user experience from end to end.",
-    "url": "https://phts.vercel.app/",
-    "github": "https://github.com/samirhusayn28-dev/PHTS.git",
-    "stack": "React"
-  },
-  {
-    "img": "/assets/MP1.png",
-    "title": "Personal Portfolio",
-    "tag": "Portfolio",
-    "year": "2025",
-    "accent": "#315cfd",
-    "desc": "A sleek personal portfolio showcasing projects, skills, and experience with a clean, modern design and smooth animations.",
-    "url": "https://personal-portfolio-lemon-ten.vercel.app/",
-    "github": "https://github.com/Mukhtar-816/Personal_Portfolio.git",
-    "stack": "React"
-  },
-  {
-    "img": "/assets/MP2.png",
-    "title": "Hospital Mgmt",
-    "tag": "Web App",
-    "year": "2025",
-    "accent": "#22c97a",
-    "desc": "A full-featured hospital management system with patient records, appointment scheduling, and an admin dashboard built with Next.js.",
-    "url": "https://hospital-managment-system-rosy.vercel.app/",
-    "github": "https://github.com/Mukhtar-816/Hospital-Management-System-Nextjs.git",
-    "stack": "Next.js"
-  },
-  {
-    "img": "/assets/MP3.png",
-    "title": "Bid&Go",
-    "tag": "Web App",
-    "year": "2025",
-    "accent": "#e63946",
-    "desc": "A real-time online bidding and auction platform where users can list items, place live bids, and track auctions as they unfold.",
-    "url": "https://mukhtar-dev.vercel.app",
-    "github": "https://github.com/Mukhtar-816",
-    "stack": "React"
-  },
-  {
-    "img": "/assets/Project01.avif",
-    "title": "FinTech Dashboard",
-    "tag": "Web App",
-    "year": "2024",
-    "accent": "#3b82f6",
-    "desc": "Real-time analytics engine and financial management dashboard engineered for institutional investors with sub-second chart rendering.",
-    "url": "https://studioxenos.com",
-    "github": "https://github.com/samirhusayn28-dev",
-    "stack": "Next.js / TypeScript"
-  },
-  {
-    "img": "/assets/Project02.avif",
-    "title": "Aura Commerce",
-    "tag": "E-Commerce",
-    "year": "2024",
-    "accent": "#8b5cf6",
-    "desc": "Headless enterprise e-commerce platform with automated inventory routing, AI product search, and 99.9% uptime checkout infrastructure.",
-    "url": "https://studioxenos.com",
-    "github": "https://github.com/samirhusayn28-dev",
-    "stack": "React / Node.js"
-  }
+    {
+        "img": "https://images.unsplash.com/photo-1551650975-87deedd944c3?q=80&w=600&auto=format&fit=crop",
+        "title": "FitPulse Mobile",
+        "tag": "Mobile App",
+        "year": "2025",
+        "accent": "#10b981",
+        "desc": "Cross-platform mobile application for tracking workouts, meal planning, and health metrics with offline-first local database synchronization.",
+        "url": "https://github.com/Mukhtar-816",
+        "github": "https://github.com/Mukhtar-816/FitPulse-Mobile.git",
+        "stack": "React Native"
+    },
+    {
+        "img": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600&auto=format&fit=crop",
+        "title": "MarketMetrics Scraper",
+        "tag": "Web Scraping",
+        "year": "2025",
+        "accent": "#f59e0b",
+        "desc": "High-performance automated web scraper capable of extracting, parsing, and cleaning thousands of e-commerce product listings per minute.",
+        "url": "https://github.com/Mukhtar-816",
+        "github": "https://github.com/Mukhtar-816/MarketMetrics-Scraper.git",
+        "stack": "Python / BeautifulSoup"
+    },
+    {
+        "img": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=600&auto=format&fit=crop",
+        "title": "WorkflowSync Bot",
+        "tag": "Automation",
+        "year": "2024",
+        "accent": "#ec4899",
+        "desc": "Automated task management pipeline and notification bot that synchronizes GitHub pull requests, Jira tickets, and team Slack channels in real time.",
+        "url": "https://github.com/Mukhtar-816",
+        "github": "https://github.com/Mukhtar-816/WorkflowSync-Bot.git",
+        "stack": "Node.js / Express"
+    },
+    {
+        "img": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=600&auto=format&fit=crop",
+        "title": "InsightAI Engine",
+        "tag": "AI Tool",
+        "year": "2025",
+        "accent": "#6366f1",
+        "desc": "An AI-powered document summarizer and query engine built to parse massive PDF contracts and extract core legal clauses instantly.",
+        "url": "https://github.com/Mukhtar-816",
+        "github": "https://github.com/Mukhtar-816/InsightAI-Engine.git",
+        "stack": "Python / OpenAI"
+    },
+    {
+        "img": "/assets/PHTS.png",
+        "title": "PATIENT HEALTH TRACKING SYSTEM",
+        "tag": "Web App",
+        "year": "2025",
+        "accent": "#c47a30",
+        "desc": "A full-featured web application built with modern technologies. Clean UI, smooth interactions, and a seamless user experience from end to end.",
+        "url": "https://phts.vercel.app/",
+        "github": "https://github.com/samirhusayn28-dev/PHTS.git",
+        "stack": "React"
+    },
+    {
+        "img": "/assets/MP1.png",
+        "title": "Personal Portfolio",
+        "tag": "Portfolio",
+        "year": "2025",
+        "accent": "#315cfd",
+        "desc": "A sleek personal portfolio showcasing projects, skills, and experience with a clean, modern design and smooth animations.",
+        "url": "https://personal-portfolio-lemon-ten.vercel.app/",
+        "github": "https://github.com/Mukhtar-816/Personal_Portfolio.git",
+        "stack": "React"
+    },
+    {
+        "img": "/assets/MP2.png",
+        "title": "Hospital MANAGEMENT SYSTEM",
+        "tag": "Web App",
+        "year": "2025",
+        "accent": "#22c97a",
+        "desc": "A full-featured hospital management system with patient records, appointment scheduling, and an admin dashboard built with Next.js.",
+        "url": "https://hospital-managment-system-rosy.vercel.app/",
+        "github": "https://github.com/Mukhtar-816/Hospital-Management-System-Nextjs.git",
+        "stack": "Next.js"
+    },
+    {
+        "img": "/assets/MP3.png",
+        "title": "Bid&Go",
+        "tag": "Web App",
+        "year": "2025",
+        "accent": "#e63946",
+        "desc": "A real-time online bidding and auction platform where users can list items, place live bids, and track auctions as they unfold.",
+        "url": "https://mukhtar-dev.vercel.app",
+        "github": "https://github.com/Mukhtar-816",
+        "stack": "React"
+    },
+    {
+        "img": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&fit=crop",
+        "title": "FinTech Dashboard",
+        "tag": "Web App",
+        "year": "2024",
+        "accent": "#3b82f6",
+        "desc": "Real-time analytics engine and financial management dashboard engineered for institutional investors with sub-second chart rendering.",
+        "url": "https://studioxenos.com",
+        "github": "https://github.com/samirhusayn28-dev",
+        "stack": "Next.js / TypeScript"
+    },
+    {
+        "img": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=600&auto=format&fit=crop",
+        "title": "Aura Commerce",
+        "tag": "E-Commerce",
+        "year": "2024",
+        "accent": "#8b5cf6",
+        "desc": "Headless enterprise e-commerce platform with automated inventory routing, AI product search, and 99.9% uptime checkout infrastructure.",
+        "url": "https://studioxenos.com",
+        "github": "https://github.com/samirhusayn28-dev",
+        "stack": "React / Node.js"
+    }
 ]
