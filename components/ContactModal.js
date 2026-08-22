@@ -39,8 +39,8 @@ const contactModalStyles = `
     width: 100%; max-width: 680px;
     background: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 28px;
-    padding: 48px 48px 40px;
+    border-radius: 14px;
+    padding: 44px 44px 36px;
     box-sizing: border-box;
     opacity: 0;
     transform: scale(0.95) translateY(10px) translateZ(0);
@@ -57,7 +57,7 @@ const contactModalStyles = `
 
   .contact-modal-close {
     position: absolute; top: 18px; right: 20px;
-    width: 36px; height: 36px; border-radius: 50%;
+    width: 36px; height: 36px; border-radius: 8px;
     background: #f8fafc; border: 1px solid rgba(0, 0, 0, 0.06);
     color: #64748b; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
@@ -71,7 +71,7 @@ const contactModalStyles = `
   .modal-input {
     width: 100%; background: #f8fafc;
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 12px; padding: 14px 16px;
+    border-radius: 8px; padding: 14px 16px;
     font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 400;
     color: #0f172a; outline: none; box-sizing: border-box;
     transition: border-color 0.2s ease, background 0.2s ease;
@@ -93,7 +93,7 @@ const contactModalStyles = `
   .modal-submit-btn {
     font-family: 'Outfit', sans-serif; font-size: 14px;
     font-weight: 700; letter-spacing: 0.04em;
-    padding: 14px 36px; border-radius: 999px; cursor: pointer;
+    padding: 13px 32px; border-radius: 8px; cursor: pointer;
     border: none; background: #2563eb;
     color: #fff;
     transition: background 0.2s ease;

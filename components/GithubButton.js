@@ -3,7 +3,7 @@ import React, { useState, useCallback, useMemo, memo } from 'react';
 const styles = {
   btn: {
     border: 'none',
-    borderRadius: '50%',
+    borderRadius: '8px',
     width: '45px',
     height: '45px',
     display: 'flex',
@@ -19,7 +19,7 @@ const styles = {
   },
   btnHover: {
     width: '110px',
-    borderRadius: '30px',
+    borderRadius: '8px',
   },
   svgIcon: {
     transition: 'opacity 0.3s',

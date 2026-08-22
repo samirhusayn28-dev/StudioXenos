@@ -99,7 +99,7 @@ const heroStyles = `
   overflow: hidden;
   background: var(--btn-bg);
   border: 1px solid var(--btn-border);
-  border-radius: 999px;
+  border-radius: 8px;
   color: var(--btn-color);
   font-size: 0.82rem;
   font-weight: 600;
@@ -136,7 +136,7 @@ const heroStyles = `
   border: 1px solid var(--card-border);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border-radius: 14px;
+  border-radius: 10px;
   padding: 10px 14px;
   max-width: 210px;
   box-shadow: 0 8px 24px var(--card-shadow-h);
@@ -160,7 +160,7 @@ const heroStyles = `
 .robot-chip {
   font-family: 'Outfit', sans-serif;
   font-size: 10px; font-weight: 500;
-  padding: 3px 8px; border-radius: 999px;
+  padding: 3px 8px; border-radius: 6px;
   border: 1px solid var(--card-border);
   background: rgba(37, 99, 235, 0.08);
   color: #2563eb; cursor: pointer;
@@ -284,7 +284,7 @@ function Hero() {
             ([entry]) => {
                 setIsHeroVisible(entry.isIntersecting);
             },
-            { threshold: 0.01 }
+            { threshold: 0 }
         );
 
         observer.observe(el);

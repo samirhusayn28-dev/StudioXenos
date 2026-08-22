@@ -9,7 +9,7 @@ const facebookButtonStyles = `
   }
   .fb-btn {
     border: none;
-    border-radius: 30px;
+    border-radius: 8px;
     width: ${COLLAPSED_WIDTH}px;
     height: 45px;
     display: flex;

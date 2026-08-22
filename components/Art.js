@@ -1,13 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
-const img1 = '/assets/Artimg1.jpg';
-const img2 = '/assets/Artimg2.jpg';
-const img3 = '/assets/Artimg3.jpg';
-const img4 = '/assets/Artimg4.jpg';
-const img5 = '/assets/Artimg5.jpg';
-const img6 = '/assets/Artimg6.jpg';
-const img7 = '/assets/Artimg7.jpg';
-const img8 = '/assets/Artimg8.jpg';
 import SimpleGallery from './CircularGallery';
+import galleryItems from '../data/gallery.json';
 
 const artStyles = `
 /* ── artStyles (Articles / Showcase Section) ── */
@@ -30,7 +23,7 @@ const artStyles = `
   overflow: hidden; 
   background: var(--btn-bg, #2563eb); 
   border: 1px solid var(--btn-border, rgba(37, 99, 235, 0.3)); 
-  border-radius: 999px; 
+  border-radius: 8px; 
   color: var(--btn-color, #fff); 
   font-size: 0.82rem; 
   font-weight: 600; 
@@ -146,17 +139,6 @@ const artStyles = `
   .art-heading-line { font-size: 30px; }
 }
 `;
-
-const galleryItems = [
-    { image: img1, text: 'Design', description: 'Crafting visual identities that speak louder than words.' },
-    { image: img2, text: 'Branding', description: 'Building brands that leave a lasting impression.' },
-    { image: img3, text: 'Web', description: 'Designing web experiences that are fast, beautiful, and built to convert.' },
-    { image: img4, text: 'Mobile', description: 'Intuitive mobile interfaces designed for real users.' },
-    { image: img5, text: 'UI/UX', description: 'User-first design that balances aesthetics with function.' },
-    { image: img6, text: 'Motion', description: 'Bringing designs to life through animation and motion.' },
-    { image: img7, text: 'Identity', description: 'Creating cohesive visual systems that define who you are.' },
-    { image: img8, text: 'Creative', description: 'Bold ideas executed with craft and precision.' },
-];
 
 function ArtGallery() {
     const [bend, setBend] = useState(1);

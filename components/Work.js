@@ -81,7 +81,7 @@ const workStyles = `
   opacity: 0;
 }
 
-.work-section.has-animated .work-header {
+.work-section.header-animated .work-header {
   animation: sequentialFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -144,9 +144,8 @@ const workStyles = `
   will-change: stroke-dashoffset, opacity;
 }
 
-.work-section.has-animated .gradient-rope-path {
+.work-section.content-animated .gradient-rope-path {
   animation: ropeDraw 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: 0.3s;
 }
 
 .arrow-head {
@@ -154,8 +153,8 @@ const workStyles = `
   opacity: 0;
 }
 
-.work-section.has-animated .arrow-head {
-  animation: sequentialFadeIn 0.4s ease 1.2s both;
+.work-section.content-animated .arrow-head {
+  animation: sequentialFadeIn 0.4s ease 0.9s both;
 }
 
 .work-grid {
@@ -181,7 +180,7 @@ const workStyles = `
   transform: translateZ(0);
 }
 
-.work-section.has-animated .work-card {
+.work-section.content-animated .work-card {
   animation: sequentialFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -276,13 +275,13 @@ const workStyles = `
 .small-floating-card {
   background: var(--card-bg, rgba(255, 255, 255, 0.95));
   border: 1px solid var(--card-border, rgba(37, 99, 235, 0.2));
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 6px 12px;
   margin: 0 auto 8px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
   transition: transform 0.3s ease;
   will-change: transform;
   transform: translateZ(0);
@@ -326,74 +325,37 @@ const workStyles = `
 }
 `;
 
-const steps = [
-    {
-        id: '01',
-        posClass: 'card-pos-0',
-        delay: '0.15s',
-        label: 'Quotation',
-        labelColor: '#2563eb',
-        robot: robot1,
-        title: 'Request a Quote',
-        desc: 'Schedule a quick call to discuss your goals.',
-        stroke: '#2563eb',
-        iconPath: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-    },
-    {
-        id: '02',
-        posClass: 'card-pos-1',
-        delay: '0.3s',
-        label: 'Custom Plan',
-        labelColor: '#d97706',
-        robot: robot2,
-        title: 'Custom Plan',
-        desc: 'We analyze requirements and build strategy.',
-        stroke: '#f59e0b',
-        iconPath: (
-            <>
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-            </>
-        )
-    },
-    {
-        id: '03',
-        posClass: 'card-pos-2',
-        delay: '0.45s',
-        label: 'Development',
-        labelColor: '#3b82f6',
-        robot: robot1,
-        title: 'Development',
-        desc: 'Iterative building with clean code architecture.',
-        stroke: '#3b82f6',
-        iconPath: (
-            <>
-                <polyline points="16 18 22 12 16 6"></polyline>
-                <polyline points="8 6 2 12 8 18"></polyline>
-            </>
-        )
-    },
-    {
-        id: '04',
-        posClass: 'card-pos-3',
-        delay: '0.6s',
-        label: 'Launch & Grow',
-        labelColor: '#10b981',
-        robot: robot3,
-        title: 'Launch & Grow',
-        desc: 'Deploy seamlessly and scale performance.',
-        stroke: '#10b981',
-        iconPath: (
-            <>
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                <polyline points="9 12 11 14 15 10"></polyline>
-            </>
-        )
-    }
-];
+import rawSteps from '../data/howWeWork.json';
+
+const iconPaths = {
+    '01': <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>,
+    '02': (
+        <>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+        </>
+    ),
+    '03': (
+        <>
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+        </>
+    ),
+    '04': (
+        <>
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <polyline points="9 12 11 14 15 10"></polyline>
+        </>
+    ),
+};
+
+const steps = rawSteps.map((s) => ({
+    ...s,
+    iconPath: iconPaths[s.id] || null,
+}));
 
 const StepCard = memo(function StepCard({ step }) {
     return (
@@ -421,42 +383,59 @@ const StepCard = memo(function StepCard({ step }) {
 });
 
 export default function Work() {
-    const sectionRef = useRef(null);
-    const [hasAnimated, setHasAnimated] = useState(false);
+    const headerRef = useRef(null);
+    const contentRef = useRef(null);
+
+    const [headerAnimated, setHeaderAnimated] = useState(false);
+    const [contentAnimated, setContentAnimated] = useState(false);
 
     useEffect(() => {
-        const observer = new IntersectionObserver(
+        const isDesktop = window.matchMedia('(min-width: 1000px)').matches;
+
+        // Dynamic thresholds based on device view
+        const headerThreshold = isDesktop ? 0.2 : 0.5;
+        const contentThreshold = isDesktop ? 0.5 : 0.2;
+
+        const headerObserver = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
-                    setHasAnimated(true);
-
-                    if (sectionRef.current) {
-                        observer.unobserve(sectionRef.current);
-                    }
+                    setHeaderAnimated(true);
+                    if (headerRef.current) headerObserver.unobserve(headerRef.current);
                 }
             },
-            { threshold: 0.5 }
+            { threshold: headerThreshold }
         );
 
-        if (sectionRef.current) {
-            observer.observe(sectionRef.current);
-        }
+        const contentObserver = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setContentAnimated(true);
+                    if (contentRef.current) contentObserver.unobserve(contentRef.current);
+                }
+            },
+            { threshold: contentThreshold }
+        );
+
+        if (headerRef.current) headerObserver.observe(headerRef.current);
+        if (contentRef.current) contentObserver.observe(contentRef.current);
 
         return () => {
-            if (sectionRef.current) {
-                observer.unobserve(sectionRef.current);
-            }
+            headerObserver.disconnect();
+            contentObserver.disconnect();
         };
     }, []);
 
     return (
-        <section ref={sectionRef} id="how-we-work" className={`work-section ${hasAnimated ? 'has-animated' : ''}`}>
+        <section
+            id="how-we-work"
+            className={`work-section ${headerAnimated ? 'header-animated' : ''} ${contentAnimated ? 'content-animated' : ''}`}
+        >
             <style>{workStyles}</style>
 
             <div className="work-bg-grid" />
             <div className="work-glow-orb" />
 
-            <div className="work-header">
+            <div ref={headerRef} className="work-header">
                 <h2 className="work-title">
                     <span className="work-title-main">How We </span>
                     <span className="work-title-gradient">Work</span>
@@ -464,7 +443,7 @@ export default function Work() {
                 <p className="work-subtitle">Our seamless 4-step continuous journey from start to launch.</p>
             </div>
 
-            <div className="work-flow-container">
+            <div ref={contentRef} className="work-flow-container">
                 <svg className="rope-svg" viewBox="0 0 1300 620" preserveAspectRatio="none">
                     <defs>
                         <linearGradient id="ropeGradient" x1="0%" y1="0%" x2="100%" y2="100%">

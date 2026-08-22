@@ -1,0 +1,30 @@
+[
+  {
+    "num": "01",
+    "img": "/assets/Design.png",
+    "title": "Design & UX",
+    "desc": "Focusing on clarity, wireframing, and design systems. We deliver high-fidelity interactive prototypes that map out your exact solution.",
+    "tags": ["UI/UX Design", "Design Systems", "Prototyping", "Branding"]
+  },
+  {
+    "num": "02",
+    "img": "/assets/WebDev.png",
+    "title": "Web Engineering",
+    "desc": "Specializing in ultra-fast, scalable Web Applications and Next.js sites built with purposeful architecture, dynamic animations, and SEO excellence.",
+    "tags": ["Next.js / React", "Full-Stack Development", "Headless CMS", "SEO & Speed"]
+  },
+  {
+    "num": "03",
+    "img": "/assets/AppDev.png",
+    "title": "Mobile Apps",
+    "desc": "Designed for high performance. We build cross-platform iOS and Android apps with smooth 60fps native performance and offline capabilities.",
+    "tags": ["iOS & Android", "React Native / Flutter", "App Store Deployment"]
+  },
+  {
+    "num": "04",
+    "img": "/assets/Automation.png",
+    "title": "AI & Automation",
+    "desc": "Streamline operations by integrating AI workflows, custom LLM agents, and automated backends to eliminate manual tasks and scale efficiency.",
+    "tags": ["Custom AI Agents", "Workflow Automation", "API Integrations", "n8n & Zapier"]
+  }
+]

@@ -4,7 +4,9 @@ import React, { useEffect, useRef, useState } from "react";
 import manifest from './assetManifest';
 import preloadAssets from './Preloader';
 
-const MAX_WAIT_MS = 4000;
+// Hard cap: loader dismisses after this many ms regardless of asset state.
+// Kept short because we now only preload 2 images + 1 font URL.
+const MAX_WAIT_MS = 600;
 
 export default function Loader({ onComplete }) {
     const [progress, setProgress] = useState({ loaded: 0, total: 1, percent: 0 });
@@ -19,7 +21,7 @@ export default function Loader({ onComplete }) {
             if (finished || !isMounted) return;
             finished = true;
             setFadeOut(true);
-            timeoutRef.current = setTimeout(() => onComplete && onComplete(), 500);
+            timeoutRef.current = setTimeout(() => onComplete && onComplete(), 400);
         };
 
         const handleProgress = (loaded, total, detail = {}) => {
@@ -46,7 +48,7 @@ export default function Loader({ onComplete }) {
             position: "fixed", inset: 0, zIndex: 99999,
             display: "flex", flexDirection: "column",
             alignItems: "center", justifyContent: "center",
-            background: "#ffffff",
+            background: "#f0f4f9",
             opacity: fadeOut ? 0 : 1,
             transition: "opacity 0.6s ease",
             pointerEvents: fadeOut ? "none" : "all",
@@ -55,8 +57,6 @@ export default function Loader({ onComplete }) {
             backfaceVisibility: "hidden",
         }}>
             <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&display=swap');
-
     @keyframes sxPulse {
       0%, 100% { opacity: 0.2; transform: scale(1); }
       50%       { opacity: 0.4; transform: scale(1.08); }
@@ -71,7 +71,7 @@ export default function Loader({ onComplete }) {
     .sx-text-wrap {
       position: relative;
       display: inline-block;
-      font-family: 'Syne', sans-serif;
+    //   font-family: 'Syne', sans-serif;
       font-weight: 800;
       font-size: 32px;
       letter-spacing: 0.08em;
@@ -134,7 +134,7 @@ export default function Loader({ onComplete }) {
                 <span className="sx-text-base" aria-hidden="true">STUDIO XENOS</span>
                 <span
                     className="sx-text-fill"
-                    style={{ clipPath: `inset(0 ${100 - progress.percent}% 0 0)` }}
+                    style={{ clipPath: `inset(0 ${100 - progress.percent - 50}% 0 0)` }}
                     aria-hidden="true"
                 >
                     STUDIO XENOS

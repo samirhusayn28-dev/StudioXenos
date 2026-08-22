@@ -53,7 +53,7 @@ function InstagramButton({ href = '#' }) {
   const btnStyle = useMemo(
     () => ({
       ...styles.btnBase,
-      borderRadius: hovered ? '30px' : '50%',
+      borderRadius: '8px',
       width: hovered ? '110px' : '45px',
     }),
     [hovered]

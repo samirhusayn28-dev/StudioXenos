@@ -1,0 +1,44 @@
+[
+  {
+    "quote": "Working with Studio Xenos completely transformed our digital footprint. Their attention to detail is unmatched.",
+    "name": "SARAH JENKINS",
+    "role": "CTO, TechFlow Inc.",
+    "rating": 5,
+    "avatar": "SJ"
+  },
+  {
+    "quote": "The design deliverables blew our expectations out of the water. User engagement went up by 140% fast.",
+    "name": "ALEXANDER WRIGHT",
+    "role": "Product Director, Veloce",
+    "rating": 5,
+    "avatar": "AW"
+  },
+  {
+    "quote": "Their strategic marketing roadmap and execution helped us capture our target audience efficiently. Absolute pros!",
+    "name": "ELENA ROSTOVA",
+    "role": "CMO, Nexus Global",
+    "rating": 5,
+    "avatar": "ER"
+  },
+  {
+    "quote": "Scalable architecture, flawless code quality, and delivery ahead of schedule. They operate like a dream team.",
+    "name": "MARCUS VANCE",
+    "role": "Founder, Apex Studio",
+    "rating": 5,
+    "avatar": "MV"
+  },
+  {
+    "quote": "The level of creativity and technical execution they brought to our web platform was truly exceptional.",
+    "name": "SOPHIA CHEN",
+    "role": "Head of Product, Lumina",
+    "rating": 5,
+    "avatar": "SC"
+  },
+  {
+    "quote": "An incredible partner from day one. They understood our vision immediately and delivered beyond par.",
+    "name": "LIAM O’CONNOR",
+    "role": "CEO, FinPulse",
+    "rating": 5,
+    "avatar": "LO"
+  }
+]

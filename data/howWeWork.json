@@ -1,0 +1,46 @@
+[
+  {
+    "id": "01",
+    "posClass": "card-pos-0",
+    "delay": "0.15s",
+    "label": "Quotation",
+    "labelColor": "#2563eb",
+    "robot": "/assets/Robot.png",
+    "title": "Request a Quote",
+    "desc": "Schedule a quick call to discuss your goals.",
+    "stroke": "#2563eb"
+  },
+  {
+    "id": "02",
+    "posClass": "card-pos-1",
+    "delay": "0.3s",
+    "label": "Custom Plan",
+    "labelColor": "#d97706",
+    "robot": "/assets/Robot2.png",
+    "title": "Custom Plan",
+    "desc": "We analyze requirements and build strategy.",
+    "stroke": "#f59e0b"
+  },
+  {
+    "id": "03",
+    "posClass": "card-pos-2",
+    "delay": "0.45s",
+    "label": "Development",
+    "labelColor": "#3b82f6",
+    "robot": "/assets/Robot.png",
+    "title": "Development",
+    "desc": "Iterative building with clean code architecture.",
+    "stroke": "#3b82f6"
+  },
+  {
+    "id": "04",
+    "posClass": "card-pos-3",
+    "delay": "0.6s",
+    "label": "Launch & Grow",
+    "labelColor": "#10b981",
+    "robot": "/assets/Robot1.png",
+    "title": "Launch & Grow",
+    "desc": "Deploy seamlessly and scale performance.",
+    "stroke": "#10b981"
+  }
+]

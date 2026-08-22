@@ -1,16 +1,59 @@
 'use client';
 
-import React, { useState, useEffect, memo, useCallback } from 'react';
+import React, { useState, useEffect, memo, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
+import navLinks from '../data/navLinks.json';
 
-const navLinks = [
-    { label: 'Services', id: 'services' },
-    { label: 'Projects', id: 'projects' },
-    { label: 'How we work', id: 'how-we-work' },
-    { label: 'About', id: 'about' },
-    { label: 'What People Say', id: 'testimonials' },
-];
+// Inline SVG icons map for navigation links using primary colors
+const navIcons = {
+    hero: (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+    ),
+    services: (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+        </svg>
+    ),
+    projects: (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect width="7" height="7" x="3" y="3" rx="1" />
+            <rect width="7" height="7" x="14" y="3" rx="1" />
+            <rect width="7" height="7" x="14" y="14" rx="1" />
+            <rect width="7" height="7" x="3" y="14" rx="1" />
+        </svg>
+    ),
+    work: (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+        </svg>
+    ),
+    about: (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4" />
+            <path d="M12 8h.01" />
+        </svg>
+    ),
+    team: (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+    ),
+    footer: (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m22 2-7 20-4-9-9-4Z" />
+            <path d="M22 2 11 13" />
+        </svg>
+    ),
+};
 
 const navbarStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap');
@@ -23,33 +66,41 @@ const navbarStyles = `
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 20px;
+    padding-top: 16px;
     box-sizing: border-box;
     z-index: 9999;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease;
+    will-change: transform, opacity;
+  }
+
+  .hero-nav-container.nav-hidden {
+    transform: translateY(-120%);
+    opacity: 0;
+    pointer-events: none;
   }
 
   .hero-nav-inner {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 64px;
-    height: 65px;
-    padding: 0 44px 0 18px;
-    border-radius: 999px;
-    background: var(--glass-bg, rgba(255, 255, 255, 0.05));
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
-    box-shadow: 0 4px 20px var(--shadow-medium, rgba(0, 0, 0, 0.08));
-    transition: background 0.2s ease, border-color 0.2s ease;
+    gap: 24px;
+    height: 58px;
+    padding: 0 24px 0 14px;
+    border-radius: 12px;
+    background: var(--glass-bg, rgba(255, 255, 255, 0.85));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--card-border, rgba(15, 23, 42, 0.08));
+    box-shadow: 0 4px 20px var(--shadow-medium, rgba(0, 0, 0, 0.06));
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .nav-logo {
-    height: 35px;
+    height: 32px;
     width: auto;
     background: var(--btn-bg, #2563eb); 
-    padding: 5px 20px;
-    border-radius: 999px;
+    padding: 4px 16px;
+    border-radius: 8px;
     object-fit: contain;
     cursor: pointer;
   }
@@ -57,28 +108,42 @@ const navbarStyles = `
   .nav-links-desktop {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
   .nav-link {
-    color: var(--text-secondary, #94a3b8);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary, #475569);
     text-decoration: none;
     font-size: 0.78rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
+    font-weight: 600;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     padding: 6px 12px;
     font-family: 'Outfit', sans-serif;
-    border-radius: 999px;
+    border-radius: 6px;
     transition: background 0.15s ease, color 0.15s ease;
   }
 
+  .nav-link svg {
+    color: var(--btn-bg, #2563eb);
+    opacity: 0.85;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+
   .nav-link:hover {
-    color: var(--text-on-primary, #ffffff);
-    background: var(--accent-blue-overlay, rgba(37, 99, 235, 0.15));
+    color: var(--btn-bg, #2563eb);
+    background: rgba(37, 99, 235, 0.08);
+  }
+
+  .nav-link:hover svg {
+    opacity: 1;
+    transform: scale(1.1);
   }
 
   .hamburger-btn {
@@ -102,41 +167,51 @@ const navbarStyles = `
 
   .mobile-dropdown {
     margin-top: 8px;
-    border-radius: 20px;
-    background: var(--chat-window-bg, rgba(15, 23, 42, 0.9));
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
-    padding: 14px;
+    border-radius: 10px;
+    background: var(--chat-window-bg, rgba(255, 255, 255, 0.96));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--card-border, rgba(15, 23, 42, 0.08));
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+    padding: 10px;
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
 
   .mobile-nav-link {
-    color: var(--text-primary, #ffffff);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary, #0f172a);
     text-decoration: none;
     font-family: 'Outfit', sans-serif;
-    font-size: 0.85rem;
-    letter-spacing: 0.05em;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    padding: 10px 14px;
-    border-radius: 10px;
-    transition: background 0.15s ease;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .mobile-nav-link svg {
+    color: var(--btn-bg, #2563eb);
   }
 
   .mobile-nav-link:hover {
-    background: var(--accent-blue-overlay, rgba(37, 99, 235, 0.15));
+    background: rgba(37, 99, 235, 0.08);
+    color: #2563eb;
   }
 
-  .nav-desktop-group { display: flex; align-items: center; gap: 12px; }
+  .nav-desktop-group { display: flex; align-items: center; gap: 8px; }
   .nav-mobile-group  { display: none; }
 
-  @media (max-width: 900px) {
+  @media (max-width: 992px) {
     .nav-desktop-group { display: none !important; }
     .nav-mobile-group  { display: flex !important; align-items: center; gap: 10px; }
-    .hero-nav-container { padding: 12px 16px 0; }
-    .hero-nav-inner { width: 100%; justify-content: space-between; gap: 0; padding: 0 18px; height: 56px; }
+    .hero-nav-container { padding: 10px 14px 0; }
+    .hero-nav-inner { width: 100%; justify-content: space-between; gap: 0; padding: 0 14px; height: 52px; }
     .mobile-dropdown { align-self: flex-end; width: auto; min-width: 190px; max-width: 240px; }
   }
 `;
@@ -144,9 +219,39 @@ const navbarStyles = `
 function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [visible, setVisible] = useState(true);
+    const lastScrollY = useRef(0);
+    const ticking = useRef(false);
 
     useEffect(() => {
         setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (ticking.current) return;
+            ticking.current = true;
+
+            requestAnimationFrame(() => {
+                const currentScrollY = window.scrollY;
+                const heroThreshold = 100;
+
+                if (currentScrollY <= heroThreshold) {
+                    setVisible(true);
+                } else if (currentScrollY < lastScrollY.current) {
+                    setVisible(true);
+                } else if (currentScrollY > lastScrollY.current + 8) {
+                    setVisible(false);
+                    setMenuOpen(false);
+                }
+
+                lastScrollY.current = currentScrollY;
+                ticking.current = false;
+            });
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
     const scrollTo = useCallback((id) => {
@@ -160,7 +265,7 @@ function Navbar() {
     if (!mounted) return null;
 
     return createPortal(
-        <header className="hero-nav-container animate-slide-down">
+        <header className={`hero-nav-container ${visible ? '' : 'nav-hidden'}`}>
             <style>{navbarStyles}</style>
 
             <div className="hero-nav-inner">
@@ -168,9 +273,10 @@ function Navbar() {
                     src="/assets/StudioX.png"
                     alt="StudioX Logo"
                     className="nav-logo"
-                    width={140}
-                    height={30}
-                    onClick={() => scrollTo('home')}
+                    width={120}
+                    height={32}
+                    priority
+                    onClick={() => scrollTo('hero')}
                 />
 
                 <ul className="nav-links-desktop nav-desktop-group">
@@ -184,6 +290,7 @@ function Navbar() {
                                 }}
                                 className="nav-link"
                             >
+                                {navIcons[link.id]}
                                 {link.label}
                             </a>
                         </li>
@@ -224,6 +331,7 @@ function Navbar() {
                             }}
                             className="mobile-nav-link"
                         >
+                            {navIcons[link.id]}
                             {link.label}
                         </a>
                     ))}

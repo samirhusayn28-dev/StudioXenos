@@ -10,33 +10,7 @@ import InstagramButton from '../components/Instagrambutton';
 import FacebookButton from '../components/Facebookbutton';
 import LinkedInButton from '../components/Linkedinbutton';
 import { useContactModal } from './ContactModal';
-
-const faqData = [
-    {
-        question: 'What services does Studio Xenos provide?',
-        answer: 'We specialize in full-stack web development, custom UI/UX design, mobile application development, and digital marketing strategies tailored for startups and scaling enterprises.'
-    },
-    {
-        question: 'How long does a typical project take?',
-        answer: 'Project timelines vary based on scope and complexity. A standard web application or design system typically takes between 4 to 8 weeks from initial design to final launch.'
-    },
-    {
-        question: 'Do you offer ongoing maintenance and support?',
-        answer: 'Yes! We provide post-launch maintenance, security updates, feature expansions, and technical support plans to keep your platform running smoothly.'
-    },
-    {
-        question: 'How can we kick off a new project with you?',
-        answer: 'Simply click the "Contact Us" button in the footer below or send us an email. We will schedule a discovery call to discuss your goals, timeline, and budget.'
-    },
-    {
-        question: 'Which technologies do you work with?',
-        answer: 'Our stack centers on React, Next.js, and modern backend frameworks, paired with cloud infrastructure like AWS and Vercel for scalable, production-ready deployments.'
-    },
-    {
-        question: 'Can you redesign an existing website or app?',
-        answer: 'Absolutely. We audit your current product, identify friction points, and rebuild the experience with improved performance, accessibility, and a refreshed visual identity.'
-    }
-];
+import faqData from '../data/faq.json';
 
 const footerStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
@@ -115,8 +89,8 @@ const footerStyles = `
     color: #2563eb;
     background: rgba(37, 99, 235, 0.07);
     border: 1px solid rgba(37, 99, 235, 0.18);
-    border-radius: 999px;
-    padding: 6px 16px;
+    border-radius: 6px;
+    padding: 5px 14px;
     margin-bottom: 18px;
   }
 
@@ -164,9 +138,9 @@ const footerStyles = `
     position: relative;
     background: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.07);
-    border-radius: 16px;
+    border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
     display: flex;
     flex-direction: column;
@@ -358,7 +332,7 @@ const footerStyles = `
     font-weight: 700; 
     letter-spacing: 0.04em;
     padding: 13px 32px; 
-    border-radius: 999px; 
+    border-radius: 8px; 
     cursor: pointer;
     border: 1px solid rgba(37, 99, 235, 0.2);
     background: #eff6ff;

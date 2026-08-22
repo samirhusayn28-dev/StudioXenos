@@ -1,0 +1,7 @@
+[
+  { "label": "Services", "id": "services" },
+  { "label": "Projects", "id": "projects" },
+  { "label": "How we work", "id": "how-we-work" },
+  { "label": "About", "id": "about" },
+  { "label": "What People Say", "id": "testimonials" }
+]

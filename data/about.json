@@ -1,0 +1,40 @@
+{
+  "badge": "Who We Are",
+  "heading": {
+    "main": "About",
+    "gradient": "Us"
+  },
+  "paragraphs": [
+    "At Studio Xenos, we are more than just a development studio — we are digital architects, creative thinkers, and relentless problem solvers committed to building products that matter.",
+    "Our culture brings together visionary strategists, meticulous engineering leads, and UI/UX purists who transform complex challenges into intuitive, high-performance software.",
+    "Whether launching groundbreaking startups or engineering modern systems for established enterprises, we partner closely with our clients to turn vision into reality."
+  ],
+  "stats": [
+    { "number": "50+", "label": "Projects Delivered" },
+    { "number": "30+", "label": "Happy Clients" },
+    { "number": "4+", "label": "Years Experience" }
+  ],
+  "personas": [
+    {
+      "title": "The Innovators",
+      "desc": "Pushing technological boundaries with cutting-edge tech stacks."
+    },
+    {
+      "title": "Digital Architects",
+      "desc": "Designing resilient, scalable systems that grow with your business."
+    },
+    {
+      "title": "Product Builders",
+      "desc": "Crafting user-centric applications from initial concept to launch."
+    },
+    {
+      "title": "Solution Producers",
+      "desc": "Untangling complex business logic through smart software."
+    },
+    {
+      "title": "Strategic Growth Partners",
+      "desc": "Long-term alignment to turn technology into a continuous competitive edge.",
+      "featured": true
+    }
+  ]
+}

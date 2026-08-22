@@ -1,0 +1,68 @@
+[
+  {
+    "img": "/assets/PHTS.png",
+    "title": "PHTS",
+    "tag": "Web App",
+    "year": "2025",
+    "accent": "#c47a30",
+    "desc": "A full-featured web application built with modern technologies. Clean UI, smooth interactions, and a seamless user experience from end to end.",
+    "url": "https://phts.vercel.app/",
+    "github": "https://github.com/samirhusayn28-dev/PHTS.git",
+    "stack": "React"
+  },
+  {
+    "img": "/assets/MP1.png",
+    "title": "Personal Portfolio",
+    "tag": "Portfolio",
+    "year": "2025",
+    "accent": "#315cfd",
+    "desc": "A sleek personal portfolio showcasing projects, skills, and experience with a clean, modern design and smooth animations.",
+    "url": "https://personal-portfolio-lemon-ten.vercel.app/",
+    "github": "https://github.com/Mukhtar-816/Personal_Portfolio.git",
+    "stack": "React"
+  },
+  {
+    "img": "/assets/MP2.png",
+    "title": "Hospital Mgmt",
+    "tag": "Web App",
+    "year": "2025",
+    "accent": "#22c97a",
+    "desc": "A full-featured hospital management system with patient records, appointment scheduling, and an admin dashboard built with Next.js.",
+    "url": "https://hospital-managment-system-rosy.vercel.app/",
+    "github": "https://github.com/Mukhtar-816/Hospital-Management-System-Nextjs.git",
+    "stack": "Next.js"
+  },
+  {
+    "img": "/assets/MP3.png",
+    "title": "Bid&Go",
+    "tag": "Web App",
+    "year": "2025",
+    "accent": "#e63946",
+    "desc": "A real-time online bidding and auction platform where users can list items, place live bids, and track auctions as they unfold.",
+    "url": "https://mukhtar-dev.vercel.app",
+    "github": "https://github.com/Mukhtar-816",
+    "stack": "React"
+  },
+  {
+    "img": "/assets/Project01.avif",
+    "title": "FinTech Dashboard",
+    "tag": "Web App",
+    "year": "2024",
+    "accent": "#3b82f6",
+    "desc": "Real-time analytics engine and financial management dashboard engineered for institutional investors with sub-second chart rendering.",
+    "url": "https://studioxenos.com",
+    "github": "https://github.com/samirhusayn28-dev",
+    "stack": "Next.js / TypeScript"
+  },
+  {
+    "img": "/assets/Project02.avif",
+    "title": "Aura Commerce",
+    "tag": "E-Commerce",
+    "year": "2024",
+    "accent": "#8b5cf6",
+    "desc": "Headless enterprise e-commerce platform with automated inventory routing, AI product search, and 99.9% uptime checkout infrastructure.",
+    "url": "https://studioxenos.com",
+    "github": "https://github.com/samirhusayn28-dev",
+    "stack": "React / Node.js"
+  }
+]

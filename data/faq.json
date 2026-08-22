@@ -1,0 +1,26 @@
+[
+  {
+    "question": "What services does Studio Xenos provide?",
+    "answer": "We specialize in full-stack web development, custom UI/UX design, mobile application development, and digital marketing strategies tailored for startups and scaling enterprises."
+  },
+  {
+    "question": "How long does a typical project take?",
+    "answer": "Project timelines vary based on scope and complexity. A standard web application or design system typically takes between 4 to 8 weeks from initial design to final launch."
+  },
+  {
+    "question": "Do you offer ongoing maintenance and support?",
+    "answer": "Yes! We provide post-launch maintenance, security updates, feature expansions, and technical support plans to keep your platform running smoothly."
+  },
+  {
+    "question": "How can we kick off a new project with you?",
+    "answer": "Simply click the \"Contact Us\" button in the footer below or send us an email. We will schedule a discovery call to discuss your goals, timeline, and budget."
+  },
+  {
+    "question": "Which technologies do you work with?",
+    "answer": "Our stack centers on React, Next.js, and modern backend frameworks, paired with cloud infrastructure like AWS and Vercel for scalable, production-ready deployments."
+  },
+  {
+    "question": "Can you redesign an existing website or app?",
+    "answer": "Absolutely. We audit your current product, identify friction points, and rebuild the experience with improved performance, accessibility, and a refreshed visual identity."
+  }
+]

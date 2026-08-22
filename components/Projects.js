@@ -2,58 +2,7 @@
 
 import React, { useState, useMemo, memo } from 'react';
 import Image from 'next/image';
-
-const phtsImg = '/assets/PHTS.png';
-const mp1Img = '/assets/MP1.png';
-const mp2Img = '/assets/MP2.png';
-const mp3Img = '/assets/MP3.png';
-
-const projects = [
-    {
-        img: phtsImg,
-        title: 'PHTS',
-        tag: 'Web App',
-        year: '2025',
-        accent: '#c47a30',
-        desc: 'A full-featured web application built with modern technologies. Clean UI, smooth interactions, and a seamless user experience from end to end.',
-        url: 'https://phts.vercel.app/',
-        github: 'https://github.com/samirhusayn28-dev/PHTS.git',
-        stack: 'React',
-    },
-    {
-        img: mp1Img,
-        title: 'Personal Portfolio',
-        tag: 'Portfolio',
-        year: '2025',
-        accent: '#315cfd',
-        desc: 'A sleek personal portfolio showcasing projects, skills, and experience with a clean, modern design and smooth animations.',
-        url: 'https://personal-portfolio-lemon-ten.vercel.app/',
-        github: 'https://github.com/Mukhtar-816/Personal_Portfolio.git',
-        stack: 'React',
-    },
-    {
-        img: mp2Img,
-        title: 'Hospital Mgmt',
-        tag: 'Web App',
-        year: '2025',
-        accent: '#22c97a',
-        desc: 'A full-featured hospital management system with patient records, appointment scheduling, and an admin dashboard built with Next.js.',
-        url: 'https://hospital-managment-system-rosy.vercel.app/',
-        github: 'https://github.com/Mukhtar-816/Hospital-Management-System-Nextjs.git',
-        stack: 'Next.js',
-    },
-    {
-        img: mp3Img,
-        title: 'Bid&Go',
-        tag: 'Web App',
-        year: '2025',
-        accent: '#e63946',
-        desc: 'A real-time online bidding and auction platform where users can list items, place live bids, and track auctions as they unfold.',
-        url: 'https://mukhtar-dev.vercel.app',
-        github: '#',
-        stack: 'React',
-    },
-];
+import projects from '../data/projects.json';
 
 const categories = ['All', ...Array.from(new Set(projects.map((p) => p.tag)))];
 
@@ -108,7 +57,7 @@ const css = `
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 24px;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
 }
 
 .pj-heading-block {
@@ -121,15 +70,15 @@ const css = `
   gap: 7px;
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 999px;
-  padding: 6px 16px 6px 12px;
-  margin-bottom: 16px;
-  font-size: 11.5px;
+  border-radius: 6px;
+  padding: 5px 14px 5px 10px;
+  margin-bottom: 14px;
+  font-size: 11px;
   font-weight: 700;
   color: #2563eb;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
 .pj-pill-dot {
@@ -156,24 +105,24 @@ const css = `
 .pj-controls {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .pj-filters {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .pj-filter-btn {
   font-family: 'Outfit', sans-serif;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  padding: 9px 18px;
-  border-radius: 999px;
+  padding: 8px 16px;
+  border-radius: 8px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: #ffffff;
   color: #475569;
@@ -191,7 +140,7 @@ const css = `
   background: #2563eb;
   border-color: #2563eb;
   color: #ffffff;
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
 }
 
 .pj-sort-wrap {
@@ -203,10 +152,10 @@ const css = `
   align-items: center;
   gap: 8px;
   font-family: 'Outfit', sans-serif;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 9px 16px;
-  border-radius: 999px;
+  padding: 8px 14px;
+  border-radius: 8px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: #ffffff;
   color: #0f172a;
@@ -224,10 +173,10 @@ const css = `
   right: 0;
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 14px;
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+  border-radius: 10px;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
   padding: 6px;
-  min-width: 150px;
+  min-width: 140px;
   z-index: 20;
 }
 
@@ -235,11 +184,11 @@ const css = `
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   color: #475569;
-  padding: 9px 12px;
-  border-radius: 9px;
+  padding: 8px 12px;
+  border-radius: 6px;
   cursor: pointer;
   transition: background 0.15s ease;
 }
@@ -249,45 +198,39 @@ const css = `
 .pj-sort-option.active { color: #2563eb; font-weight: 700; }
 
 .pj-count {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   color: #94a3b8;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 
 .pj-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 28px;
+  gap: 24px;
 }
 
 .pj-card {
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 22px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.03);
   display: flex;
   flex-direction: column;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
-  animation: pjFadeIn 0.4s ease both;
-}
-
-@keyframes pjFadeIn {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .pj-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   border-color: rgba(37, 99, 235, 0.25);
-  box-shadow: 0 24px 48px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.08);
 }
 
 .pj-card-img-wrap {
   position: relative;
   width: 100%;
-  height: 240px;
+  height: 230px;
   overflow: hidden;
 }
 
@@ -297,45 +240,45 @@ const css = `
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.pj-card-img-wrap:hover .pj-card-img { transform: scale(1.05); }
+.pj-card-img-wrap:hover .pj-card-img { transform: scale(1.04); }
 
 .pj-card-img-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, transparent 40%, rgba(0,0,0,0.35) 100%);
+  background: linear-gradient(180deg, rgba(0,0,0,0.04) 0%, transparent 40%, rgba(0,0,0,0.3) 100%);
   pointer-events: none;
 }
 
 .pj-card-bar {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 4px;
+  height: 3px;
 }
 
 .pj-card-tag {
   position: absolute;
-  top: 14px;
-  left: 14px;
-  font-size: 10.5px;
+  top: 12px;
+  left: 12px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #ffffff;
-  background: rgba(15, 23, 42, 0.55);
-  padding: 5px 12px;
-  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.65);
+  padding: 4px 10px;
+  border-radius: 6px;
   backdrop-filter: blur(6px);
 }
 
 .pj-card-body {
-  padding: 24px 24px 22px;
+  padding: 22px 22px 20px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
 .pj-card-title {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 800;
   text-transform: uppercase;
   color: #0f172a;
@@ -344,19 +287,19 @@ const css = `
 }
 
 .pj-card-meta {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 500;
   color: #94a3b8;
   letter-spacing: 0.04em;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .pj-card-desc {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 300;
   color: #64748b;
   line-height: 1.6;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   flex-grow: 1;
 }
 
@@ -368,10 +311,10 @@ const css = `
 
 .pj-btn-visit {
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
-  padding: 10px 20px;
-  border-radius: 999px;
+  padding: 8px 18px;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
   color: #ffffff;
@@ -382,10 +325,10 @@ const css = `
 
 .pj-btn-gh {
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 500;
-  padding: 9px 16px;
-  border-radius: 999px;
+  padding: 8px 14px;
+  border-radius: 8px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   background: transparent;
   color: #0f172a;
@@ -398,6 +341,40 @@ const css = `
 }
 
 .pj-btn-gh:hover { background: rgba(37, 99, 235, 0.06); transform: translateY(-1px); }
+
+/* ── See More / Show Less CTA Button ── */
+.pj-see-more-wrap {
+  margin-top: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pj-see-more-btn {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 12px 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  background: #ffffff;
+  color: #2563eb;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
+  transition: all 0.2s ease;
+}
+
+.pj-see-more-btn:hover {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.2);
+}
 
 .pj-empty {
   text-align: center;
@@ -414,6 +391,7 @@ const css = `
 @media (max-width: 500px) {
   .pj-section { padding: 56px 16px; }
   .pj-controls { width: 100%; justify-content: space-between; }
+  .pj-see-more-btn { width: 100%; justify-content: center; }
 }
 `;
 
@@ -421,6 +399,7 @@ function Projects() {
     const [filter, setFilter] = useState('All');
     const [sortBy, setSortBy] = useState('newest');
     const [sortOpen, setSortOpen] = useState(false);
+    const [showAll, setShowAll] = useState(false);
 
     const visibleProjects = useMemo(() => {
         let list = filter === 'All' ? [...projects] : projects.filter((p) => p.tag === filter);
@@ -434,7 +413,24 @@ function Projects() {
         return list;
     }, [filter, sortBy]);
 
+    const displayedProjects = useMemo(() => {
+        if (showAll) return visibleProjects;
+        return visibleProjects.slice(0, 4);
+    }, [visibleProjects, showAll]);
+
     const activeSortLabel = sortOptions.find((s) => s.id === sortBy)?.label;
+    const hasMore = visibleProjects.length > 4;
+
+    const handleFilterChange = (cat) => {
+        setFilter(cat);
+        setShowAll(false);
+    };
+
+    const handleSortChange = (optId) => {
+        setSortBy(optId);
+        setSortOpen(false);
+        setShowAll(false);
+    };
 
     return (
         <section id="projects" className="pj-section">
@@ -442,7 +438,7 @@ function Projects() {
 
             <div className="pj-inner">
                 <div className="pj-header">
-                    <div className="pj-heading-block">
+                    <div className="pj-heading-block sx-anim sx-fade-in" data-threshold="0.2">
                         <span className="pj-pill-label">
                             <span className="pj-pill-dot" />
                             Selected Work
@@ -459,7 +455,7 @@ function Projects() {
                                 <button
                                     key={cat}
                                     className={`pj-filter-btn ${filter === cat ? 'active' : ''}`}
-                                    onClick={() => setFilter(cat)}
+                                    onClick={() => handleFilterChange(cat)}
                                 >
                                     {cat}
                                 </button>
@@ -478,10 +474,7 @@ function Projects() {
                                         <div
                                             key={opt.id}
                                             className={`pj-sort-option ${sortBy === opt.id ? 'active' : ''}`}
-                                            onClick={() => {
-                                                setSortBy(opt.id);
-                                                setSortOpen(false);
-                                            }}
+                                            onClick={() => handleSortChange(opt.id)}
                                         >
                                             {opt.label}
                                         </div>
@@ -492,50 +485,70 @@ function Projects() {
                     </div>
                 </div>
 
-                <div className="pj-count">
-                    {visibleProjects.length} project{visibleProjects.length !== 1 ? 's' : ''}
+                <div className="pj-count" data-threshold="0.2">
+                    Showing {displayedProjects.length} of {visibleProjects.length} project{visibleProjects.length !== 1 ? 's' : ''}
                 </div>
 
-                {visibleProjects.length === 0 ? (
+                {displayedProjects.length === 0 ? (
                     <div className="pj-empty">No projects match this filter.</div>
                 ) : (
-                    <div className="pj-grid">
-                        {visibleProjects.map((p, i) => (
-                            <div className="pj-card" key={p.title} style={{ animationDelay: `${i * 0.06}s` }}>
-                                <div className="pj-card-img-wrap">
-                                    <Image
-                                        src={p.img}
-                                        alt={p.title}
-                                        fill
-                                        sizes="(max-width: 900px) 100vw, 50vw"
-                                        className="pj-card-img"
-                                    />
-                                    <div className="pj-card-img-overlay" />
-                                    <span className="pj-card-tag">{p.tag}</span>
-                                    <div className="pj-card-bar" style={{ background: p.accent }} />
-                                </div>
+                    <>
+                        {/* Grid container wrapper animation with 0.2 threshold */}
+                        <div className="pj-grid sx-anim sx-fade-in" data-threshold="0.2">
+                            {displayedProjects.map((p) => (
+                                <div key={p.title}>
+                                    <div className="pj-card">
+                                        <div className="pj-card-img-wrap">
+                                            <Image
+                                                src={p.img}
+                                                alt={p.title}
+                                                fill
+                                                sizes="(max-width: 900px) 100vw, 50vw"
+                                                className="pj-card-img"
+                                            />
+                                            <div className="pj-card-img-overlay" />
+                                            <span className="pj-card-tag">{p.tag}</span>
+                                            <div className="pj-card-bar" style={{ background: p.accent }} />
+                                        </div>
 
-                                <div className="pj-card-body">
-                                    <h3 className="pj-card-title">{p.title}</h3>
-                                    <div className="pj-card-meta">{p.stack} · {p.year}</div>
-                                    <p className="pj-card-desc">{p.desc}</p>
+                                        <div className="pj-card-body">
+                                            <h3 className="pj-card-title">{p.title}</h3>
+                                            <div className="pj-card-meta">{p.stack} · {p.year}</div>
+                                            <p className="pj-card-desc">{p.desc}</p>
 
-                                    <div className="pj-card-btns">
-                                        <button
-                                            className="pj-btn-visit"
-                                            style={{ background: p.accent }}
-                                            onClick={() => window.open(p.url, '_blank')}
-                                        >
-                                            Visit Site ↗
-                                        </button>
-                                        <a className="pj-btn-gh" href={p.github} target="_blank" rel="noreferrer">
-                                            <GithubIcon /> Source
-                                        </a>
+                                            <div className="pj-card-btns">
+                                                <button
+                                                    className="pj-btn-visit"
+                                                    style={{ background: p.accent }}
+                                                    onClick={() => window.open(p.url, '_blank')}
+                                                >
+                                                    Visit Site ↗
+                                                </button>
+                                                <a className="pj-btn-gh" href={p.github} target="_blank" rel="noreferrer">
+                                                    <GithubIcon /> Source
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                            ))}
+                        </div>
+
+                        {hasMore && (
+                            <div className="pj-see-more-wrap">
+                                <button
+                                    className="pj-see-more-btn"
+                                    onClick={() => setShowAll((prev) => !prev)}
+                                >
+                                    {showAll ? (
+                                        <>Show Less ↑</>
+                                    ) : (
+                                        <>See More ({visibleProjects.length - 4} more projects) ↓</>
+                                    )}
+                                </button>
                             </div>
-                        ))}
-                    </div>
+                        )}
+                    </>
                 )}
             </div>
         </section>

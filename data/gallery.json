@@ -1,0 +1,10 @@
+[
+  { "image": "/assets/Artimg1.jpg", "text": "Design", "description": "Crafting visual identities that speak louder than words." },
+  { "image": "/assets/Artimg2.jpg", "text": "Branding", "description": "Building brands that leave a lasting impression." },
+  { "image": "/assets/Artimg3.jpg", "text": "Web", "description": "Designing web experiences that are fast, beautiful, and built to convert." },
+  { "image": "/assets/Artimg4.jpg", "text": "Mobile", "description": "Intuitive mobile interfaces designed for real users." },
+  { "image": "/assets/Artimg5.jpg", "text": "UI/UX", "description": "User-first design that balances aesthetics with function." },
+  { "image": "/assets/Artimg6.jpg", "text": "Motion", "description": "Bringing designs to life through animation and motion." },
+  { "image": "/assets/Artimg7.jpg", "text": "Identity", "description": "Creating cohesive visual systems that define who you are." },
+  { "image": "/assets/Artimg8.jpg", "text": "Creative", "description": "Bold ideas executed with craft and precision." }
+]

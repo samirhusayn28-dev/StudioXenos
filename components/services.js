@@ -3,42 +3,7 @@
 // src/components/Services.jsx
 import React, { memo } from 'react';
 import Image from 'next/image';
-
-const designImg = '/assets/Design.png';
-const webDevImg = '/assets/WebDev.png';
-const appDevImg = '/assets/AppDev.png';
-const autoImg = '/assets/Automation.png';
-
-const services = [
-    {
-        num: '01',
-        img: designImg,
-        title: 'Design & UX',
-        desc: 'Focusing on clarity, wireframing, and design systems. We deliver high-fidelity interactive prototypes that map out your exact solution.',
-        tags: ['UI/UX Design', 'Design Systems', 'Prototyping', 'Branding'],
-    },
-    {
-        num: '02',
-        img: webDevImg,
-        title: 'Web Engineering',
-        desc: 'Specializing in ultra-fast, scalable Web Applications and Next.js sites built with purposeful architecture, dynamic animations, and SEO excellence.',
-        tags: ['Next.js / React', 'Full-Stack Development', 'Headless CMS', 'SEO & Speed'],
-    },
-    {
-        num: '03',
-        img: appDevImg,
-        title: 'Mobile Apps',
-        desc: 'Designed for high performance. We build cross-platform iOS and Android apps with smooth 60fps native performance and offline capabilities.',
-        tags: ['iOS & Android', 'React Native / Flutter', 'App Store Deployment'],
-    },
-    {
-        num: '04',
-        img: autoImg,
-        title: 'AI & Automation',
-        desc: 'Streamline operations by integrating AI workflows, custom LLM agents, and automated backends to eliminate manual tasks and scale efficiency.',
-        tags: ['Custom AI Agents', 'Workflow Automation', 'API Integrations', 'n8n & Zapier'],
-    },
-];
+import services from '../data/services.json';
 
 const servicesStyles = `
  /* ── servicesStyles ── */
@@ -117,12 +82,11 @@ const servicesStyles = `
 
 .srv-card {
   position: relative;
-  /* Backdrop filter removed completely for instant rendering speed */
   background: #ffffff;
-  border-radius: 20px;
-  padding: 28px 22px;
+  border-radius: 12px;
+  padding: 24px 20px;
   border: 1px solid var(--card-border);
-  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden;
   display: flex;
@@ -133,17 +97,17 @@ const servicesStyles = `
 }
 
 .srv-card:hover {
-  transform: translate3d(0, -6px, 0);
+  transform: translate3d(0, -5px, 0);
   border-color: rgba(37, 99, 235, 0.3);
-  box-shadow: 0 16px 30px rgba(37, 99, 235, 0.08), 0 6px 12px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
 }
 
 .srv-card-num {
   position: absolute;
-  top: 10px;
-  right: 18px;
+  top: 8px;
+  right: 14px;
   font-family: 'Outfit', sans-serif;
-  font-size: 4.5rem;
+  font-size: 4rem;
   font-weight: 900;
   color: var(--text-muted);
   opacity: 0.15;
@@ -159,32 +123,32 @@ const servicesStyles = `
 
 .srv-card-icon {
   background: var(--card-bg);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
   border: 1px solid var(--card-border);
   border-radius: 8px;
   padding: 6px;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   position: relative;
   z-index: 2;
 }
 
 .srv-card-heading {
   font-family: 'Outfit', sans-serif;
-  font-size: 1.7rem;
+  font-size: 1.55rem;
   font-weight: 900;
   text-transform: uppercase;
   color: var(--text-primary);
-  letter-spacing: -0.05rem;
+  letter-spacing: -0.04rem;
   margin: 0 0 8px 0;
   position: relative;
   z-index: 2;
 }
 
 .srv-card-desc {
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   line-height: 1.5;
   color: var(--text-sub);
   font-weight: 400;
@@ -220,12 +184,12 @@ const servicesStyles = `
   overflow: hidden;
   background: var(--btn-bg);
   border: 1px solid var(--btn-border);
-  border-radius: 999px;
+  border-radius: 8px;
   color: var(--btn-color);
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.05em;
-  padding: 0 32px;
+  padding: 0 30px;
   height: 44px;
   min-width: 140px;
   cursor: pointer;
@@ -235,14 +199,14 @@ const servicesStyles = `
   justify-content: center;
   will-change: transform;
   transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
   z-index: 1;
 }
 
 .srv-book-btn:hover {
   transform: translate3d(0, -2px, 0);
   background: #1d4ed8;
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.28);
 }
 
 .srv-book-btn .txt-default,
@@ -301,7 +265,7 @@ const servicesStyles = `
 
   .srv-card {
     padding: 16px 14px;
-    border-radius: 14px;
+    border-radius: 10px;
   }
 
   .srv-card-top-row {
@@ -320,13 +284,13 @@ const servicesStyles = `
   }
 
   .srv-card-heading {
-    font-size: 1.4rem;
+    font-size: 1.35rem;
     margin-bottom: 0;
     line-height: 1.1;
   }
 
   .srv-card-desc {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     line-height: 1.35;
     margin-bottom: 10px;
   }
@@ -355,7 +319,7 @@ const servicesStyles = `
   }
 
   .srv-card-heading {
-    font-size: 1.5rem;
+    font-size: 1.45rem;
   }
   .srv-card-num {
     display: none;
@@ -370,7 +334,7 @@ const servicesStyles = `
 
   .srv-card {
     padding: 16px 14px;
-    border-radius: 14px;
+    border-radius: 10px;
   }
 
   .srv-card-top-row {
@@ -390,7 +354,7 @@ const servicesStyles = `
   }
 
   .srv-card-desc {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     line-height: 1.35;
     margin-bottom: 10px;
   }
@@ -412,41 +376,43 @@ function Services() {
         <section id="services" className="srv-section">
             <style>{servicesStyles}</style>
 
-            <div className="srv-header">
+            <div className="srv-header sx-anim sx-fade-down">
                 <h2 className="srv-header-title">What We Deliver</h2>
                 <p className="srv-subtitle">End-to-End digital engineering and design crafted to scale modern businesses.</p>
             </div>
 
-            <div className="srv-grid">
+            <div className="srv-grid sx-stagger">
                 {services.map((s, i) => (
-                    <div key={i} className="srv-card">
-                        <div>
-                            <span className="srv-card-num">{s.num}</span>
+                    <div key={i} className="sx-anim sx-fade-up" style={{ display: 'flex' }}>
+                        <div className="srv-card">
+                            <div>
+                                <span className="srv-card-num">{s.num}</span>
 
-                            {/* Icon & Heading Wrapper */}
-                            <div className="srv-card-top-row">
-                                <Image
-                                    src={s.img}
-                                    alt={s.title}
-                                    className="srv-card-icon"
-                                    width={44}
-                                    height={44}
-                                    loading="lazy"
-                                    onError={(e) => {
-                                        e.currentTarget.src = webDevImg;
-                                    }}
-                                />
-                                <h3 className="srv-card-heading">{s.title}</h3>
+                                {/* Icon & Heading Wrapper */}
+                                <div className="srv-card-top-row">
+                                    <Image
+                                        src={s.img}
+                                        alt={s.title}
+                                        className="srv-card-icon"
+                                        width={42}
+                                        height={42}
+                                        loading="lazy"
+                                        onError={(e) => {
+                                            e.currentTarget.src = '/assets/WebDev.png';
+                                        }}
+                                    />
+                                    <h3 className="srv-card-heading">{s.title}</h3>
+                                </div>
+
+                                <p className="srv-card-desc">{s.desc}</p>
                             </div>
 
-                            <p className="srv-card-desc">{s.desc}</p>
-                        </div>
-
-                        {/* Feature Tags */}
-                        <div className="srv-tags-wrapper">
-                            {s.tags.map((tag, idx) => (
-                                <span key={idx} className="srv-tag">{tag}</span>
-                            ))}
+                            {/* Feature Tags */}
+                            <div className="srv-tags-wrapper">
+                                {s.tags.map((tag, idx) => (
+                                    <span key={idx} className="srv-tag">{tag}</span>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 ))}
