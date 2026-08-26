@@ -6,12 +6,11 @@ export default function Loader({ onComplete }) {
     const [fadeOut, setFadeOut] = useState(false);
 
     useEffect(() => {
-        // Snappy, lightweight timer: loads instantly and finishes in 350ms
         const timer = setTimeout(() => {
             setFadeOut(true);
             const finishTimer = setTimeout(() => {
                 if (onComplete) onComplete();
-            }, 400); // Matches the fade-out CSS transition duration
+            }, 400);
             return () => clearTimeout(finishTimer);
         }, 350);
 
@@ -20,14 +19,19 @@ export default function Loader({ onComplete }) {
 
     return (
         <div style={{
-            position: "fixed", inset: 0, zIndex: 99999,
-            display: "flex", flexDirection: "column",
-            alignItems: "center", justifyContent: "center",
+            position: "fixed",
+            inset: 0,
+            zIndex: 99999,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
             background: "#f0f4f9",
             opacity: fadeOut ? 0 : 1,
             transition: "opacity 0.4s ease",
             pointerEvents: fadeOut ? "none" : "all",
-            contain: "layout paint style",
+            willChange: "opacity",
+            contain: "strict",
         }}>
             <style>{`
                 @keyframes sxShimmer {
@@ -40,7 +44,6 @@ export default function Loader({ onComplete }) {
                   font-size: 32px;
                   letter-spacing: 0.08em;
                   text-align: center;
-                  /* Gradient that creates the light beam sweeping left to right */
                   background: linear-gradient(90deg, #1e3a8a 0%, #1e3a8a 35%, #93c5fd 50%, #1e3a8a 65%, #1e3a8a 100%);
                   background-size: 200% auto;
                   color: transparent;
@@ -54,7 +57,6 @@ export default function Loader({ onComplete }) {
                 }
             `}</style>
 
-            {/* Sweeping left-to-right text animation */}
             <div className="sx-loader-logo">STUDIO XENOS</div>
         </div>
     );
