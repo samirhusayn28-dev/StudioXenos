@@ -25,6 +25,7 @@
 const images = [
     '/assets/X Logo.png',
     '/assets/Shadow.png',
+    '/robot-optimized.glb',
 ];
 
 const fetchables = [];

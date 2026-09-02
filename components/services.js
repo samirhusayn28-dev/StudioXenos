@@ -9,15 +9,15 @@ const servicesStyles = `
 .srv-section {
   position: relative;
   width: 100%;
-  gap: 50px;
+  gap: 40px;
   min-height: 100vh;
-  padding: 40px 5%;
+  padding: 140px 5% 100px 5%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
   font-family: var(--font-outfit), sans-serif;
   background-color: transparent;
 }
@@ -31,83 +31,93 @@ const servicesStyles = `
   transform: translate3d(-50%, -50%, 0);
   width: 80vw;
   height: 50vh;
-  background: radial-gradient(ellipse, rgba(37, 99, 235, 0.06) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
   will-change: transform;
 }
 
 /* ── Header Titles ── */
+/* ── Header Titles ── */
 .srv-header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px; /* Increased slightly to give the stack room */
   position: relative;
-  z-index: 1;
+  z-index: 50; /* Forced high to stay above the 3D cards */
   max-width: 600px;
 }
 
 .srv-header-title {
   font-family: var(--font-outfit), sans-serif;
-  font-size: clamp(36px, 5.5vw, 50px);
+  font-size: clamp(36px, 5.5vw, 52px);
   font-weight: 900;
   text-transform: uppercase;
-  color: var(--text-primary);
-  line-height: 1;
+  color: #ffffff;
+  line-height: 1.1;
   letter-spacing: 0.02em;
   margin: 0 0 8px 0;
 }
 
 .srv-subtitle {
   font-size: clamp(0.9rem, 1.2vw, 1.1rem);
-  color: var(--text-sub);
-  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 6px;
   font-weight: 400;
 }
 
-/* ── Cards Grid (4 Columns Desktop) ── */
+/* ── Cards Grid (3D Perspective Container) ── */
 .srv-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   width: 100%;
   max-width: 1320px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   position: relative;
   z-index: 1;
+  perspective: 1200px; /* Enables true 3D spatial transforms */
+}
+
+.srv-card-wrapper {
+  display: flex;
+  width: 100%;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  /* Disable CSS transitions here so JS scroll loop has full, smooth control without conflict */
+  transition: none !important; 
 }
 
 .srv-card {
   position: relative;
+  width: 100%;
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 24px 20px;
-  border: 1px solid var(--card-border);
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  will-change: transform;
-  transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
+  transform: translateZ(0); /* Force GPU layer instantiation */
 }
 
 .srv-card:hover {
-  transform: translate3d(0, -5px, 0);
-  border-color: rgba(37, 99, 235, 0.3);
-  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transform: translate3d(0, -6px, 0) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
 }
 
 .srv-card-num {
   position: absolute;
-  top: 8px;
-  right: 14px;
+  top: 10px;
+  right: 16px;
   font-family: var(--font-outfit), sans-serif;
-  font-size: 4rem;
+  font-size: 3.8rem;
   font-weight: 900;
-  color: var(--text-muted);
-  opacity: 0.15;
+  color: #2972EB;
+  opacity: 0.1;
   pointer-events: none;
   line-height: 1;
 }
@@ -119,10 +129,10 @@ const servicesStyles = `
 }
 
 .srv-card-icon {
-  background: var(--card-bg);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
-  border: 1px solid var(--card-border);
-  border-radius: 8px;
+  background: #f8fafc;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
   padding: 6px;
   width: 42px;
   height: 42px;
@@ -134,20 +144,20 @@ const servicesStyles = `
 
 .srv-card-heading {
   font-family: var(--font-outfit), sans-serif;
-  font-size: 1.55rem;
+  font-size: 1.45rem;
   font-weight: 900;
   text-transform: uppercase;
-  color: var(--text-primary);
-  letter-spacing: -0.04rem;
+  color: #0F172A;
+  letter-spacing: -0.03em;
   margin: 0 0 8px 0;
   position: relative;
   z-index: 2;
 }
 
 .srv-card-desc {
-  font-size: 0.86rem;
+  font-size: 0.85rem;
   line-height: 1.5;
-  color: var(--text-sub);
+  color: #475569;
   font-weight: 400;
   margin: 0 0 16px 0;
   position: relative;
@@ -169,9 +179,9 @@ const servicesStyles = `
   font-weight: 500;
   padding: 4px 8px;
   border-radius: 6px;
-  background: rgba(37, 99, 235, 0.06);
-  color: #2563eb;
-  border: 1px solid var(--card-border);
+  background: rgba(41, 114, 235, 0.08);
+  color: #2972EB;
+  border: 1px solid rgba(41, 114, 235, 0.15);
 }
 
 /* ── Sliding CTA Button ── */
@@ -179,16 +189,16 @@ const servicesStyles = `
   font-family: var(--font-poppins), sans-serif;
   position: relative;
   overflow: hidden;
-  background: var(--btn-bg);
-  border: 1px solid var(--btn-border);
-  border-radius: 8px;
-  color: var(--btn-color);
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+  color: #2972EB;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.05em;
-  padding: 0 30px;
-  height: 44px;
-  min-width: 140px;
+  padding: 0 32px;
+  height: 46px;
+  min-width: 150px;
   cursor: pointer;
   white-space: nowrap;
   display: inline-flex;
@@ -196,14 +206,14 @@ const servicesStyles = `
   justify-content: center;
   will-change: transform;
   transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
   z-index: 1;
 }
 
 .srv-book-btn:hover {
   transform: translate3d(0, -2px, 0);
-  background-color: #1d4ed8;
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.28);
+  background-color: #f8fafc;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .srv-book-btn .txt-default,
@@ -217,7 +227,7 @@ const servicesStyles = `
   position: absolute;
   transform: translate3d(0, 100%, 0);
   opacity: 0;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.1em;
 }
 
@@ -236,124 +246,61 @@ const servicesStyles = `
   .srv-section {
     height: auto;
     min-height: auto;
-    padding: 50px 20px;
+    padding: 120px 20px 50px 20px;
     overflow: visible;
     justify-content: flex-start;
   }
 
   .srv-grid {
     grid-template-columns: repeat(2, 1fr);
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     gap: 12px;
+    perspective: none;
+  }
+
+  .srv-card-wrapper {
+    transform: none !important;
   }
 
   .srv-card {
     padding: 16px 14px;
-    border-radius: 10px;
-  }
-
-  .srv-card-top-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-
-  .srv-card-icon {
-    width: 32px;
-    height: 32px;
-    padding: 4px;
-    margin-bottom: 0;
-    flex-shrink: 0;
-  }
-
-  .srv-card-heading {
-    font-size: 1.35rem;
-    margin-bottom: 0;
-    line-height: 1.1;
-  }
-
-  .srv-card-desc {
-    font-size: 0.88rem;
-    line-height: 1.35;
-    margin-bottom: 10px;
-  }
-
-  .srv-card-num {
-    font-size: 2.2rem;
-    top: 6px;
-    right: 10px;
-  }
-
-  .srv-tag {
-    font-size: 0.7rem;
-    padding: 2px 6px;
-  }
-
-  .srv-book-btn {
-    min-height: 40px;
-    display: inline-flex;
+    border-radius: 12px;
   }
 }
 
 @media (max-width: 600px) {
   .srv-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 14px;
   }
 
-  .srv-card-heading {
-    font-size: 1.45rem;
-  }
   .srv-card-num {
     display: none;
   }
-  .srv-section {
-    height: auto;
-    min-height: auto;
-    padding: 50px 20px;
-    overflow: visible;
-    justify-content: flex-start;
-  }
-
-  .srv-card {
-    padding: 16px 14px;
-    border-radius: 10px;
-  }
-
-  .srv-card-top-row {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-
-  .srv-card-icon {
-    width: 32px;
-    height: 32px;
-    padding: 4px;
-    margin-bottom: 0;
-    flex-shrink: 0;
-  }
-
-  .srv-card-desc {
-    font-size: 0.88rem;
-    line-height: 1.35;
-    margin-bottom: 10px;
-  }
-
-  .srv-tag {
-    font-size: 0.7rem;
-    padding: 2px 6px;
-  }
-
-  .srv-book-btn {
-    min-height: 40px;
-    display: inline-flex;
-  }
 }
 `;
+
+function get3DCardStyle(index, total, progress) {
+    // Apply an easing curve (power 0.7) so the progress spreads out over a longer scroll window
+    const easedProgress = Math.pow(Math.max(0, Math.min(1, progress)), 0.7);
+    const factor = 1 - easedProgress; // 1 at start (tight stack), 0 at end (flat grid)
+
+    const centerOffset = index - (total - 1) / 2;
+
+    // Tighter stack values (reduced offsets bring cards closer together)
+    const translateX = centerOffset * -35 * factor; // Reduced from -120 to -35 for a tight horizontal stack
+    const translateY = (index * 12 + factor * 30) * factor; // Reduced vertical gap from 25 to 12
+    const translateZ = -index * 40 * factor; // Reduced depth gap from -100 to -40
+    const rotateX = 18 * factor; // Subtle backward tilt
+    const rotateY = centerOffset * -8 * factor; // Gentle inward angle
+    const scale = 1 - index * 0.03 * factor; // Slight scale reduction for depth
+
+    return {
+        transform: `translate3d(${translateX}px, ${translateY}px, ${translateZ}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${scale})`,
+        opacity: Math.max(0.4, easedProgress + (1 - index * 0.15)),
+        zIndex: total - index
+    };
+}
 
 function Services() {
     const { openModal } = useContactModal();
@@ -362,14 +309,16 @@ function Services() {
         <section id="services" className="srv-section">
             <style>{servicesStyles}</style>
 
-            <div className="srv-header sx-anim sx-fade-down">
+            {/* Removed sx-anim to prevent IntersectionObserver from hiding it */}
+            <div className="srv-header">
                 <h2 className="srv-header-title">What We Deliver</h2>
                 <p className="srv-subtitle">End-to-End digital engineering and design crafted to scale modern businesses.</p>
             </div>
 
             <div className="srv-grid">
                 {services.map((s, i) => (
-                    <div key={i} className="sx-anim sx-fade-up" style={{ display: 'flex' }}>
+                    // Removed inline style logic entirely! The JS loop handles it now.
+                    <div key={i} className="srv-card-wrapper">
                         <div className="srv-card">
                             <div>
                                 <span className="srv-card-num">{s.num}</span>

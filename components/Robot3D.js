@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useEffect, useState, useMemo, memo } from "react";
+import React, { useRef, useEffect, useState, useMemo, memo, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -25,6 +25,11 @@ const robotStyles = `
     50%      { transform: translate3d(-50%, 0, 0) scale(0.85); opacity: 0.30; }
   }
 
+  @keyframes pulseGlow {
+    0%, 100% { transform: translate3d(-50%, -50%, 0) scale(0.8); opacity: 0.3; }
+    50%      { transform: translate3d(-50%, -50%, 0) scale(1.2); opacity: 0.8; }
+  }
+
   .robot-wrapper-anim {
     width: 100%;
     height: 100%;
@@ -42,7 +47,7 @@ const robotStyles = `
     width: 400px;
     height: 400px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(49,92,253,0.3) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(43,104,246,0.3) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
     will-change: opacity;
@@ -63,13 +68,38 @@ const robotStyles = `
     animation: robotFloatShadow 4s ease-in-out infinite;
   }
 
+  .robot-html-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(43,104,246,0.6) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 10;
+    animation: pulseGlow 1.5s ease-in-out infinite;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .robot-canvas-wrap {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+  }
+  
+  .robot-canvas-wrap.is-ready {
+    opacity: 1;
+  }
+
   @media (max-width: 767px) {
     .robot-pure-shadow { width: 120px; bottom: 4%; }
   }
 `;
 
-const Model = memo(function Model({ mouseX, mouseY, isMobile, isHovered }) {
-    const { scene } = useGLTF("/robot.glb");
+const Model = memo(function Model({ mouseX, mouseY, isMobile, isHovered, onLoaded }) {
+    const { scene } = useGLTF("/robot-optimized.glb");
     const groupRef = useRef();
 
     const smoothX = useRef(0);
@@ -85,12 +115,20 @@ const Model = memo(function Model({ mouseX, mouseY, isMobile, isHovered }) {
             if (child.isMesh) {
                 child.castShadow = false;
                 child.receiveShadow = false;
+                child.matrixAutoUpdate = false;
+                child.updateMatrix();
+
                 if (child.material) {
+                    child.material.roughness = 0.5;
+                    child.material.metalness = 0.5;
                     child.material.precision = "mediump";
                 }
             }
         });
-    }, [scene]);
+
+        // Tell the parent component that the model is fully parsed and mounted
+        onLoaded();
+    }, [scene, onLoaded]);
 
     useFrame((state) => {
         if (!groupRef.current) return;
@@ -113,12 +151,12 @@ const Model = memo(function Model({ mouseX, mouseY, isMobile, isHovered }) {
 
     return (
         <group ref={groupRef}>
-            <object3D object={scene} scale={modelScale} />
+            <primitive object={scene} scale={modelScale} />
         </group>
     );
 });
 
-useGLTF.preload("/robot.glb");
+useGLTF.preload("/robot-optimized.glb");
 
 export default function Robot3D({ isHeroVisible = true }) {
     const mouseX = useRef(0);
@@ -127,6 +165,9 @@ export default function Robot3D({ isHeroVisible = true }) {
 
     const [isMobile, setIsMobile] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+
+    // New state to track when the model is actually ready to be shown
+    const [isReady, setIsReady] = useState(false);
 
     useEffect(() => {
         const mql = window.matchMedia("(max-width: 767px)");
@@ -187,32 +228,46 @@ export default function Robot3D({ isHeroVisible = true }) {
             <div className="robot-wrapper-anim">
                 {!isMobile && <div className="robot-pure-glow" />}
 
-                <Canvas
-                    camera={cameraConfig}
-                    dpr={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 1.5) : 1}
-                    frameloop={isHeroVisible ? "always" : "never"}
-                    gl={{
-                        antialias: false,
-                        powerPreference: "high-performance",
-                        alpha: true,
-                        stencil: false,
-                        depth: true,
+                {/* Standard HTML Loader: Visible immediately, fades out when isReady is true */}
+                <div
+                    className="robot-html-loader"
+                    style={{
+                        opacity: isReady ? 0 : 1,
+                        transform: isReady ? 'translate3d(-50%, -50%, 0) scale(0.5)' : 'translate3d(-50%, -50%, 0) scale(1)'
                     }}
-                    style={canvasStyle}
-                >
-                    <ambientLight intensity={isMobile ? 1.6 : 1.2} />
-                    <directionalLight position={[4, 6, 4]} intensity={1.8} />
-                    {!isMobile && <directionalLight position={[-3, 1, -2]} intensity={0.5} />}
+                />
 
-                    <Model
-                        mouseX={mouseX}
-                        mouseY={mouseY}
-                        isMobile={isMobile}
-                        isHovered={isHovered}
-                    />
-                </Canvas>
+                <div className={`robot-canvas-wrap ${isReady ? 'is-ready' : ''}`}>
+                    <Canvas
+                        camera={cameraConfig}
+                        dpr={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 1.5) : 1}
+                        frameloop={isHeroVisible || isHovered ? "always" : "never"}
+                        gl={{
+                            antialias: false,
+                            powerPreference: "high-performance",
+                            alpha: true,
+                            stencil: false,
+                            depth: true,
+                        }}
+                        style={canvasStyle}
+                    >
+                        <ambientLight intensity={isMobile ? 1.6 : 1.2} />
+                        <directionalLight position={[4, 6, 4]} intensity={1.8} />
+                        {!isMobile && <directionalLight position={[-3, 1, -2]} intensity={0.5} />}
 
-                <div className="robot-pure-shadow" />
+                        <Suspense fallback={null}>
+                            <Model
+                                mouseX={mouseX}
+                                mouseY={mouseY}
+                                isMobile={isMobile}
+                                isHovered={isHovered}
+                                onLoaded={() => setIsReady(true)}
+                            />
+                        </Suspense>
+                    </Canvas>
+                </div>
+
+                <div className="robot-pure-shadow" style={{ opacity: isReady ? '' : 0, transition: 'opacity 0.8s ease' }} />
             </div>
         </div>
     );

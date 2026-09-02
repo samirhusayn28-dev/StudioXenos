@@ -275,6 +275,7 @@ function Hero({ isLoaded }) {
     const { openModal } = useContactModal();
     const [isHeroVisible, setIsHeroVisible] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
+    const [isCoveredByDome, setIsCoveredByDome] = useState(false);
 
     useEffect(() => {
         const mql = window.matchMedia('(max-width: 900px)');
@@ -292,11 +293,47 @@ function Hero({ isLoaded }) {
             ([entry]) => {
                 setIsHeroVisible(entry.isIntersecting);
             },
-            { threshold: 0 }
+            // A small buffer so isHeroVisible doesn't flip true/false
+            // repeatedly if the user scrolls back and forth right at the
+            // sticky boundary — each flip mounts/unmounts the whole
+            // Robot3D WebGL canvas (context + shader recompilation).
+            { threshold: 0, rootMargin: '200px 0px 200px 0px' }
         );
 
         observer.observe(el);
         return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+        // The Services "dome" (in SectionSlider.js) grows over Hero's own
+        // first viewport-height of scroll until it fully covers it. Hero
+        // stays sticky-pinned the whole time, so the IntersectionObserver
+        // above still reports it as visible even once it's completely
+        // hidden underneath the dome — occlusion by a higher z-index
+        // sibling doesn't change geometric intersection with the
+        // viewport. Track scroll position directly here so Robot3D's
+        // WebGL canvas stops rendering once it's substantially covered,
+        // instead of burning GPU/CPU on an invisible scene during the
+        // busiest part of the scroll animation.
+        let rafId = null;
+
+        const updateCoverage = () => {
+            rafId = null;
+            const coverProgress = Math.min(1, Math.max(0, window.scrollY / window.innerHeight));
+            setIsCoveredByDome(coverProgress > 0.75);
+        };
+
+        const onScroll = () => {
+            if (rafId) return;
+            rafId = requestAnimationFrame(updateCoverage);
+        };
+
+        updateCoverage();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => {
+            window.removeEventListener('scroll', onScroll);
+            if (rafId) cancelAnimationFrame(rafId);
+        };
     }, []);
 
     const scrollToNext = useCallback(() => {
@@ -344,7 +381,8 @@ function Hero({ isLoaded }) {
                             transform: `translate3d(${isMobile ? '0%' : '-53%'}, ${isMobile ? '5%' : '18%'}, 0) scale(${isMobile ? 0.5 : 1})`
                         }}
                     >
-                        <Robot3D isHeroVisible={isHeroVisible} />
+                        {/* Only mount and render the 3D canvas when the Hero section is actively in view AND not already hidden under the Services dome */}
+                        {isHeroVisible && !isCoveredByDome && <Robot3D isHeroVisible={isHeroVisible} />}
                     </div>
                     <XenosBubble extraClass="robot-bubble-desktop" />
                 </div>

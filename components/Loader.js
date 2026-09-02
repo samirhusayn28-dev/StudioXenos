@@ -81,8 +81,8 @@ export default function Loader({ readyToOpen, onComplete }) {
                 }
 
                 .vault-mask-path {
-                    fill: #FFFFFF;
-                    stroke: #2563EB;
+                    fill: #0F172A;
+                    stroke: #2B68F6;
                     stroke-width: 0.3px;
                     vector-effect: non-scaling-stroke;
                     d: ${MASK_PATHS.covered};
@@ -95,7 +95,7 @@ export default function Loader({ readyToOpen, onComplete }) {
                     font-size: 28px;
                     letter-spacing: 0.15em;
                     text-transform: uppercase;
-                    color: #2B68F6;
+                    color: #93C5FD;
                     font-weight: 800;
                     will-change: transform, opacity;
                     transform: translateZ(0);

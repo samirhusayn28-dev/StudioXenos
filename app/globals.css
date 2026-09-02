@@ -4,8 +4,9 @@
 
 html,
 body {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
+    /* overflow-y: auto !important; */
+    overflow-x: clip !important;
+    /* Changed from hidden to clip to fix sticky positioning */
     height: auto !important;
     min-height: 100%;
     touch-action: pan-y;
@@ -159,6 +160,7 @@ body {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -169,6 +171,7 @@ body {
         opacity: 0;
         transform: translate3d(0, 30px, 0);
     }
+
     to {
         opacity: 1;
         transform: translate3d(0, 0, 0);
@@ -180,6 +183,7 @@ body {
         opacity: 0;
         transform: translate3d(0, -30px, 0);
     }
+
     to {
         opacity: 1;
         transform: translate3d(0, 0, 0);
@@ -191,6 +195,7 @@ body {
         opacity: 0;
         transform: translate3d(30px, 0, 0);
     }
+
     to {
         opacity: 1;
         transform: translate3d(0, 0, 0);
@@ -202,6 +207,7 @@ body {
         opacity: 0;
         transform: translate3d(-30px, 0, 0);
     }
+
     to {
         opacity: 1;
         transform: translate3d(0, 0, 0);
@@ -213,6 +219,7 @@ body {
         opacity: 0;
         transform: translate3d(0, 30px, 0);
     }
+
     100% {
         opacity: 1;
         transform: translate3d(0, 0, 0);
@@ -224,6 +231,7 @@ body {
         transform: scaleX(0);
         opacity: 0;
     }
+
     100% {
         transform: scaleX(1);
         opacity: 1;
@@ -231,10 +239,13 @@ body {
 }
 
 @keyframes arrowFloat {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translate3d(0, 0, 0);
         opacity: 0.6;
     }
+
     50% {
         transform: translate3d(0, 5px, 0);
         opacity: 1;
@@ -246,6 +257,7 @@ body {
         opacity: 0;
         transform: translate3d(0, 15px, 0) scale(0.90);
     }
+
     100% {
         opacity: 1;
         transform: translate3d(0, 0, 0) scale(1);
@@ -256,6 +268,7 @@ body {
     0% {
         transform: translate3d(0, 0, 0);
     }
+
     100% {
         transform: translate3d(-50%, 0, 0);
     }
@@ -265,6 +278,7 @@ body {
     0% {
         transform: translate3d(-50%, 0, 0);
     }
+
     100% {
         transform: translate3d(0, 0, 0);
     }
@@ -274,17 +288,34 @@ body {
     0% {
         background-position: -200% 0;
     }
+
     100% {
         background-position: 200% 0;
     }
 }
 
 @keyframes shake {
-    0%, 100% { transform: translate3d(0, 0, 0); }
-    20%      { transform: translate3d(-6px, 0, 0); }
-    40%      { transform: translate3d(6px, 0, 0); }
-    60%      { transform: translate3d(-4px, 0, 0); }
-    80%      { transform: translate3d(4px, 0, 0); }
+
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0);
+    }
+
+    20% {
+        transform: translate3d(-6px, 0, 0);
+    }
+
+    40% {
+        transform: translate3d(6px, 0, 0);
+    }
+
+    60% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    80% {
+        transform: translate3d(4px, 0, 0);
+    }
 }
 
 /* ── Scroll Animation Utility Classes (IntersectionObserver Driven) ── */
@@ -344,7 +375,10 @@ body {
 
 /* ── Prefers-reduced-motion Support ── */
 @media (prefers-reduced-motion: reduce) {
-    *, ::before, ::after {
+
+    *,
+    ::before,
+    ::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
