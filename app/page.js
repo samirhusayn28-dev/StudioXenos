@@ -10,10 +10,17 @@ import { preloadAssets } from '../components/Preloader';
 
 export default function Page() {
     const [loaded, setLoaded] = useState(false);
+    const [readyToOpen, setReadyToOpen] = useState(false);
 
     useEffect(() => {
-        // Run asset preloading concurrently with EmailJS initialization
-        preloadAssets(assetManifest);
+        // Minimum 2.5s hold timer for smooth brand presentation
+        const minHoldTimer = new Promise((resolve) => setTimeout(resolve, 2500));
+        const assetLoader = Promise.resolve(preloadAssets(assetManifest));
+
+        // Wait until both assets are fully loaded and min hold time has elapsed
+        Promise.all([assetLoader, minHoldTimer]).then(() => {
+            setReadyToOpen(true);
+        });
 
         import('@emailjs/browser').then(({ default: emailjs }) => {
             emailjs.init('nBS7HLI2w7Zq5t3gI');
@@ -22,17 +29,11 @@ export default function Page() {
 
     return (
         <>
-            {!loaded && <Loader onComplete={() => setLoaded(true)} />}
-
-            <div
-                style={{
-                    opacity: loaded ? 1 : 0,
-                    transition: 'opacity 0.5s ease',
-                    visibility: loaded ? 'visible' : 'hidden',
-                }}
-            >
-                <SectionSlider />
-            </div>
+            <Loader
+                readyToOpen={readyToOpen}
+                onComplete={() => setLoaded(true)}
+            />
+            <SectionSlider isLoaded={loaded} />
             <ChatBot />
             <SectionToast />
         </>

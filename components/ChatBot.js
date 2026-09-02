@@ -198,7 +198,7 @@ const SuggestionChips = memo(function SuggestionChips({ t, onPick, suggestions }
                         color: t.chipColor, fontSize: 11,
                         padding: "4px 10px", borderRadius: 6,
                         cursor: "pointer", whiteSpace: "nowrap",
-                        fontFamily: "'DM Sans',sans-serif",
+                        fontFamily: "var(--font-outfit), sans-serif",
                         fontWeight: 500,
                         maxWidth: "100%",
                         overflow: "hidden",
@@ -349,8 +349,6 @@ export default function ChatBot() {
     return (
         <>
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap');
-                
                 @keyframes xenosBounce{ 0%,80%,100%{transform:translateY(0);opacity:.5} 40%{transform:translateY(-4px);opacity:1} }
                 .sx-d1{animation:xenosBounce 1.2s infinite}
                 .sx-d2{animation:xenosBounce 1.2s infinite .15s}
@@ -427,7 +425,7 @@ export default function ChatBot() {
                         display: "flex", flexDirection: "column", overflow: "hidden",
                         zIndex: 9998, transformOrigin: "bottom right",
                         transform: "translateZ(0)",
-                        fontFamily: "'DM Sans',sans-serif",
+                        fontFamily: "var(--font-outfit), sans-serif",
                         "--sx-close-hover": t.closeHoverBg,
                     }}
                 >
@@ -449,7 +447,7 @@ export default function ChatBot() {
                         />
 
                         <div>
-                            <div style={{ margin: 0, fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 13.5, color: t.titleColor }}>
+                            <div style={{ margin: 0, fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: 13.5, color: t.titleColor }}>
                                 StudioXenos Support
                             </div>
                             <div style={{ fontSize: 10.5, color: "#16a34a", display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
@@ -523,7 +521,7 @@ export default function ChatBot() {
                             style={{
                                 flex: 1, background: t.textareaBg, border: `1px solid ${t.textareaBorder}`,
                                 borderRadius: 10, padding: "9px 12px", color: t.textareaColor,
-                                fontSize: 13, fontFamily: "'DM Sans',sans-serif",
+                                fontSize: 13, fontFamily: "var(--font-outfit), sans-serif",
                                 resize: "none", outline: "none", maxHeight: 90, minHeight: 38,
                                 lineHeight: 1.45,
                             }}

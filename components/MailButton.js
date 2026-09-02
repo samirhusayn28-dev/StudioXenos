@@ -1,53 +1,36 @@
-import React, { useState, useCallback, useMemo, memo } from 'react';
+import React, { memo } from 'react';
 
-const styles = {
-  link: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    textDecoration: 'none',
-    transition: 'color 0.2s',
-    paddingBottom: '2px',
-    willChange: 'color',
-  },
-  text: {
-    fontFamily: 'DM Sans, sans-serif',
-    fontSize: '14px',
-  },
-};
+const mailStyles = `
+  .mail-btn-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.65);
+    transition: color 0.2s ease, border-color 0.2s ease;
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+    font-family: var(--font-outfit), sans-serif;
+    font-size: 14px;
+    will-change: color;
+  }
+  .mail-btn-link:hover {
+    color: #ffffff;
+    border-bottom-color: rgba(255, 255, 255, 0.6);
+  }
+`;
 
-const MailIcon = memo(function MailIcon() {
+function MailButton({ href = 'mailto:contact@studioxenos.com' }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-    </svg>
-  );
-});
-
-function MailButton({ href }) {
-  const [hovered, setHovered] = useState(false);
-
-  const handleMouseEnter = useCallback(() => {
-    setHovered(true);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    setHovered(false);
-  }, []);
-
-  const linkStyle = useMemo(() => {
-    return {
-      ...styles.link,
-      color: hovered ? '#fff' : 'rgba(255,255,255,0.65)',
-      borderBottom: hovered ? '1px solid rgba(255,255,255,0.6)' : '1px solid transparent',
-    };
-  }, [hovered]);
-
-  return (
-    <a href={href} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} style={linkStyle}>
-      <MailIcon />
-      <span style={styles.text}>info@studioxenos.co</span>
-    </a>
+    <>
+      <style>{mailStyles}</style>
+      <a href={href} className="mail-btn-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+        </svg>
+        <span>info@studioxenos.co</span>
+      </a>
+    </>
   );
 }
 

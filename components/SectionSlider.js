@@ -1,102 +1,21 @@
 'use client';
 
-import { useEffect } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 import Hero from './Hero';
 import Services from './services';
 import Work from './Work';
 import Projects from './Projects';
 import AboutUs from './About';
 import Footer from './Footer';
-import ChatBot from './ChatBot';
 import OurTeam from './OurTeam';
-import StarBackground from './StarBackground';
 
-const sections = [
-    { id: 'hero', node: <Hero key="hero" /> },
-    { id: 'services', node: <Services key="services" /> },
-    { id: 'projects', node: <Projects key="projects" /> },
-    { id: 'work', node: <Work key="work" /> },
-    { id: 'about', node: <AboutUs key="about" /> },
-    { id: 'team', node: <OurTeam key="team" /> },
-    { id: 'footer', node: <Footer key="footer" /> },
-];
+const SectionSlider = memo(function SectionSlider({ isLoaded }) {
+    const shellRef = useRef(null);
 
-const styles = `
-  html, body {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    height: auto !important;
-    position: relative !important;
-    background-color: var(--bg-primary, #040610);
-    color: var(--text-primary, #e8ddd0);
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .section-slider-shell {
-    position: relative !important;
-    width: 100% !important;
-    height: auto !important;
-    min-height: 100vh !important;
-    overflow: visible !important;
-    z-index: 1;
-  }
-
-  .section-slider-track {
-    display: flex !important;
-    flex-direction: column !important;
-    width: 100% !important;
-    height: auto !important;
-    transform: none !important;
-    transition: none !important;
-    overflow: visible !important;
-  }
-
-  .section-slider-page {
-    width: 100% !important;
-    height: auto !important;
-    min-height: 100vh !important;
-    position: relative !important;
-    overflow: visible !important;
-    flex-shrink: 0;
-    background-color: transparent;
-  }
-
-  .section-slider-page > section {
-    height: auto !important;
-    min-height: 100vh !important;
-    max-height: none !important;
-    overflow: visible !important;
-  }
-
-  /* ── Global Pure CSS Scroll Animations ── */
-  .sx-anim {
-    opacity: 0;
-    transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .sx-fade-up { transform: translateY(30px); }
-  .sx-fade-down { transform: translateY(-30px); }
-  .sx-fade-right { transform: translateX(-30px); }
-  .sx-fade-in { transform: none; }
-
-  .sx-anim.is-visible {
-    opacity: 1;
-    transform: translate(0, 0);
-  }
-
-  /* Stagger Group */
-  .sx-stagger .sx-anim:nth-child(1) { transition-delay: 0ms; }
-  .sx-stagger .sx-anim:nth-child(2) { transition-delay: 150ms; }
-  .sx-stagger .sx-anim:nth-child(3) { transition-delay: 300ms; }
-  .sx-stagger .sx-anim:nth-child(4) { transition-delay: 450ms; }
-  .sx-stagger .sx-anim:nth-child(5) { transition-delay: 600ms; }
-  .sx-stagger .sx-anim:nth-child(6) { transition-delay: 750ms; }
-  .sx-stagger .sx-anim:nth-child(7) { transition-delay: 900ms; }
-  .sx-stagger .sx-anim:nth-child(8) { transition-delay: 1050ms; }
-`;
-
-export default function SectionSlider() {
     useEffect(() => {
+        const root = shellRef.current;
+        if (!root) return;
+
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
@@ -106,49 +25,42 @@ export default function SectionSlider() {
                     }
                 });
             },
-            { threshold: 0.3, rootMargin: '0px 0px -40px 0px' } // Updated threshold to 0.6 (60%)
+            { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
         );
 
-        // Observe initial targets
-        document.querySelectorAll('.sx-anim').forEach((el) => observer.observe(el));
-
-        // Watch for dynamically added targets (e.g. Projects filtering / "See More")
-        const mutationObserver = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                mutation.addedNodes.forEach((node) => {
-                    if (node.nodeType === 1) { // ELEMENT_NODE
-                        if (node.classList.contains('sx-anim')) {
-                            observer.observe(node);
-                        }
-                        const children = node.querySelectorAll('.sx-anim');
-                        if (children.length) {
-                            children.forEach((el) => observer.observe(el));
-                        }
-                    }
-                });
-            });
-        });
-
-        mutationObserver.observe(document.body, { childList: true, subtree: true });
+        const animElements = root.querySelectorAll('.sx-anim');
+        animElements.forEach((el) => observer.observe(el));
 
         return () => {
             observer.disconnect();
-            mutationObserver.disconnect();
         };
-    }, []);
+    }, [isLoaded]);
+
+    const sections = [
+        { id: 'hero', node: <Hero isLoaded={isLoaded} /> },
+        { id: 'services', node: <Services /> },
+        { id: 'projects', node: <Projects /> },
+        { id: 'work', node: <Work /> },
+        { id: 'about', node: <AboutUs /> },
+        { id: 'team', node: <OurTeam /> },
+        { id: 'footer', node: <Footer /> },
+    ];
 
     return (
-        <div className="section-slider-shell">
-            <style>{styles}</style>
-            {/* <StarBackground /> */}
-
-            <div className="section-slider-track">
+        <div ref={shellRef} className="relative w-full min-h-screen z-[1]">
+            <div className="flex flex-col w-full">
                 {sections.map(({ id, node }) => (
-                    <div key={`slide-${id}`} className="section-slider-page" data-section={id}>
+                    <div
+                        key={`slide-${id}`}
+                        className="w-full min-h-screen relative flex-shrink-0 bg-transparent"
+                        data-section={id}
+                    >
                         {node}
                     </div>
                 ))}
             </div>
         </div>
     );
-}
+});
+
+export default SectionSlider;

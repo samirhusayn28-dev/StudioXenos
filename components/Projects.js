@@ -35,15 +35,13 @@ const SortIcon = memo(() => (
 SortIcon.displayName = 'SortIcon';
 
 const css = `
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&family=Poppins:wght@500;600&display=swap');
-
 .pj-section {
   position: relative;
   background: transparent;
   width: 100%;
   padding: 80px 24px;
   box-sizing: border-box;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
 }
 
 .pj-inner {
@@ -117,7 +115,7 @@ const css = `
 }
 
 .pj-filter-btn {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -151,7 +149,7 @@ const css = `
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   font-size: 12px;
   font-weight: 600;
   padding: 8px 14px;
@@ -190,10 +188,10 @@ const css = `
   padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 
-.pj-sort-option:hover { background: rgba(37, 99, 235, 0.06); }
+.pj-sort-option:hover { background-color: rgba(37, 99, 235, 0.06); }
 
 .pj-sort-option.active { color: #2563eb; font-weight: 700; }
 
@@ -219,10 +217,13 @@ const css = `
   display: flex;
   flex-direction: column;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 .pj-card:hover {
-  transform: translateY(-4px);
+  transform: translate3d(0, -4px, 0);
   border-color: rgba(37, 99, 235, 0.25);
   box-shadow: 0 16px 36px rgba(37, 99, 235, 0.08);
 }
@@ -268,6 +269,7 @@ const css = `
   padding: 4px 10px;
   border-radius: 6px;
   backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .pj-card-body {
@@ -310,7 +312,7 @@ const css = `
 }
 
 .pj-btn-visit {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
   font-size: 11.5px;
   font-weight: 600;
   padding: 8px 18px;
@@ -319,12 +321,13 @@ const css = `
   cursor: pointer;
   color: #ffffff;
   transition: transform 0.15s ease, filter 0.15s ease;
+  will-change: transform;
 }
 
-.pj-btn-visit:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.pj-btn-visit:hover { transform: translate3d(0, -1px, 0); filter: brightness(1.08); }
 
 .pj-btn-gh {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
   font-size: 11.5px;
   font-weight: 500;
   padding: 8px 14px;
@@ -337,10 +340,11 @@ const css = `
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+  will-change: transform;
 }
 
-.pj-btn-gh:hover { background: rgba(37, 99, 235, 0.06); transform: translateY(-1px); }
+.pj-btn-gh:hover { background-color: rgba(37, 99, 235, 0.06); transform: translate3d(0, -1px, 0); }
 
 /* ── See More / Show Less CTA Button ── */
 .pj-see-more-wrap {
@@ -351,7 +355,7 @@ const css = `
 }
 
 .pj-see-more-btn {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -366,13 +370,14 @@ const css = `
   gap: 8px;
   box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
   transition: all 0.2s ease;
+  will-change: transform;
 }
 
 .pj-see-more-btn:hover {
-  background: #2563eb;
+  background-color: #2563eb;
   color: #ffffff;
   border-color: #2563eb;
-  transform: translateY(-2px);
+  transform: translate3d(0, -2px, 0);
   box-shadow: 0 8px 24px rgba(37, 99, 235, 0.2);
 }
 
@@ -438,7 +443,7 @@ function Projects() {
 
             <div className="pj-inner">
                 <div className="pj-header">
-                    <div className="pj-heading-block sx-anim sx-fade-in" data-threshold="0.2">
+                    <div className="pj-heading-block sx-anim sx-fade-in">
                         <span className="pj-pill-label">
                             <span className="pj-pill-dot" />
                             Selected Work
@@ -485,7 +490,7 @@ function Projects() {
                     </div>
                 </div>
 
-                <div className="pj-count" data-threshold="0.2">
+                <div className="pj-count">
                     Showing {displayedProjects.length} of {visibleProjects.length} project{visibleProjects.length !== 1 ? 's' : ''}
                 </div>
 
@@ -493,8 +498,7 @@ function Projects() {
                     <div className="pj-empty">No projects match this filter.</div>
                 ) : (
                     <>
-                        {/* Grid container wrapper animation with 0.2 threshold */}
-                        <div className="pj-grid sx-anim sx-fade-in" data-threshold="0.2">
+                        <div className="pj-grid sx-anim sx-fade-in">
                             {displayedProjects.map((p) => (
                                 <div key={p.title}>
                                     <div className="pj-card">

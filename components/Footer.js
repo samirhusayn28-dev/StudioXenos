@@ -1,9 +1,7 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import Image from 'next/image';
-const robot = '/assets/Footer Robot.png';
-const xLogo = '/assets/X Logo.png';
 import MailButton from './MailButton';
 import WhatsAppButton from './WhatsAppButton';
 import InstagramButton from '../components/Instagrambutton';
@@ -12,8 +10,14 @@ import LinkedInButton from '../components/Linkedinbutton';
 import { useContactModal } from './ContactModal';
 import faqData from '../data/faq.json';
 
+const robot = '/assets/Footer Robot.png';
+const xLogo = '/assets/X Logo.png';
+
 const footerStyles = `
-  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+  @keyframes arrowFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
 
   .footer-root {
     position: relative;
@@ -26,6 +30,7 @@ const footerStyles = `
     box-sizing: border-box;
     background: transparent;
     contain: paint style;
+    font-family: var(--font-outfit), sans-serif;
   }
 
   .footer-divider-top {
@@ -49,18 +54,17 @@ const footerStyles = `
     width: 100%; 
     border-top: 1px solid rgba(0, 0, 0, 0.05);
     will-change: transform;
-    transform: translateZ(0);
+    transform: translate3d(0, 0, 0);
     contain: paint style;
   }
 
   .footer-glow {
-    position: absolute; top: -100px; left: 50%; transform: translateX(-50%) translateZ(0);
+    position: absolute; top: -100px; left: 50%; transform: translate3d(-50%, 0, 0);
     width: 700px; height: 300px;
     background: radial-gradient(circle, rgba(37,99,235,0.06) 0%, transparent 70%);
     pointer-events: none; z-index: 1;
   }
 
-  /* ── FAQ SECTION STYLES ── */
   .faq-section {
     position: relative;
     z-index: 2;
@@ -81,7 +85,7 @@ const footerStyles = `
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-outfit), sans-serif;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.18em;
@@ -103,7 +107,7 @@ const footerStyles = `
   }
 
   .faq-title {
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-outfit), sans-serif;
     font-weight: 900;
     text-transform: uppercase;
     line-height: 1.1;
@@ -118,7 +122,7 @@ const footerStyles = `
   }
 
   .faq-subtitle {
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-outfit), sans-serif;
     font-size: 14px;
     font-weight: 400;
     color: #64748b;
@@ -146,7 +150,7 @@ const footerStyles = `
     flex-direction: column;
     justify-content: flex-start;
     will-change: transform;
-    transform: translateZ(0);
+    transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
   }
 
@@ -166,7 +170,7 @@ const footerStyles = `
   }
 
   .faq-item:hover {
-    transform: translateY(-3px) translateZ(0);
+    transform: translate3d(0, -3px, 0);
     border-color: rgba(37, 99, 235, 0.22);
     box-shadow: 0 14px 32px rgba(37, 99, 235, 0.06);
   }
@@ -186,7 +190,7 @@ const footerStyles = `
     background: none;
     border: none;
     color: #0f172a;
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-outfit), sans-serif;
     font-size: 15px;
     font-weight: 600;
     text-align: left;
@@ -198,309 +202,177 @@ const footerStyles = `
     display: flex;
     align-items: baseline;
     gap: 12px;
+    flex: 1;
   }
 
   .faq-number {
-    font-family: 'Outfit', sans-serif;
     font-size: 12px;
     font-weight: 700;
-    color: rgba(37, 99, 235, 0.35);
-    letter-spacing: 0.04em;
-    flex-shrink: 0;
-  }
-
-  .faq-item.active .faq-number {
     color: #2563eb;
+    letter-spacing: 0.05em;
   }
 
   .faq-icon {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    background: rgba(15, 23, 42, 0.04);
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    color: #475569;
+    background: rgba(37, 99, 235, 0.08);
+    color: #2563eb;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, color 0.2s ease;
   }
 
   .faq-icon svg {
-    width: 12px;
-    height: 12px;
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 14px;
+    height: 14px;
   }
 
   .faq-item.active .faq-icon {
     transform: rotate(180deg);
-    background: #2563eb;
-    border-color: #2563eb;
+    background-color: #2563eb;
     color: #ffffff;
   }
 
   .faq-answer {
     max-height: 0;
+    opacity: 0;
     overflow: hidden;
-    transition: max-height 0.35s ease, padding 0.35s ease;
+    transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, padding 0.35s ease;
     padding: 0 24px;
   }
 
   .faq-item.active .faq-answer {
-    max-height: 250px;
-    padding: 0 24px 22px 24px;
+    max-height: 200px;
+    opacity: 1;
+    padding: 0 24px 22px;
   }
 
   .faq-answer-text {
-    font-family: 'Outfit', sans-serif;
-    font-size: 13.5px;
-    font-weight: 400;
+    font-family: var(--font-outfit), sans-serif;
+    font-size: 14px;
+    line-height: 1.65;
     color: #64748b;
-    line-height: 1.7;
     margin: 0;
+    border-top: 1px dashed rgba(0, 0, 0, 0.08);
     padding-top: 14px;
-    padding-left: 24px;
-    border-top: 1px solid rgba(15, 23, 42, 0.06);
   }
 
   .faq-footer-divider {
-    max-width: 1200px;
-    margin: 0 auto 40px;
     border: none;
     height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.08) 50%, transparent 100%);
-  }
-
-  .footer-col-title {
-    font-family: 'Outfit', sans-serif;
-    font-size: 12px; 
-    font-weight: 800;
-    text-transform: uppercase; 
-    letter-spacing: 0.12em;
-    color: #0f172a; 
-    margin-bottom: 20px; 
-    margin-top: 0;
-  }
-
-  .footer-nav-btn {
-    font-family: 'Outfit', sans-serif; 
-    font-size: 14px; 
-    font-weight: 400;
-    color: #64748b; 
-    background: none; 
-    border: none; 
-    padding: 0;
-    cursor: pointer; 
-    text-align: left; 
-    display: block;
-    transition: color 0.2s ease, transform 0.2s ease; 
-    line-height: 1;
-    will-change: transform;
-    transform: translateZ(0);
-  }
-  .footer-nav-btn:hover { color: #2563eb; transform: translateX(4px) translateZ(0); }
-
-  .footer-divider-bottom {
-    border: none; 
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    margin: 0; 
-  }
-
-  .footer-robot-wrap {
-    position: relative; display: flex;
-    align-items: flex-end; justify-content: center;
-  }
-  .footer-robot-wrap::before {
-    content: ''; position: absolute; bottom: 0; left: 50%;
-    transform: translateX(-50%) translateZ(0); width: 100px; height: 36px;
-    background: radial-gradient(ellipse, rgba(37,99,235,0.2) 0%, transparent 70%);
-    filter: blur(8px);
-  }
-  .footer-robot-wrap img {
-    position: relative; z-index: 1;
-    filter: drop-shadow(0 8px 28px rgba(37,99,235,0.25));
-    transition: transform 0.3s ease;
-    will-change: transform;
-    transform: translateZ(0);
-  }
-  .footer-robot-wrap:hover img { transform: translateY(-8px) translateZ(0); }
-
-  .footer-contact-btn {
-    font-family: 'Outfit', sans-serif;
-    font-size: 13px; 
-    font-weight: 700; 
-    letter-spacing: 0.04em;
-    padding: 13px 32px; 
-    border-radius: 8px; 
-    cursor: pointer;
-    border: 1px solid rgba(37, 99, 235, 0.2);
-    background: #eff6ff;
-    color: #2563eb;
-    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
-    will-change: transform;
-    transform: translateZ(0);
-  }
-  .footer-contact-btn:hover {
-    background: #2563eb;
-    color: #ffffff;
-    transform: scale(1.04) translateZ(0);
-    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
-  }
-
-  .footer-brand-desc {
-    font-family: 'Outfit', sans-serif;
-    font-size: 13px; font-weight: 400;
-    color: #64748b; line-height: 1.6;
-    max-width: 220px; margin-bottom: 20px;
+    background: linear-gradient(90deg, transparent 0%, rgba(37, 99, 235, 0.15) 30%, rgba(37, 99, 235, 0.15) 70%, transparent 100%);
+    margin: 40px auto 0;
+    max-width: 1100px;
+    width: calc(100% - 32px);
   }
 
   .footer-main-grid {
     display: grid;
-    grid-template-columns: 1.4fr 1fr 1fr 1fr 160px;
-    grid-template-areas: "brand l1 l2 l3 cta";
-    gap: 0;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr;
+    gap: 32px;
     max-width: 1200px;
-    margin: 0 auto 40px;
-    align-items: center;
+    margin: 0 auto;
     padding: 0 24px;
     box-sizing: border-box;
   }
 
-  .footer-main-grid > div {
-    border-right: 1px solid rgba(0, 0, 0, 0.06);
-    padding-right: 32px;
-    margin-right: 32px;
-  }
-  .footer-main-grid > div:last-child {
-    border-right: none;
-    padding-right: 0;
-    margin-right: 0;
+  .footer-brand-desc {
+    font-family: var(--font-outfit), sans-serif;
+    font-size: 13.5px;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0 0 20px;
+    max-width: 280px;
   }
 
-  .footer-area-brand { grid-area: brand; align-self: start; }
-  .footer-area-l1    { grid-area: l1;   align-self: start; }
-  .footer-area-l2    { grid-area: l2;   align-self: start; }
-  .footer-area-l3    { grid-area: l3;   align-self: start; }
-  .footer-area-cta   {
-    grid-area: cta;
-    align-self: center;
+  .footer-col-title {
+    font-family: var(--font-outfit), sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #0f172a;
+    margin: 0 0 16px;
+  }
+
+  .footer-nav-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: var(--font-outfit), sans-serif;
+    font-size: 13.5px;
+    color: #64748b;
+    cursor: pointer;
+    text-align: left;
+    transition: color 0.15s ease;
+  }
+
+  .footer-nav-btn:hover {
+    color: #2563eb;
+  }
+
+  .footer-area-cta {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    justify-content: center;
+    gap: 14px;
   }
 
-  @media (max-width: 1100px) {
-    .footer-main-grid {
-      grid-template-columns: 1fr 1fr 1fr 1fr;
-      grid-template-areas:
-        "brand l1 l2 l3"
-        ". . cta cta";
-      gap: 24px;
-      align-items: start;
-    }
-    .footer-main-grid > div {
-      border-right: none;
-      padding-right: 0;
-      margin-right: 0;
-    }
-    .footer-area-cta {
-      flex-direction: row;
-      justify-content: flex-end;
-      align-items: center;
-    }
-    .footer-brand-desc { display: none; }
+  .footer-robot-wrap {
+    animation: arrowFloat 3s ease-in-out infinite;
+    will-change: transform;
   }
 
-  @media (max-width: 768px) {
-    .faq-container {
-      grid-template-columns: 1fr;
-    }
+  .footer-contact-btn {
+    font-family: var(--font-outfit), sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    will-change: transform;
+    white-space: nowrap;
   }
 
-  @media (max-width: 700px) {
-    .footer-root { padding: 40px 0 20px !important; }
-    .faq-section { margin-bottom: 30px; }
-    .faq-question-btn { font-size: 14.5px; padding: 18px 20px; }
-    .faq-answer-text { font-size: 13px; padding-left: 20px; }
-    .faq-answer { padding: 0 20px; }
-    .faq-item.active .faq-answer { padding: 0 20px 20px 20px; }
-
-    .footer-main-grid {
-      grid-template-columns: 1fr 1fr;
-      grid-template-areas:
-        "brand brand"
-        "l1 l2"
-        "l3 cta";
-      gap: 28px 20px;
-      margin-bottom: 28px;
-    }
-    .footer-area-brand { padding-bottom: 4px; }
-    .footer-area-cta {
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: flex-start;
-      gap: 12px;
-    }
-    .footer-robot-wrap { display: none; }
-    .footer-col-title  { font-size: 11px; margin-bottom: 12px; letter-spacing: 0.15em; }
-    .footer-nav-btn    { font-size: 13px; }
-    .footer-contact-btn {
-      font-size: 12px;
-      padding: 10px 22px;
-      width: 100%;
-      text-align: center;
-    }
-    .footer-brand-desc { display: none; }
-    .footer-desktop-contact { display: none; }
-
-    .footer-area-brand > div:last-child { gap: 8px !important; }
-    .footer-area-brand > img { width: 32px !important; height: 32px !important; margin-bottom: 14px !important; }
+  .footer-contact-btn:hover {
+    transform: translate3d(0, -2px, 0);
+    background-color: #1d4ed8;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
   }
 
-  @media (max-width: 480px) {
-    .footer-root { padding: 32px 0 16px !important; }
+  .footer-divider-bottom {
+    border: none;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.06);
+    margin: 40px auto 0;
+    max-width: 1200px;
+    width: calc(100% - 48px);
+  }
 
-    .contact-modal {
-      padding: 24px 18px 20px;
-      border-radius: 18px;
-      margin: 0;
-    }
-    .modal-fields-grid { grid-template-columns: 1fr !important; }
-
-    .footer-bottom-bar {
-      flex-direction: column !important;
-      align-items: flex-start !important;
-      gap: 4px !important;
-    }
-
+  @media (max-width: 900px) {
+    .faq-container { grid-template-columns: 1fr; }
     .footer-main-grid {
       grid-template-columns: 1fr 1fr;
-      gap: 24px 16px;
+      gap: 28px;
     }
-
-    .footer-nav-btn { font-size: 12.5px; }
-    ul[style] { gap: 10px !important; }
-
-    .modal-submit-btn { width: 100%; }
-    .modal-warning { text-align: left; font-size: 12px; }
+    .footer-area-brand { grid-column: span 2; }
+    .footer-area-cta { grid-column: span 2; }
   }
 
-  @media (max-width: 360px) {
-    .footer-main-grid {
-      grid-template-columns: 1fr;
-      grid-template-areas: "brand" "l1" "l2" "l3" "cta";
-      gap: 20px;
-    }
-    .footer-area-cta {
-      align-items: flex-start;
-    }
-    .footer-contact-btn { width: auto; }
-
-    .contact-modal { padding: 20px 14px 18px; }
+  @media (max-width: 550px) {
+    .footer-main-grid { grid-template-columns: 1fr; gap: 24px; }
+    .footer-area-brand, .footer-area-cta { grid-column: span 1; }
   }
 `;
 
@@ -511,41 +383,6 @@ const footerLinks = {
 };
 
 const styles = {
-    successIconWrap: {
-        width: '56px', height: '56px', borderRadius: '50%',
-        background: 'rgba(37,99,235,0.1)', border: '1px solid rgba(37,99,235,0.3)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px',
-    },
-    successTitle: {
-        fontFamily: "'Outfit', sans-serif",
-        fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 900,
-        textTransform: 'uppercase', lineHeight: 1.1,
-        color: '#0f172a', marginBottom: '14px',
-    },
-    successBody: {
-        fontFamily: "'Outfit', sans-serif", fontSize: '14px',
-        fontWeight: 400, color: '#64748b',
-        lineHeight: 1.6, maxWidth: '340px', margin: '0 auto',
-    },
-    headingWrap: { marginBottom: '28px' },
-    headingTitle: {
-        fontFamily: "'Outfit', sans-serif",
-        fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 900,
-        textTransform: 'uppercase', lineHeight: 1.1,
-        color: '#0f172a', marginBottom: '8px',
-    },
-    headingGradient: {
-        color: '#2563eb',
-    },
-    headingSub: {
-        fontFamily: "'Outfit', sans-serif", fontSize: '14px',
-        fontWeight: 400, color: '#64748b', margin: 0,
-    },
-    fieldsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' },
-    textarea: { marginBottom: '20px', display: 'block' },
-    footerRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' },
-    warning: { margin: 0, textAlign: 'left' },
-    submitBtn: { marginLeft: 'auto' },
     brandLogo: { width: '36px', height: '36px', objectFit: 'contain', marginBottom: '16px' },
     mailWrap: { marginBottom: '10px' },
     whatsappWrap: { marginBottom: '20px' },
@@ -558,15 +395,15 @@ const styles = {
         justifyContent: 'space-between', maxWidth: '1200px',
         margin: '0 auto', flexWrap: 'wrap', gap: '8px', boxSizing: 'border-box',
     },
-    copyright: { fontFamily: "'Outfit', sans-serif", fontSize: '12px', color: '#64748b', margin: 0, fontWeight: 400 },
+    copyright: { fontFamily: "var(--font-outfit), sans-serif", fontSize: '12px', color: '#64748b', margin: 0, fontWeight: 400 },
     crafted: {
-        fontFamily: "'Outfit', sans-serif", fontSize: '12px', fontWeight: 700,
+        fontFamily: "var(--font-outfit), sans-serif", fontSize: '12px', fontWeight: 700,
         letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b', margin: 0,
     },
     footerRoot: { padding: '56px 0 24px' },
 };
 
-export default function Footer() {
+function Footer() {
     const { openModal } = useContactModal();
     const [activeFaq, setActiveFaq] = useState(null);
 
@@ -590,14 +427,13 @@ export default function Footer() {
 
     return (
         <footer className="footer-root" style={styles.footerRoot}>
-            <style dangerouslySetInnerHTML={{ __html: footerStyles }} />
+            <style>{footerStyles}</style>
 
             <div className="footer-dither-overlay" />
             <div className="footer-glow" />
             <div className="footer-divider-top" />
 
-            {/* ── SECTION 1: FREQUENTLY ASKED QUESTIONS ── */}
-            <div className="faq-section">
+            <div className="faq-section sx-anim sx-fade-up">
                 <div className="faq-header">
                     <span className="faq-eyebrow">
                         <span className="faq-eyebrow-dot" />
@@ -640,22 +476,18 @@ export default function Footer() {
                 </div>
             </div>
 
-            {/* Separator Divider Line Between FAQ and Footer */}
             <hr className="faq-footer-divider" />
 
-            {/* ── SECTION 2: FOOTER MAIN CONTENT ── */}
             <div className="footer-content">
                 <div className="footer-main-grid">
-
-                    {/* Brand */}
                     <div className="footer-area-brand">
                         <Image src={xLogo} alt="StudioX" width={36} height={36} style={styles.brandLogo} />
                         <p className="footer-brand-desc">
                             Building digital products for the next generation of startups and enterprises.
                         </p>
                         <div className="footer-desktop-contact">
-                            <div style={styles.mailWrap}><MailButton href="/" /></div>
-                            <div style={styles.whatsappWrap}><WhatsAppButton href="/" /></div>
+                            <div style={styles.mailWrap}><MailButton href="mailto:contact@studioxenos.com" /></div>
+                            <div style={styles.whatsappWrap}><WhatsAppButton href="https://wa.me/" /></div>
                         </div>
                         <p className="footer-col-title" style={styles.socialTitle}>Social Media</p>
                         <div style={styles.socialRow}>
@@ -667,7 +499,6 @@ export default function Footer() {
 
                     {linkColumns}
 
-                    {/* Robot + CTA */}
                     <div className="footer-area-cta">
                         <div className="footer-robot-wrap">
                             <Image src={robot} alt="Robot" width={95} height={95} style={styles.robotImg} />
@@ -676,7 +507,6 @@ export default function Footer() {
                             Contact Us →
                         </button>
                     </div>
-
                 </div>
 
                 <hr className="footer-divider-bottom" />
@@ -692,3 +522,5 @@ export default function Footer() {
         </footer>
     );
 }
+
+export default memo(Footer);

@@ -10,7 +10,9 @@ body {
     min-height: 100%;
     touch-action: pan-y;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
 }
 
 :root {
@@ -138,19 +140,25 @@ body {
     margin: 0;
     background-color: var(--bg-primary) !important;
     color: var(--text-primary) !important;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    font-family: var(--font-outfit), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* ── Global Entrance Animations ── */
+/* ── Hardware Acceleration & GPU Layer Optimization ── */
+.gpu-layer {
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: transform, opacity;
+}
 
+/* ── Global Keyframes ── */
 @keyframes fadeIn {
     from {
         opacity: 0;
     }
-
     to {
         opacity: 1;
     }
@@ -159,49 +167,153 @@ body {
 @keyframes slideUp {
     from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translate3d(0, 30px, 0);
     }
-
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translate3d(0, 0, 0);
     }
 }
 
 @keyframes slideDown {
     from {
         opacity: 0;
-        transform: translateY(-30px);
+        transform: translate3d(0, -30px, 0);
     }
-
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translate3d(0, 0, 0);
     }
 }
 
 @keyframes slideLeft {
     from {
         opacity: 0;
-        transform: translateX(30px);
+        transform: translate3d(30px, 0, 0);
     }
-
     to {
         opacity: 1;
-        transform: translateX(0);
+        transform: translate3d(0, 0, 0);
     }
 }
 
 @keyframes slideRight {
     from {
         opacity: 0;
-        transform: translateX(-30px);
+        transform: translate3d(-30px, 0, 0);
     }
-
     to {
         opacity: 1;
-        transform: translateX(0);
+        transform: translate3d(0, 0, 0);
     }
+}
+
+@keyframes heroFadeUp {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 30px, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes lineGrow {
+    0% {
+        transform: scaleX(0);
+        opacity: 0;
+    }
+    100% {
+        transform: scaleX(1);
+        opacity: 1;
+    }
+}
+
+@keyframes arrowFloat {
+    0%, 100% {
+        transform: translate3d(0, 0, 0);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translate3d(0, 5px, 0);
+        opacity: 1;
+    }
+}
+
+@keyframes bubblePop {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 15px, 0) scale(0.90);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes sxMarqueeLeft {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+@keyframes sxMarqueeRight {
+    0% {
+        transform: translate3d(-50%, 0, 0);
+    }
+    100% {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes sxShimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    20%      { transform: translate3d(-6px, 0, 0); }
+    40%      { transform: translate3d(6px, 0, 0); }
+    60%      { transform: translate3d(-4px, 0, 0); }
+    80%      { transform: translate3d(4px, 0, 0); }
+}
+
+/* ── Scroll Animation Utility Classes (IntersectionObserver Driven) ── */
+.sx-anim {
+    opacity: 0;
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sx-fade-up {
+    transform: translate3d(0, 30px, 0);
+}
+
+.sx-fade-down {
+    transform: translate3d(0, -30px, 0);
+}
+
+.sx-fade-right {
+    transform: translate3d(-30px, 0, 0);
+}
+
+.sx-fade-in {
+    transform: translate3d(0, 0, 0);
+}
+
+.sx-anim.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
 }
 
 /* Reusable Animation Utility Classes with GPU Layer Acceleration */
@@ -228,4 +340,14 @@ body {
 .animate-slide-right {
     animation: slideRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     will-change: transform, opacity;
+}
+
+/* ── Prefers-reduced-motion Support ── */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }

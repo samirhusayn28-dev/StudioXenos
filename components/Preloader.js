@@ -3,6 +3,7 @@
 export function normalizeManifest(manifest = {}) {
     const images = Array.isArray(manifest.images) ? manifest.images : [];
     const fetchables = Array.isArray(manifest.fetchables) ? manifest.fetchables : [];
+    const fonts = Array.isArray(manifest.fonts) ? manifest.fonts : [];
 
     const normalizeUrl = (value) => {
         if (typeof value !== 'string') return null;
@@ -16,17 +17,24 @@ export function normalizeManifest(manifest = {}) {
             : (withoutQuery.startsWith('/') ? withoutQuery : `/${withoutQuery}`);
     };
 
+    const normalizeFontUrl = (value) => {
+        if (typeof value !== 'string') return null;
+        const trimmed = value.trim();
+        return trimmed || null;
+    };
+
     return {
         images: Array.from(new Set(images.map(normalizeUrl).filter(Boolean))),
         fetchables: Array.from(new Set(fetchables.map(normalizeUrl).filter(Boolean))),
+        fonts: Array.from(new Set(fonts.map(normalizeFontUrl).filter(Boolean))),
     };
 }
 
 export async function preloadAssets(manifest = {}, onProgress = () => { }) {
     if (typeof window === 'undefined') return;
 
-    const { images, fetchables } = normalizeManifest(manifest);
-    const totalUnits = images.length + fetchables.length;
+    const { images, fetchables, fonts } = normalizeManifest(manifest);
+    const totalUnits = images.length + fetchables.length + fonts.length;
     let loadedUnits = 0;
 
     if (totalUnits === 0) {
@@ -55,7 +63,13 @@ export async function preloadAssets(manifest = {}, onProgress = () => { }) {
             .catch((err) => report({ type: 'fetch-error', url, err }))
     );
 
-    await Promise.allSettled([...imagePromises, ...fetchPromises]);
+    const fontPromises = fonts.map((url) =>
+        fetch(url, { method: 'GET' })
+            .then(() => report({ type: 'font-complete', url }))
+            .catch((err) => report({ type: 'font-error', url, err }))
+    );
+
+    await Promise.allSettled([...imagePromises, ...fetchPromises, ...fontPromises]);
 }
 
 export default preloadAssets;

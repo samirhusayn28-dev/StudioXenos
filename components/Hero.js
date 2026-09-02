@@ -1,77 +1,74 @@
 'use client';
 
-// src/components/Hero.jsx
 import React, { useRef, useEffect, useState, useCallback, memo } from "react";
 import Navbar from "./Navbar";
-import Robot3D from "../components/Robot3D";
+import Robot3D from "./Robot3D";
+import { useContactModal } from "./ContactModal";
 
 const heroStyles = `
-  /* ── heroStyles ── */
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Outfit:wght@300;400;500;600&family=Poppins:wght@600;700;800&display=swap');
-
-/* ── Responsive Title Sizing & Theme Variable Mapping ── */
 .hero-h1, .hero-h3 {
-  font-family: 'Outfit', sans-serif;  
+  font-family: var(--font-outfit), sans-serif;  
   font-size: clamp(2.5rem, 5vw, 4.2rem);
   font-weight: 900;
   text-transform: uppercase;
   margin: 0;
   color: var(--text-primary);
+  opacity: 0;
 }
 
 .hero-h2 {
-  font-family: 'Outfit', sans-serif;  
+  font-family: var(--font-outfit), sans-serif;  
   font-size: clamp(2.5rem, 5vw, 4.2rem);
   font-weight: 900;
   text-transform: uppercase;
   margin: 0 0 2px 0;
-  background: linear-gradient(110deg, #2563eb 0%, #3b82f6 50%, #2563eb 100%);
+  background: linear-gradient(110deg, #2B68F6 0%, #93C5FD 50%, #2B68F6 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  opacity: 0;
+  background-size: 200% auto;
 }
 
-/* ── Hardware-Accelerated Pure CSS Keyframes ── */
-@keyframes heroFadeUp {
-  0%   { opacity: 0; transform: translate3d(0, 14px, 0); }
-  100% { opacity: 1; transform: translate3d(0, 0, 0); }
+@keyframes robotSync {
+  0% { 
+    transform: translate3d(var(--mover-start-x), var(--mover-start-y), 0) scale(var(--mover-start-scale)); 
+  }
+  68% {
+    transform: translate3d(var(--mover-start-x), var(--mover-start-y), 0) scale(var(--mover-start-scale));
+  }
+  100% { 
+    transform: translate3d(0, 10%, 0) scale(1);
+  }
 }
 
-@keyframes lineGrow {
-  0%   { transform: scaleX(0); opacity: 0; }
-  100% { transform: scaleX(1); opacity: 1; }
+.is-loaded .hero-h1  { animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 2.55s both; }
+.is-loaded .hero-h2  { animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 2.65s both; }
+.is-loaded .hero-h3  { animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 2.75s both; }
+.is-loaded .hero-hr  { animation: lineGrow   0.7s cubic-bezier(0.22, 1, 0.36, 1) 2.85s both; }
+.is-loaded .hero-sub { animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 2.95s both; }
+.is-loaded .hero-btn { animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 3.05s both; }
+.is-loaded .hero-scroll-arrow { animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 3.15s both; }
+.is-loaded .robot-bubble-wrap { animation: bubblePop 0.8s cubic-bezier(0.22, 1, 0.36, 1) 3.25s both; }
+
+.is-loaded .hero-robot-mover {
+  animation: robotSync 2.5s cubic-bezier(0.76, 0, 0.24, 1) forwards;
 }
 
-@keyframes arrowFloat {
-  0%, 100% { transform: translate3d(0, 0, 0); opacity: 0.6; }
-  50%       { transform: translate3d(0, 5px, 0); opacity: 1; }
-}
-
-@keyframes bubblePop {
-  0%   { opacity: 0; transform: translate3d(0, 8px, 0) scale(0.95); }
-  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-/* ── GPU-Accelerated CSS Entry Classes ── */
-.hero-h1  { animation: heroFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.20s both; will-change: transform, opacity; }
-.hero-h2  { animation: heroFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.32s both; will-change: transform, opacity; }
-.hero-h3  { animation: heroFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.44s both; will-change: transform, opacity; }
-.hero-hr  { 
-  animation: lineGrow 0.5s cubic-bezier(0.16,1,0.3,1) 0.54s both; 
+.hero-hr { 
   transform-origin: left; 
-  will-change: transform;
   width: 38px;
   height: 2px;
   background: var(--hr-color);
   border-radius: 2px;
   margin: 16px 0 14px;
+  opacity: 0;
 }
 
 .hero-sub { 
-  animation: heroFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.62s both; 
-  will-change: transform, opacity; 
+  opacity: 0;
   font-size: clamp(0.85rem, 1.2vw, 1.05rem);
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   line-height: 1.55;
   color: var(--text-sub);
   margin: 0 0 22px;
@@ -79,12 +76,12 @@ const heroStyles = `
   max-width: 400px;
 }
 
-.hero-btn { animation: heroFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.72s both; will-change: transform, opacity; }
-.hero-scroll-arrow { animation: heroFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.85s both; }
-.hero-arrow-icon   { animation: arrowFloat 1.8s ease-in-out infinite; will-change: transform; }
+.hero-btn { opacity: 0; }
+.hero-scroll-arrow { opacity: 0; }
+.hero-arrow-icon { animation: arrowFloat 2.2s ease-in-out infinite; }
 
 .hero-scroll-text {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -92,9 +89,8 @@ const heroStyles = `
   font-weight: 500;
 }
 
-/* ── CTA Button ── */
 .hero-book-btn {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
   position: relative;
   overflow: hidden;
   background: var(--btn-bg);
@@ -107,17 +103,17 @@ const heroStyles = `
   padding: 11px 28px;
   cursor: pointer;
   white-space: nowrap;
-  will-change: transform;
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.3s cubic-bezier(0.76, 0, 0.24, 1), background-color 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 4px 14px var(--card-shadow);
-}
-.hero-book-btn:hover {
-  transform: translate3d(0, -2px, 0);
-  background: #1d4ed8;
-  box-shadow: 0 6px 20px var(--card-shadow-h);
+  will-change: transform;
 }
 
-/* ── Scroll Button ── */
+.hero-book-btn:hover {
+  transform: translate3d(0, -2px, 0);
+  background-color: #2B68F6; 
+  box-shadow: 0 6px 20px rgba(43, 104, 246, 0.25);
+}
+
 .hero-scroll-btn {
   background: none; border: none; cursor: pointer;
   display: flex; flex-direction: column; align-items: center;
@@ -125,11 +121,8 @@ const heroStyles = `
 }
 .hero-scroll-btn:hover { opacity: 0.75; }
 
-/* ── Lightweight CSS Chat Bubble ── */
-.robot-bubble-wrap { 
-  animation: bubblePop 0.4s cubic-bezier(0.16,1,0.3,1) 0.6s both; 
-  will-change: transform, opacity; 
-}
+.robot-bubble-wrap { opacity: 0; }
+
 .robot-bubble-box {
   position: relative;
   background: var(--card-bg);
@@ -139,75 +132,82 @@ const heroStyles = `
   border-radius: 10px;
   padding: 10px 14px;
   max-width: 210px;
-  box-shadow: 0 8px 24px var(--card-shadow-h);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
 }
 
 .robot-name-badge { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-.robot-name-dot { width: 5px; height: 5px; border-radius: 50%; background: #2563eb; }
+.robot-name-dot { width: 5px; height: 5px; border-radius: 50%; background: #2B68F6; } 
 .robot-name-text {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
   font-size: 9.5px; font-weight: 700;
   letter-spacing: 0.14em; text-transform: uppercase;
-  color: #2563eb;
+  color: #2B68F6; 
 }
 .robot-bubble-msg {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   font-size: 12px; font-weight: 400; line-height: 1.45;
   color: var(--text-primary); margin: 0;
 }
 
 .robot-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
 .robot-chip {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   font-size: 10px; font-weight: 500;
   padding: 3px 8px; border-radius: 6px;
   border: 1px solid var(--card-border);
-  background: rgba(37, 99, 235, 0.08);
-  color: #2563eb; cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease;
+  background: rgba(43, 104, 246, 0.08); 
+  color: #2B68F6; 
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 .robot-chip:hover {
-  background: rgba(37, 99, 235, 0.15);
+  background-color: rgba(43, 104, 246, 0.15); 
   transform: translate3d(0, -1px, 0);
 }
 
 .robot-bubble-desktop {
-  position: absolute; top: 24%; left: -2%; z-index: 25;
+  position: absolute; 
+  top: 32%; 
+  left: -20%; 
+  z-index: 25;
 }
 
-/* ── Layout Setup ── */
 .hero-inner {
   position: absolute; inset: 0; z-index: 10;
   display: flex; align-items: center;
-  padding: 150px 7% 40px; overflow: hidden;
+  padding: 140px 7% 40px; overflow: hidden;
   box-sizing: border-box;
 }
+
 .hero-text-wrap {
   width: min(540px, 48%);
   position: relative; z-index: 2;
   display: flex; flex-direction: column; justify-content: center;
 }
+
 .hero-robot-wrap {
-  position: absolute; right: 1%; top: 8%; bottom: 6%;
-  width: 50%; height: 86%;
+  position: absolute; right: 2%; top: 0; bottom: 0;
+  width: 46%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: auto;
 }
 
-/* ── Reduced Motion ── */
-@media (prefers-reduced-motion: reduce) {
-  .hero-h1, .hero-h2, .hero-h3, .hero-hr, .hero-sub, .hero-btn,
-  .hero-scroll-arrow, .hero-arrow-icon, .robot-bubble-wrap {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
+.hero-robot-mover {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
 }
 
-/* ── Mobile/Tablet Adjustments ── */
 @media (max-width: 900px) {
   .hero-inner { padding: 80px 5% 30px; flex-direction: column; justify-content: center; text-align: center; }
   .hero-text-wrap {
     width: 100%;
-    top: 20%;
+    top: 18%;
     max-width: 100%;
     align-items: flex-start;
     justify-content: flex-end;
@@ -217,20 +217,19 @@ const heroStyles = `
   }
   .hero-robot-wrap {
     position: absolute;
-    top: 0%;
-    left: 30%;
-    transform: translateX(-50%);
+    top: 5%;
+    left: 50%;
+    transform: translate3d(-50%, 0, 0);
     width: 100%;
-    height: 70vh;
+    height: 65vh;
     z-index: 1;
-    pointer-events: auto;
   }
+  
   .hero-hr-line { margin: 14px auto !important; }
   .robot-bubble-desktop {
     position: absolute;
-    top: 20%;
-    right: -2%;
-    left: auto; 
+    top: 18%;
+    left: 4%; 
   }
 }
 `;
@@ -271,11 +270,20 @@ const XenosBubble = memo(function XenosBubble({ extraClass = "" }) {
     );
 });
 
-function Hero() {
+function Hero({ isLoaded }) {
     const sectionRef = useRef(null);
+    const { openModal } = useContactModal();
     const [isHeroVisible, setIsHeroVisible] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
 
-    // Optimized Intersection Observer using discrete state toggling to prevent redundant updates
+    useEffect(() => {
+        const mql = window.matchMedia('(max-width: 900px)');
+        setIsMobile(mql.matches);
+        const onChange = (e) => setIsMobile(e.matches);
+        mql.addEventListener('change', onChange);
+        return () => mql.removeEventListener('change', onChange);
+    }, []);
+
     useEffect(() => {
         const el = sectionRef.current;
         if (!el) return;
@@ -302,15 +310,7 @@ function Hero() {
         <section
             ref={sectionRef}
             id="home"
-            style={{
-                position: "relative",
-                width: "100%",
-                height: "100vh",
-                maxHeight: "100dvh",
-                overflow: "hidden",
-                fontFamily: "'Outfit', sans-serif",
-                background: "transparent",
-            }}
+            className={`relative w-full h-screen max-h-[100dvh] overflow-hidden bg-transparent ${isLoaded ? "is-loaded" : ""}`}
         >
             <style>{heroStyles}</style>
             <Navbar />
@@ -318,17 +318,9 @@ function Hero() {
             <div className="hero-inner">
                 <div className="hero-text-wrap">
                     <div style={{ lineHeight: 0.96, letterSpacing: "-0.02em" }}>
-                        <div className="hero-h1">
-                            Unleash the
-                        </div>
-
-                        <div className="hero-h2">
-                            Growth Potential
-                        </div>
-
-                        <div className="hero-h3">
-                            of your business
-                        </div>
+                        <div className="hero-h1">Unleash the</div>
+                        <div className="hero-h2">Growth Potential</div>
+                        <div className="hero-h3">of your business</div>
                     </div>
 
                     <div className="hero-hr hero-hr-line" />
@@ -338,12 +330,22 @@ function Hero() {
                     </p>
 
                     <div className="hero-btn">
-                        <button className="hero-book-btn">Book a Call →</button>
+                        <button className="hero-book-btn" onClick={openModal}>Book a Call →</button>
                     </div>
                 </div>
 
                 <div className="hero-robot-wrap">
-                    <Robot3D isHeroVisible={isHeroVisible} />
+                    <div
+                        className="hero-robot-mover"
+                        style={{
+                            '--mover-start-x': isMobile ? '0%' : '-53%',
+                            '--mover-start-y': isMobile ? '5%' : '18%',
+                            '--mover-start-scale': isMobile ? 0.5 : 0.7,
+                            transform: `translate3d(${isMobile ? '0%' : '-53%'}, ${isMobile ? '5%' : '18%'}, 0) scale(${isMobile ? 0.5 : 1})`
+                        }}
+                    >
+                        <Robot3D isHeroVisible={isHeroVisible} />
+                    </div>
                     <XenosBubble extraClass="robot-bubble-desktop" />
                 </div>
 
@@ -357,10 +359,8 @@ function Hero() {
                         zIndex: 30,
                     }}
                 >
-                    <button className="hero-scroll-btn" onClick={scrollToNext}>
-                        <span className="hero-scroll-text">
-                            Scroll
-                        </span>
+                    <button className="hero-scroll-btn" onClick={scrollToNext} aria-label="Scroll to services">
+                        <span className="hero-scroll-text">Scroll</span>
                         <div className="hero-arrow-icon">
                             <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
                                 <path

@@ -1,19 +1,16 @@
 'use client';
 
-// src/components/Services.jsx
 import React, { memo } from 'react';
 import Image from 'next/image';
 import services from '../data/services.json';
+import { useContactModal } from './ContactModal';
 
 const servicesStyles = `
- /* ── servicesStyles ── */
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Outfit:wght@300;400;500;600&family=Poppins:wght@600;700;800&display=swap');
-
 .srv-section {
   position: relative;
   width: 100%;
   gap: 50px;
-  height: 100vh;
+  min-height: 100vh;
   padding: 40px 5%;
   box-sizing: border-box;
   display: flex;
@@ -21,9 +18,8 @@ const servicesStyles = `
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   background-color: transparent;
-  scroll-snap-align: start;
 }
 
 /* ── Ambient Background Glow ── */
@@ -32,7 +28,7 @@ const servicesStyles = `
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate3d(-50%, -50%, 0);
   width: 80vw;
   height: 50vh;
   background: radial-gradient(ellipse, rgba(37, 99, 235, 0.06) 0%, transparent 70%);
@@ -51,7 +47,7 @@ const servicesStyles = `
 }
 
 .srv-header-title {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   font-size: clamp(36px, 5.5vw, 50px);
   font-weight: 900;
   text-transform: uppercase;
@@ -93,7 +89,8 @@ const servicesStyles = `
   flex-direction: column;
   justify-content: space-between;
   will-change: transform;
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 .srv-card:hover {
@@ -106,7 +103,7 @@ const servicesStyles = `
   position: absolute;
   top: 8px;
   right: 14px;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   font-size: 4rem;
   font-weight: 900;
   color: var(--text-muted);
@@ -136,7 +133,7 @@ const servicesStyles = `
 }
 
 .srv-card-heading {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   font-size: 1.55rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -179,7 +176,7 @@ const servicesStyles = `
 
 /* ── Sliding CTA Button ── */
 .srv-book-btn {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
   position: relative;
   overflow: hidden;
   background: var(--btn-bg);
@@ -198,14 +195,14 @@ const servicesStyles = `
   align-items: center;
   justify-content: center;
   will-change: transform;
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
   z-index: 1;
 }
 
 .srv-book-btn:hover {
   transform: translate3d(0, -2px, 0);
-  background: #1d4ed8;
+  background-color: #1d4ed8;
   box-shadow: 0 6px 18px rgba(37, 99, 235, 0.28);
 }
 
@@ -232,19 +229,6 @@ const servicesStyles = `
 .srv-book-btn:hover .txt-hover {
   transform: translate3d(0, 0, 0);
   opacity: 1;
-}
-
-/* ── Reduced Motion Support ── */
-@media (prefers-reduced-motion: reduce) {
-  .srv-card {
-    transition: none !important;
-  }
-  .srv-card:hover {
-    transform: none !important;
-  }
-  .srv-book-btn, .srv-book-btn:hover {
-    transform: none !important;
-  }
 }
 
 /* ── Mobile Layout Adjustments ── */
@@ -372,6 +356,8 @@ const servicesStyles = `
 `;
 
 function Services() {
+    const { openModal } = useContactModal();
+
     return (
         <section id="services" className="srv-section">
             <style>{servicesStyles}</style>
@@ -381,14 +367,13 @@ function Services() {
                 <p className="srv-subtitle">End-to-End digital engineering and design crafted to scale modern businesses.</p>
             </div>
 
-            <div className="srv-grid sx-stagger">
+            <div className="srv-grid">
                 {services.map((s, i) => (
                     <div key={i} className="sx-anim sx-fade-up" style={{ display: 'flex' }}>
                         <div className="srv-card">
                             <div>
                                 <span className="srv-card-num">{s.num}</span>
 
-                                {/* Icon & Heading Wrapper */}
                                 <div className="srv-card-top-row">
                                     <Image
                                         src={s.img}
@@ -407,7 +392,6 @@ function Services() {
                                 <p className="srv-card-desc">{s.desc}</p>
                             </div>
 
-                            {/* Feature Tags */}
                             <div className="srv-tags-wrapper">
                                 {s.tags.map((tag, idx) => (
                                     <span key={idx} className="srv-tag">{tag}</span>
@@ -418,7 +402,7 @@ function Services() {
                 ))}
             </div>
 
-            <button className="srv-book-btn">
+            <button className="srv-book-btn" onClick={openModal}>
                 <span className="txt-default">Book a Call</span>
                 <span className="txt-hover">LET&apos;S TALK</span>
             </button>

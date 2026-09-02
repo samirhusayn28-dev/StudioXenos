@@ -4,8 +4,6 @@ import galleryItems from '../data/gallery.json';
 
 const artStyles = `
 /* ── artStyles (Articles / Showcase Section) ── */
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Outfit:wght@300;400;500&family=Poppins:wght@600;700;800&display=swap');
-
 .art-section {
   background: transparent;
   transition: background 0.4s ease;
@@ -15,10 +13,11 @@ const artStyles = `
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  font-family: var(--font-outfit), sans-serif;
 }
 
 .art-explore-btn { 
-  font-family: 'Poppins', sans-serif; 
+  font-family: var(--font-poppins), sans-serif; 
   position: relative; 
   overflow: hidden; 
   background: var(--btn-bg, #2563eb); 
@@ -32,7 +31,7 @@ const artStyles = `
   cursor: pointer; 
   white-space: nowrap; 
   will-change: transform; 
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease; 
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); 
 } 
@@ -74,7 +73,7 @@ const artStyles = `
 } 
 
 .art-heading-line { 
-  font-family: 'Outfit', sans-serif; 
+  font-family: var(--font-outfit), sans-serif; 
   font-weight: 900; 
   text-transform: uppercase; 
   line-height: 0.92; 
@@ -95,7 +94,7 @@ const artStyles = `
 } 
 
 .art-sub { 
-  font-family: 'Outfit', sans-serif; 
+  font-family: var(--font-outfit), sans-serif; 
   font-size: 15px; 
   line-height: 1.85; 
   color: var(--text-sub); 
@@ -113,7 +112,7 @@ const artStyles = `
   display: flex;
   justify-content: center;
   align-items: center;
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
 }
 
 @media (max-width: 1024px) and (min-width: 768px) {

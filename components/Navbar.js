@@ -1,11 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, memo, useCallback, useRef } from 'react';
-import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import navLinks from '../data/navLinks.json';
 
-// Inline SVG icons map for navigation links using primary colors
 const navIcons = {
     hero: (
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -56,8 +54,6 @@ const navIcons = {
 };
 
 const navbarStyles = `
-  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap');
-
   .hero-nav-container {
     position: fixed;
     top: 0;
@@ -68,13 +64,14 @@ const navbarStyles = `
     align-items: center;
     padding-top: 30px;
     box-sizing: border-box;
-    z-index: 9999;
+    z-index: 999;
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
     will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
   }
 
   .hero-nav-container.nav-hidden {
-    transform: translateY(-120%);
+    transform: translate3d(0, -120%, 0);
     opacity: 0;
     pointer-events: none;
   }
@@ -103,6 +100,11 @@ const navbarStyles = `
     border-radius: 999px;
     object-fit: contain;
     cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .nav-logo:hover {
+    transform: scale(1.02);
   }
 
   .nav-links-desktop {
@@ -125,7 +127,7 @@ const navbarStyles = `
     letter-spacing: 0.04em;
     text-transform: uppercase;
     padding: 6px 12px;
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-outfit), sans-serif;
     border-radius: 6px;
     transition: background 0.15s ease, color 0.15s ease;
   }
@@ -162,7 +164,8 @@ const navbarStyles = `
     height: 1.5px;
     background: currentColor;
     display: block;
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    will-change: transform, opacity;
   }
 
   .mobile-dropdown {
@@ -177,6 +180,7 @@ const navbarStyles = `
     display: flex;
     flex-direction: column;
     gap: 4px;
+    animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   .mobile-nav-link {
@@ -185,7 +189,7 @@ const navbarStyles = `
     gap: 10px;
     color: var(--text-primary, #0f172a);
     text-decoration: none;
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-outfit), sans-serif;
     font-size: 0.82rem;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -218,20 +222,15 @@ const navbarStyles = `
 
 function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
-    const [mounted, setMounted] = useState(false);
-    const [isReady, setIsReady] = useState(false); // Controls the initial load delay
+    const [isReady, setIsReady] = useState(false);
     const [visible, setVisible] = useState(true);
     const lastScrollY = useRef(0);
     const ticking = useRef(false);
 
     useEffect(() => {
-        setMounted(true);
-
-        // Adjust the delay time (in milliseconds) here. 
-        // For example, 500ms will wait half a second before sliding/fading the navbar down.
         const timer = setTimeout(() => {
             setIsReady(true);
-        }, 700);
+        }, 500);
 
         return () => clearTimeout(timer);
     }, []);
@@ -271,13 +270,11 @@ function Navbar() {
         el.scrollIntoView({ behavior: 'smooth' });
     }, []);
 
-    if (!mounted) return null;
-
-    return createPortal(
+    return (
         <header className={`hero-nav-container ${(!isReady || !visible) ? 'nav-hidden' : ''}`}>
             <style>{navbarStyles}</style>
 
-            <div className="hero-nav-inner">
+            <nav className="hero-nav-inner" aria-label="Main Navigation">
                 <Image
                     src="/assets/StudioX.png"
                     alt="StudioX Logo"
@@ -311,10 +308,11 @@ function Navbar() {
                         onClick={() => setMenuOpen(!menuOpen)}
                         className="hamburger-btn"
                         aria-label="Toggle menu"
+                        aria-expanded={menuOpen}
                     >
                         <span
                             className="hamburger-bar"
-                            style={menuOpen ? { transform: 'translateY(6.5px) rotate(45deg)' } : undefined}
+                            style={menuOpen ? { transform: 'translate3d(0, 6.5px, 0) rotate(45deg)' } : undefined}
                         />
                         <span
                             className="hamburger-bar"
@@ -322,11 +320,11 @@ function Navbar() {
                         />
                         <span
                             className="hamburger-bar"
-                            style={menuOpen ? { transform: 'translateY(-6.5px) rotate(-45deg)' } : undefined}
+                            style={menuOpen ? { transform: 'translate3d(0, -6.5px, 0) rotate(-45deg)' } : undefined}
                         />
                     </button>
                 </div>
-            </div>
+            </nav>
 
             {menuOpen && (
                 <div className="mobile-dropdown">
@@ -346,8 +344,7 @@ function Navbar() {
                     ))}
                 </div>
             )}
-        </header>,
-        document.body
+        </header>
     );
 }
 

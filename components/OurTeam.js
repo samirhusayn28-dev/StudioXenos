@@ -7,7 +7,7 @@ const css = `
   .t-section {
     background: transparent;
     padding: 50px 0;
-    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-outfit), sans-serif;
     width: 100%;
     box-sizing: border-box;
     contain: paint layout;
@@ -78,25 +78,6 @@ const css = `
     background: linear-gradient(to left, var(--bg-main, #f0f4f9) 0%, rgba(240, 244, 249, 0) 100%);
   }
 
-  /* ── Pure CSS Continuous Marquee Keyframes ── */
-  @keyframes sxMarqueeLeft {
-    0% {
-      transform: translate3d(0, 0, 0);
-    }
-    100% {
-      transform: translate3d(-50%, 0, 0);
-    }
-  }
-
-  @keyframes sxMarqueeRight {
-    0% {
-      transform: translate3d(-50%, 0, 0);
-    }
-    100% {
-      transform: translate3d(0, 0, 0);
-    }
-  }
-
   .t-track-css-left {
     display: flex;
     width: max-content;
@@ -130,13 +111,14 @@ const css = `
     justify-content: space-between;
     box-sizing: border-box;
     min-height: 210px;
-    transform: translateZ(0);
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
     backface-visibility: hidden;
     transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   }
 
   .t-card:hover {
-    transform: translateY(-2px);
+    transform: translate3d(0, -2px, 0);
     border-color: rgba(37, 99, 235, 0.25);
     box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
   }
@@ -221,7 +203,6 @@ const css = `
     text-overflow: ellipsis;
   }
 
-  /* ── TABLET BREAKPOINT ── */
   @media (max-width: 900px) {
     .t-section { padding: 40px 0; }
     .t-header { margin-bottom: 32px; }
@@ -235,7 +216,6 @@ const css = `
     .t-track-css-left, .t-track-css-right { animation-duration: 26s; }
   }
 
-  /* ── MOBILE BREAKPOINT (Optimized down to 360px) ── */
   @media (max-width: 640px) {
     .t-section { padding: 30px 0; }
     .t-header {
@@ -276,12 +256,6 @@ const css = `
     .t-role { font-size: 10px; }
     .t-track-css-left, .t-track-css-right { animation-duration: 20s; }
   }
-
-  @media (prefers-reduced-motion: reduce) {
-    .t-track-css-left, .t-track-css-right {
-      animation: none !important;
-    }
-  }
 `;
 
 const TestimonialCard = memo(function TestimonialCard({ item }) {
@@ -311,31 +285,25 @@ const TestimonialCard = memo(function TestimonialCard({ item }) {
     );
 });
 
-const GlobalStyle = memo(function GlobalStyle() {
-    return <style>{css}</style>;
-});
-
 const rowOne = testimonials.slice(0, 3);
 const rowTwo = testimonials.slice(3, 6);
 
-// Quadrupling elements guarantees seamless looping with no layout popping at bounds
 const rowOneRepeated = [...rowOne, ...rowOne, ...rowOne, ...rowOne];
 const rowTwoRepeated = [...rowTwo, ...rowTwo, ...rowTwo, ...rowTwo];
 
-export default function Testimonials() {
+function Testimonials() {
     return (
         <section id="testimonials" className="t-section">
-            <GlobalStyle />
+            <style>{css}</style>
 
-            <div className="t-header">
+            <div className="t-header sx-anim sx-fade-down">
                 <h2 className="t-title">
                     What <span className="t-title-blue">People Say About Us</span>
                 </h2>
                 <div className="t-divider" />
             </div>
 
-            <div className="t-marquee-wrap">
-                {/* Row 1: Smooth Left CSS Marquee */}
+            <div className="t-marquee-wrap sx-anim sx-fade-in">
                 <div className="t-marquee">
                     <div className="t-track-css-left">
                         {rowOneRepeated.map((item, i) => (
@@ -344,7 +312,6 @@ export default function Testimonials() {
                     </div>
                 </div>
 
-                {/* Row 2: Smooth Right CSS Marquee */}
                 <div className="t-marquee">
                     <div className="t-track-css-right">
                         {rowTwoRepeated.map((item, i) => (
@@ -356,3 +323,5 @@ export default function Testimonials() {
         </section>
     );
 }
+
+export default memo(Testimonials);

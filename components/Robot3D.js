@@ -35,7 +35,6 @@ const robotStyles = `
     animation: robotFloatContainer 4s ease-in-out infinite;
   }
 
-  /* Optimized: Smaller footprint and simplified gradient to prevent GPU lag */
   .robot-pure-glow {
     position: absolute;
     top: 45%;
@@ -121,7 +120,7 @@ const Model = memo(function Model({ mouseX, mouseY, isMobile, isHovered }) {
 
 useGLTF.preload("/robot.glb");
 
-export default function Robot3D() {
+export default function Robot3D({ isHeroVisible = true }) {
     const mouseX = useRef(0);
     const mouseY = useRef(0);
     const containerRef = useRef(null);
@@ -190,9 +189,8 @@ export default function Robot3D() {
 
                 <Canvas
                     camera={cameraConfig}
-                    /* Capped DPR prevents heavy rendering lag on high-res displays */
-                    dpr={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 1.0) : 1}
-                    frameloop="always"
+                    dpr={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 1.5) : 1}
+                    frameloop={isHeroVisible ? "always" : "never"}
                     gl={{
                         antialias: false,
                         powerPreference: "high-performance",

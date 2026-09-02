@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, memo } from 'react';
 
 const DURATION = 6000;
 const EXIT_DURATION = 350;
@@ -26,6 +26,7 @@ const toastStyles = `
     max-width: 300px;
     width: calc(100vw - 48px);
     pointer-events: none;
+    font-family: var(--font-outfit), sans-serif;
   }
 
   .section-toast-card {
@@ -35,6 +36,7 @@ const toastStyles = `
 
   .section-toast-text {
     font-size: 12.5px;
+    font-family: var(--font-outfit), sans-serif;
   }
 
   @media (max-width: 900px) {
@@ -55,7 +57,7 @@ const toastStyles = `
   }
 `;
 
-export default function SectionToast() {
+function SectionToast() {
     const [stack, setStack] = useState([]);
 
     const lastTriggered = useRef(null);
@@ -129,6 +131,8 @@ export default function SectionToast() {
         const sections = document.querySelectorAll('[data-section]');
         if (!sections.length) return;
 
+        const currentTimers = timers.current;
+
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
@@ -149,7 +153,7 @@ export default function SectionToast() {
 
         return () => {
             observer.disconnect();
-            Object.values(timers.current).forEach(clearTimeout);
+            Object.values(currentTimers).forEach(clearTimeout);
         };
     }, [triggerToast]);
 
@@ -196,7 +200,7 @@ export default function SectionToast() {
     );
 }
 
-function ToastCard({ toast, onClose, showProgress }) {
+const ToastCard = memo(function ToastCard({ toast, onClose, showProgress }) {
     const progressRef = useRef(null);
 
     useEffect(() => {
@@ -275,7 +279,7 @@ function ToastCard({ toast, onClose, showProgress }) {
                     margin: 0,
                     lineHeight: 1.45,
                     color: 'rgba(15, 23, 42, 0.88)',
-                    fontFamily: "'Outfit', sans-serif",
+                    fontFamily: "var(--font-outfit), sans-serif",
                     fontWeight: 500,
                 }}
             >
@@ -283,4 +287,6 @@ function ToastCard({ toast, onClose, showProgress }) {
             </p>
         </div>
     );
-}
+});
+
+export default memo(SectionToast);

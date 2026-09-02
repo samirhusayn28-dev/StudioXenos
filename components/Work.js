@@ -2,15 +2,11 @@
 
 import React, { memo, useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import rawSteps from '../data/howWeWork.json';
 
-const robot1 = '/assets/Robot.png';
-const robot2 = '/assets/Robot2.png';
-const robot3 = '/assets/Robot1.png';
 const shadow = '/assets/Shadow.png';
 
 const workStyles = `
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
-
 .work-section {
   background-color: transparent;
   width: 100%;
@@ -23,7 +19,7 @@ const workStyles = `
   align-items: center;
   position: relative;
   overflow: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: var(--font-outfit), sans-serif;
   contain: paint style;
 }
 
@@ -44,32 +40,25 @@ const workStyles = `
   background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, transparent 70%);
   top: 45%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate3d(-50%, -50%, 0);
   z-index: 0;
   pointer-events: none;
   filter: blur(40px);
 }
 
-@keyframes sequentialFadeIn {
-  from { 
-    opacity: 0; 
-    transform: translate3d(0, 15px, 0); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translate3d(0, 0, 0); 
-  }
+@keyframes slideUp {
+  from { opacity: 0; transform: translate3d(0, 15px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes ropeDraw {
-  from {
-    stroke-dashoffset: 1500;
-    opacity: 0;
-  }
-  to {
-    stroke-dashoffset: 0;
-    opacity: 1;
-  }
+  from { stroke-dashoffset: 1500; opacity: 0; }
+  to { stroke-dashoffset: 0; opacity: 1; }
 }
 
 .work-header {
@@ -82,11 +71,11 @@ const workStyles = `
 }
 
 .work-section.header-animated .work-header {
-  animation: sequentialFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .work-title {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   font-size: clamp(36px, 5.5vw, 50px);
   font-weight: 900;
   text-transform: uppercase;
@@ -104,7 +93,7 @@ const workStyles = `
 }
 
 .work-subtitle {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   font-size: clamp(14px, 1.2vw, 16px);
   color: var(--text-muted);
   margin-top: 12px;
@@ -154,7 +143,7 @@ const workStyles = `
 }
 
 .work-section.content-animated .arrow-head {
-  animation: sequentialFadeIn 0.4s ease 0.9s both;
+  animation: fadeIn 0.4s ease 0.9s both;
 }
 
 .work-grid {
@@ -177,11 +166,11 @@ const workStyles = `
   opacity: 0;
   will-change: opacity, transform;
   backface-visibility: hidden;
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
 }
 
 .work-section.content-animated .work-card {
-  animation: sequentialFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @media (min-width: 1000px) {
@@ -199,7 +188,7 @@ const workStyles = `
 }
 
 .step-number {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   font-size: clamp(48px, 6vh, 70px);
   font-weight: 900;
   line-height: 0.8;
@@ -226,25 +215,26 @@ const workStyles = `
   object-fit: contain;
   position: relative;
   z-index: 2;
-  transition: transform 0.35s ease;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
 .work-card:hover .robot-img {
-  transform: translateY(-6px) scale(1.06);
+  transform: translate3d(0, -6px, 0) scale(1.06);
 }
 
 .shadow-img {
   position: absolute;
   bottom: -8px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate3d(-50%, 0, 0);
   width: 85%;
   z-index: 1;
   opacity: 0.4;
 }
 
 .step-tag {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -255,7 +245,7 @@ const workStyles = `
 }
 
 .card-title {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   font-size: clamp(17px, 2.1vh, 21px);
   font-weight: 800;
   text-transform: uppercase;
@@ -264,7 +254,7 @@ const workStyles = `
 }
 
 .card-desc {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   font-size: clamp(12px, 1.3vh, 13px);
   font-weight: 400;
   color: var(--text-muted);
@@ -282,13 +272,13 @@ const workStyles = `
   align-items: center;
   gap: 8px;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
-  transition: transform 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
 }
 
 .small-floating-card:hover {
-  transform: translateY(-3px);
+  transform: translate3d(0, -3px, 0);
 }
 
 .card-svg-icon {
@@ -298,56 +288,36 @@ const workStyles = `
 }
 
 .card-label-text {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-primary);
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .work-header,
-  .work-card,
-  .small-floating-card,
-  .robot-img,
-  .gradient-rope-path,
-  .arrow-head {
-    animation: none !important;
-    transition: none !important;
-    stroke-dashoffset: 0 !important;
-    opacity: 1 !important;
-  }
-
-  .work-card:hover .robot-img {
-    transform: none !important;
-  }
-}
 `;
 
-import rawSteps from '../data/howWeWork.json';
-
 const iconPaths = {
-    '01': <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>,
+    '01': <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
     '02': (
         <>
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+            <polyline points="10 9 9 9 8 9" />
         </>
     ),
     '03': (
         <>
-            <polyline points="16 18 22 12 16 6"></polyline>
-            <polyline points="8 6 2 12 8 18"></polyline>
+            <polyline points="16 18 22 12 16 6" />
+            <polyline points="8 6 2 12 8 18" />
         </>
     ),
     '04': (
         <>
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            <polyline points="9 12 11 14 15 10"></polyline>
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <polyline points="9 12 11 14 15 10" />
         </>
     ),
 };
@@ -382,7 +352,7 @@ const StepCard = memo(function StepCard({ step }) {
     );
 });
 
-export default function Work() {
+function Work() {
     const headerRef = useRef(null);
     const contentRef = useRef(null);
 
@@ -391,8 +361,9 @@ export default function Work() {
 
     useEffect(() => {
         const isDesktop = window.matchMedia('(min-width: 1000px)').matches;
+        const headerEl = headerRef.current;
+        const contentEl = contentRef.current;
 
-        // Dynamic thresholds based on device view
         const headerThreshold = isDesktop ? 0.2 : 0.5;
         const contentThreshold = isDesktop ? 0.5 : 0.2;
 
@@ -400,7 +371,7 @@ export default function Work() {
             ([entry]) => {
                 if (entry.isIntersecting) {
                     setHeaderAnimated(true);
-                    if (headerRef.current) headerObserver.unobserve(headerRef.current);
+                    if (headerEl) headerObserver.unobserve(headerEl);
                 }
             },
             { threshold: headerThreshold }
@@ -410,14 +381,14 @@ export default function Work() {
             ([entry]) => {
                 if (entry.isIntersecting) {
                     setContentAnimated(true);
-                    if (contentRef.current) contentObserver.unobserve(contentRef.current);
+                    if (contentEl) contentObserver.unobserve(contentEl);
                 }
             },
             { threshold: contentThreshold }
         );
 
-        if (headerRef.current) headerObserver.observe(headerRef.current);
-        if (contentRef.current) contentObserver.observe(contentRef.current);
+        if (headerEl) headerObserver.observe(headerEl);
+        if (contentEl) contentObserver.observe(contentEl);
 
         return () => {
             headerObserver.disconnect();
@@ -478,3 +449,5 @@ export default function Work() {
         </section>
     );
 }
+
+export default memo(Work);

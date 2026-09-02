@@ -72,7 +72,7 @@ const contactModalStyles = `
     width: 100%; background: #f8fafc;
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 8px; padding: 14px 16px;
-    font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 400;
+    font-family: var(--font-outfit), sans-serif; font-size: 14px; font-weight: 400;
     color: #0f172a; outline: none; box-sizing: border-box;
     transition: border-color 0.2s ease, background 0.2s ease;
     resize: none;
@@ -91,7 +91,7 @@ const contactModalStyles = `
   .shake { animation: shake 0.4s ease; }
 
   .modal-submit-btn {
-    font-family: 'Outfit', sans-serif; font-size: 14px;
+    font-family: var(--font-outfit), sans-serif; font-size: 14px;
     font-weight: 700; letter-spacing: 0.04em;
     padding: 13px 32px; border-radius: 8px; cursor: pointer;
     border: none; background: #2563eb;
@@ -104,7 +104,7 @@ const contactModalStyles = `
   .modal-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .modal-warning {
-    font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 500;
+    font-family: var(--font-outfit), sans-serif; font-size: 13px; font-weight: 500;
     color: #ef4444; margin-top: 10px; text-align: center;
     opacity: 0; transition: opacity 0.2s ease;
   }
@@ -118,19 +118,19 @@ const styles = {
         display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px',
     },
     successTitle: {
-        fontFamily: "'Outfit', sans-serif",
+        fontFamily: "var(--font-outfit), sans-serif",
         fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 900,
         textTransform: 'uppercase', lineHeight: 1.1,
         color: '#0f172a', marginBottom: '14px',
     },
     successBody: {
-        fontFamily: "'Outfit', sans-serif", fontSize: '14px',
+        fontFamily: "var(--font-outfit), sans-serif", fontSize: '14px',
         fontWeight: 400, color: '#64748b',
         lineHeight: 1.6, maxWidth: '340px', margin: '0 auto',
     },
     headingWrap: { marginBottom: '28px' },
     headingTitle: {
-        fontFamily: "'Outfit', sans-serif",
+        fontFamily: "var(--font-outfit), sans-serif",
         fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 900,
         textTransform: 'uppercase', lineHeight: 1.1,
         color: '#0f172a', marginBottom: '8px',
@@ -139,7 +139,7 @@ const styles = {
         color: '#2563eb',
     },
     headingSub: {
-        fontFamily: "'Outfit', sans-serif", fontSize: '14px',
+        fontFamily: "var(--font-outfit), sans-serif", fontSize: '14px',
         fontWeight: 400, color: '#64748b', margin: 0,
     },
     fieldsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' },
