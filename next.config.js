@@ -10,6 +10,18 @@ const nextConfig = {
                 protocol: 'https',
                 hostname: 'encrypted-tbn0.gstatic.com',
             },
+            {
+                protocol: 'https',
+                hostname: 'play-lh.googleusercontent.com',
+            },
+            {
+                protocol: 'https',
+                hostname: 'raw.githubusercontent.com',
+            },
+            {
+                protocol: 'https',
+                hostname: 'private-user-images.githubusercontent.com',
+            }
         ],
     },
 };
