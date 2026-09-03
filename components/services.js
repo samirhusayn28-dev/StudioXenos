@@ -1,6 +1,6 @@
 'use client';
 
-import React, { memo } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import services from '../data/services.json';
 import { useContactModal } from './ContactModal';
@@ -11,7 +11,7 @@ const servicesStyles = `
   width: 100%;
   gap: 40px;
   min-height: 100vh;
-  padding: 140px 5% 100px 5%;
+  padding: 20px 5% 80px 5%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -20,9 +20,9 @@ const servicesStyles = `
   overflow: visible;
   font-family: var(--font-outfit), sans-serif;
   background-color: transparent;
+  contain: layout style;
 }
 
-/* ── Ambient Background Glow ── */
 .srv-section::before {
   content: '';
   position: absolute;
@@ -34,16 +34,13 @@ const servicesStyles = `
   background: radial-gradient(ellipse, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
-  will-change: transform;
 }
 
-/* ── Header Titles ── */
-/* ── Header Titles ── */
 .srv-header {
   text-align: center;
-  margin-bottom: 30px; /* Increased slightly to give the stack room */
+  margin-bottom: 24px;
   position: relative;
-  z-index: 50; /* Forced high to stay above the 3D cards */
+  z-index: 50;
   max-width: 600px;
 }
 
@@ -65,7 +62,6 @@ const servicesStyles = `
   font-weight: 400;
 }
 
-/* ── Cards Grid (3D Perspective Container) ── */
 .srv-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -74,8 +70,9 @@ const servicesStyles = `
   max-width: 1320px;
   margin-bottom: 20px;
   position: relative;
-  z-index: 1;
-  perspective: 1200px; /* Enables true 3D spatial transforms */
+  z-index: 10;
+  perspective: 1000px;
+  transform-style: preserve-3d;
 }
 
 .srv-card-wrapper {
@@ -83,8 +80,7 @@ const servicesStyles = `
   width: 100%;
   transform-style: preserve-3d;
   will-change: transform, opacity;
-  /* Disable CSS transitions here so JS scroll loop has full, smooth control without conflict */
-  transition: none !important; 
+  position: relative;
 }
 
 .srv-card {
@@ -93,20 +89,22 @@ const servicesStyles = `
   background: #ffffff;
   border-radius: 16px;
   padding: 24px 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   backface-visibility: hidden;
-  transform: translateZ(0); /* Force GPU layer instantiation */
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+  cursor: pointer;
 }
 
 .srv-card:hover {
-transition: transform 0.3s ease, box-shadow 0.3s ease;
-  transform: translate3d(0, -6px, 0) !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+  transform: translateY(-12px) scale(1.025) translateZ(30px) !important;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 0 0 25px rgba(41, 114, 235, 0.35);
+  border-color: rgba(41, 114, 235, 0.6);
 }
 
 .srv-card-num {
@@ -120,6 +118,12 @@ transition: transform 0.3s ease, box-shadow 0.3s ease;
   opacity: 0.1;
   pointer-events: none;
   line-height: 1;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.srv-card:hover .srv-card-num {
+  opacity: 0.25;
+  transform: scale(1.05);
 }
 
 .srv-card-top-row {
@@ -140,6 +144,11 @@ transition: transform 0.3s ease, box-shadow 0.3s ease;
   margin-bottom: 14px;
   position: relative;
   z-index: 2;
+  transition: transform 0.3s ease;
+}
+
+.srv-card:hover .srv-card-icon {
+  transform: scale(1.1) rotate(-3deg);
 }
 
 .srv-card-heading {
@@ -164,7 +173,6 @@ transition: transform 0.3s ease, box-shadow 0.3s ease;
   z-index: 2;
 }
 
-/* ── Service Tags ── */
 .srv-tags-wrapper {
   display: flex;
   flex-wrap: wrap;
@@ -182,9 +190,14 @@ transition: transform 0.3s ease, box-shadow 0.3s ease;
   background: rgba(41, 114, 235, 0.08);
   color: #2972EB;
   border: 1px solid rgba(41, 114, 235, 0.15);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-/* ── Sliding CTA Button ── */
+.srv-card:hover .srv-tag {
+  background: rgba(41, 114, 235, 0.14);
+  border-color: rgba(41, 114, 235, 0.3);
+}
+
 .srv-book-btn {
   font-family: var(--font-poppins), sans-serif;
   position: relative;
@@ -207,7 +220,7 @@ transition: transform 0.3s ease, box-shadow 0.3s ease;
   will-change: transform;
   transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-  z-index: 1;
+  z-index: 10;
 }
 
 .srv-book-btn:hover {
@@ -241,12 +254,11 @@ transition: transform 0.3s ease, box-shadow 0.3s ease;
   opacity: 1;
 }
 
-/* ── Mobile Layout Adjustments ── */
 @media (max-width: 950px) {
   .srv-section {
     height: auto;
     min-height: auto;
-    padding: 120px 20px 50px 20px;
+    padding: 20px 20px 50px 20px;
     overflow: visible;
     justify-content: flex-start;
   }
@@ -260,6 +272,7 @@ transition: transform 0.3s ease, box-shadow 0.3s ease;
 
   .srv-card-wrapper {
     transform: none !important;
+    opacity: 1 !important;
   }
 
   .srv-card {
@@ -280,61 +293,119 @@ transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 `;
 
-function get3DCardStyle(index, total, progress) {
-    // Apply an easing curve (power 0.7) so the progress spreads out over a longer scroll window
-    const easedProgress = Math.pow(Math.max(0, Math.min(1, progress)), 0.7);
-    const factor = 1 - easedProgress; // 1 at start (tight stack), 0 at end (flat grid)
+const ServiceCardIcon = memo(function ServiceCardIcon({ src, alt }) {
+    const [imgSrc, setImgSrc] = useState(src);
 
-    const centerOffset = index - (total - 1) / 2;
-
-    // Tighter stack values (reduced offsets bring cards closer together)
-    const translateX = centerOffset * -35 * factor; // Reduced from -120 to -35 for a tight horizontal stack
-    const translateY = (index * 12 + factor * 30) * factor; // Reduced vertical gap from 25 to 12
-    const translateZ = -index * 40 * factor; // Reduced depth gap from -100 to -40
-    const rotateX = 18 * factor; // Subtle backward tilt
-    const rotateY = centerOffset * -8 * factor; // Gentle inward angle
-    const scale = 1 - index * 0.03 * factor; // Slight scale reduction for depth
-
-    return {
-        transform: `translate3d(${translateX}px, ${translateY}px, ${translateZ}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${scale})`,
-        opacity: Math.max(0.4, easedProgress + (1 - index * 0.15)),
-        zIndex: total - index
-    };
-}
+    return (
+        <Image
+            src={imgSrc}
+            alt={alt}
+            className="srv-card-icon"
+            width={42}
+            height={42}
+            loading="lazy"
+            onError={() => setImgSrc('/assets/WebDev.png')}
+        />
+    );
+});
 
 function Services() {
     const { openModal } = useContactModal();
+    const sectionRef = useRef(null);
+    const gridRef = useRef(null);
+
+    useEffect(() => {
+        const sectionEl = sectionRef.current;
+        const gridEl = gridRef.current;
+        if (!sectionEl || !gridEl) return;
+
+        const cards = gridEl.querySelectorAll('.srv-card-wrapper');
+        const totalCards = cards.length;
+        if (totalCards === 0) return;
+
+        let ticking = false;
+        let winHeight = window.innerHeight;
+        let gridWidth = gridEl.offsetWidth || 1200;
+        let isMobile = window.innerWidth <= 950;
+
+        const updateCachedDimensions = () => {
+            winHeight = window.innerHeight;
+            gridWidth = gridEl.offsetWidth || 1200;
+            isMobile = window.innerWidth <= 950;
+        };
+
+        const updateCardStack = () => {
+            if (isMobile) {
+                ticking = false;
+                return;
+            }
+
+            const rect = sectionEl.getBoundingClientRect();
+            const scrollDistance = winHeight * 0.9;
+            const entryProgress = (winHeight - rect.top) / scrollDistance;
+            const targetP = Math.max(0, Math.min(1, entryProgress));
+
+            const factor = 1 - targetP;
+            const colPitch = gridWidth / totalCards;
+            const stepOffset = 52;
+            const pullDistance = colPitch - stepOffset;
+
+            cards.forEach((card, index) => {
+                const centerOffset = index - (totalCards - 1) / 2;
+
+                const translateX = centerOffset * -pullDistance * factor;
+                const translateY = (index * 10 + factor * 16) * factor;
+                const translateZ = -index * 45 * factor;
+
+                const rotateX = 14 * factor;
+                const rotateY = centerOffset * -8 * factor;
+                const rotateZ = centerOffset * 4 * factor;
+                const scale = 1 - index * 0.025 * factor;
+
+                card.style.transform = `translate3d(${translateX}px, ${translateY}px, ${translateZ}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg) scale(${scale})`;
+                card.style.opacity = Math.max(0.6, targetP + (1 - index * 0.1));
+                card.style.zIndex = totalCards - index;
+            });
+
+            ticking = false;
+        };
+
+        const onScroll = () => {
+            if (!ticking) {
+                window.requestAnimationFrame(updateCardStack);
+                ticking = true;
+            }
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', updateCachedDimensions, { passive: true });
+
+        updateCardStack();
+
+        return () => {
+            window.removeEventListener('scroll', onScroll);
+            window.removeEventListener('resize', updateCachedDimensions);
+        };
+    }, []);
 
     return (
-        <section id="services" className="srv-section">
+        <section ref={sectionRef} id="services" className="srv-section">
             <style>{servicesStyles}</style>
 
-            {/* Removed sx-anim to prevent IntersectionObserver from hiding it */}
             <div className="srv-header">
                 <h2 className="srv-header-title">What We Deliver</h2>
                 <p className="srv-subtitle">End-to-End digital engineering and design crafted to scale modern businesses.</p>
             </div>
 
-            <div className="srv-grid">
+            <div ref={gridRef} className="srv-grid">
                 {services.map((s, i) => (
-                    // Removed inline style logic entirely! The JS loop handles it now.
                     <div key={i} className="srv-card-wrapper">
                         <div className="srv-card">
                             <div>
                                 <span className="srv-card-num">{s.num}</span>
 
                                 <div className="srv-card-top-row">
-                                    <Image
-                                        src={s.img}
-                                        alt={s.title}
-                                        className="srv-card-icon"
-                                        width={42}
-                                        height={42}
-                                        loading="lazy"
-                                        onError={(e) => {
-                                            e.currentTarget.src = '/assets/WebDev.png';
-                                        }}
-                                    />
+                                    <ServiceCardIcon src={s.img} alt={s.title} />
                                     <h3 className="srv-card-heading">{s.title}</h3>
                                 </div>
 

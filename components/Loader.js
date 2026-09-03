@@ -62,7 +62,7 @@ export default function Loader({ readyToOpen, onComplete }) {
 
                 .sx-loader-logo {
                     font-weight: 900;
-                    font-size: 36px;
+                    font-size: clamp(20px, 6vw, 36px);
                     letter-spacing: 0.12em;
                     text-align: center;
                     background: linear-gradient(
@@ -92,11 +92,12 @@ export default function Loader({ readyToOpen, onComplete }) {
 
                 .arch-side-text {
                     opacity: 0;
-                    font-size: 28px;
-                    letter-spacing: 0.15em;
+                    font-size: clamp(11px, 3.2vw, 26px);
+                    letter-spacing: 0.1em;
                     text-transform: uppercase;
                     color: #93C5FD;
                     font-weight: 800;
+                    white-space: nowrap;
                     will-change: transform, opacity;
                     transform: translateZ(0);
                 }
@@ -113,14 +114,6 @@ export default function Loader({ readyToOpen, onComplete }) {
                 .is-opening .arch-side-text {
                     animation: archTextReveal 2.5s cubic-bezier(0.76, 0, 0.24, 1) forwards;
                 }
-
-                @media (max-width: 768px) {
-                    .arch-side-text { font-size: 16px; }
-                }
-                @media (max-width: 480px) {
-                    .sx-loader-logo { font-size: 24px; }
-                    .arch-side-text { font-size: 14px; }
-                }
             `}</style>
 
             <svg
@@ -135,16 +128,16 @@ export default function Loader({ readyToOpen, onComplete }) {
             </svg>
 
             {/* Main Center Logo */}
-            <div className="loader-text-wrapper absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
-                <div className="relative flex items-center justify-center">
-                    <div className="overflow-hidden py-2 px-4">
+            <div className="loader-text-wrapper absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none px-4">
+                <div className="relative flex items-center justify-center w-full max-w-xs sm:max-w-none">
+                    <div className="overflow-hidden py-2 px-2 sm:px-4">
                         <div className="sx-loader-logo uppercase">STUDIO XENOS</div>
                     </div>
                 </div>
             </div>
 
             {/* Flanking Arch Text Container */}
-            <div className="absolute bottom-[35%] left-1/2 -translate-x-1/2 w-full max-w-[1100px] flex justify-between px-10 z-20 pointer-events-none">
+            <div className="absolute bottom-[28vh] sm:bottom-[35%] left-1/2 -translate-x-1/2 w-full max-w-[92vw] sm:max-w-[1100px] flex justify-between px-2 sm:px-10 z-20 pointer-events-none">
                 <div className="arch-side-text">Welcome Mr.</div>
                 <div className="arch-side-text">Studio Xenos</div>
             </div>

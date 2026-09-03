@@ -16,80 +16,86 @@ const SectionSlider = memo(function SectionSlider({ isLoaded }) {
     const heroRef = useRef(null);
     const domeRef = useRef(null);
 
+    const workAboutTrackRef = useRef(null);
+    const workRef = useRef(null);
+    const aboutSlideRef = useRef(null);
+
     useEffect(() => {
         const lenis = new Lenis({
-            duration: 1.2,
+            duration: 1.0,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
             smoothWheel: true,
             wheelMultiplier: 1,
-            touchMultiplier: 2,
+            touchMultiplier: 1.5,
         });
 
-        // Cache DOM elements ONCE to prevent layout thrashing
-        const cards = document.querySelectorAll('.srv-card-wrapper');
-        const totalCards = cards.length;
-
         let ticking = false;
-        // Damped display value for scroll progress — smooths out per-frame
-        // jitter on top of Lenis's own scroll smoothing, without changing
-        // any of the hero/dome/card formulas that consume it below.
-        let currentP = 0;
+
+        const handleScroll = () => {
+            const windowHeight = window.innerHeight;
+            const isMobile = window.innerWidth < 1024;
+
+            // 1. Hero scale-down & Dome expand animation
+            const track = servicesTrackRef.current;
+            if (track) {
+                const rect = track.getBoundingClientRect();
+                const rawDomeProgress = 1 - (rect.top / windowHeight);
+                const domeP = Math.max(0, Math.min(1, rawDomeProgress));
+
+                if (heroRef.current) {
+                    const scale = 1 - domeP * 0.05;
+                    const brightness = 1 - domeP * 0.25;
+                    heroRef.current.style.transform = `scale3d(${scale}, ${scale}, 1)`;
+                    heroRef.current.style.filter = `brightness(${brightness})`;
+                }
+
+                if (domeRef.current) {
+                    const insetX = (1 - domeP) * (isMobile ? 4 : 8);
+                    const radius = Math.round((1 - domeP) * (isMobile ? 160 : 400));
+                    const clipValue = `inset(0vw ${insetX}vw 0vw ${insetX}vw round ${radius}px ${radius}px 0px 0px)`;
+
+                    domeRef.current.style.webkitClipPath = clipValue;
+                    domeRef.current.style.clipPath = clipValue;
+                }
+            }
+
+            // 2. How We Work -> About Us horizontal slide (DESKTOP ONLY)
+            const waTrack = workAboutTrackRef.current;
+            const aSlide = aboutSlideRef.current;
+            if (waTrack && aSlide) {
+                if (isMobile) {
+                    aSlide.style.transform = 'none';
+                    if (workRef.current) {
+                        workRef.current.style.transform = 'none';
+                        workRef.current.style.filter = 'none';
+                    }
+                } else {
+                    const rect = waTrack.getBoundingClientRect();
+                    const scrollableDistance = rect.height - windowHeight;
+                    if (scrollableDistance > 0) {
+                        const currentScroll = -rect.top;
+
+                        // Standard progress rate over the full track distance
+                        const progress = Math.max(0, Math.min(1, currentScroll / scrollableDistance));
+
+                        aSlide.style.transform = `translate3d(${-100 + progress * 100}%, 0, 0)`;
+
+                        if (workRef.current) {
+                            const scale = 1 - progress * 0.05;
+                            const brightness = 1 - progress * 0.25;
+                            workRef.current.style.transform = `scale3d(${scale}, ${scale}, 1)`;
+                            workRef.current.style.filter = `brightness(${brightness})`;
+                        }
+                    }
+                }
+            }
+
+            ticking = false;
+        };
 
         lenis.on('scroll', () => {
-            if (!servicesTrackRef.current) return;
-
-            // Throttle scroll logic using requestAnimationFrame for 60 FPS performance
             if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    const rect = servicesTrackRef.current.getBoundingClientRect();
-                    const windowHeight = window.innerHeight;
-
-                    let rawProgress = 1 - (rect.top / windowHeight);
-                    const targetP = Math.max(0, Math.min(1, rawProgress));
-
-                    // Ease the displayed progress toward its target each
-                    // frame instead of snapping to it directly. Everything
-                    // below still just reads `p` exactly as before.
-                    currentP += (targetP - currentP) * 0.15;
-                    const p = currentP;
-
-
-                    // Mutate Hero
-                    if (heroRef.current) {
-                        heroRef.current.style.transform = `translateY(${p * 50}px)`;
-                        heroRef.current.style.opacity = 1 - p * 0.2;
-                    }
-
-                    // Mutate Dome
-                    if (domeRef.current) {
-                        const insetX = (1 - p) * 8;
-                        const radius = (1 - p) * 400;
-                        domeRef.current.style.clipPath = `inset(0vw ${insetX}vw 0vw ${insetX}vw round ${radius}px ${radius}px 0px 0px)`;
-                    }
-
-                    // Card 3D Stack-to-Grid Animation with tighter spacing and custom easing
-                    if (totalCards > 0) {
-                        const easedProgress = Math.pow(p, 0.7); // Stretches animation progression smoothly
-                        const factor = 1 - easedProgress;
-
-                        cards.forEach((card, index) => {
-                            const centerOffset = index - (totalCards - 1) / 2;
-
-                            // Tighter initial card offsets
-                            const translateX = centerOffset * -35 * factor;
-                            const translateY = (index * 12 + factor * 30) * factor;
-                            const translateZ = -index * 40 * factor;
-                            const rotateX = 18 * factor;
-                            const rotateY = centerOffset * -8 * factor;
-                            const scale = 1 - index * 0.03 * factor;
-
-                            card.style.transform = `translate3d(${translateX}px, ${translateY}px, ${translateZ}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${scale})`;
-                            card.style.opacity = Math.max(0.4, easedProgress + (1 - index * 0.15));
-                        });
-                    }
-
-                    ticking = false;
-                });
+                window.requestAnimationFrame(handleScroll);
                 ticking = true;
             }
         });
@@ -130,36 +136,89 @@ const SectionSlider = memo(function SectionSlider({ isLoaded }) {
     }, [isLoaded]);
 
     return (
-        <div ref={shellRef} className="w-full relative">
-            <div
-                ref={heroRef}
-                className="w-full h-screen sticky top-0 z-10 bg-[#f0f4f9] overflow-hidden"
-                style={{ transformOrigin: 'center top', willChange: 'transform, opacity' }}
-                data-section="hero"
-            >
-                <Hero isLoaded={isLoaded} />
+        <div ref={shellRef} className="w-full relative bg-[#f0f4f9]">
+            <style jsx global>{`
+                .no-scrollbar::-webkit-scrollbar {
+                    display: none;
+                }
+                .no-scrollbar {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+                .gpu-layer {
+                    will-change: transform, clip-path;
+                    transform: translate3d(0, 0, 0);
+                    backface-visibility: hidden;
+                }
+            `}</style>
+
+            {/* Hero Section */}
+            <div className="w-full h-screen sticky top-0 z-10 bg-[#f0f4f9] overflow-hidden">
+                <div
+                    ref={heroRef}
+                    className="w-full h-full bg-[#f0f4f9] overflow-hidden gpu-layer"
+                    style={{ transformOrigin: 'center center' }}
+                    data-section="hero"
+                >
+                    <Hero isLoaded={isLoaded} />
+                </div>
             </div>
 
+            {/* Services Track */}
             <div
                 ref={servicesTrackRef}
-                className="w-full relative z-20"
-                style={{ height: '140vh' }}
+                data-track="services-track"
+                className="w-full relative z-20 h-auto lg:h-[120vh]"
             >
                 <div
                     ref={domeRef}
-                    className="w-full min-h-screen sticky top-0 bg-[#2972EB] text-white shadow-[0_-40px_90px_rgba(0,0,0,0.3)] flex flex-col justify-center overflow-hidden border-t-2 border-white/30"
-                    style={{ willChange: 'clip-path' }}
+                    className="w-full min-h-screen relative lg:sticky lg:top-0 bg-[#2972EB] text-white shadow-[0_-40px_90px_rgba(0,0,0,0.3)] flex flex-col justify-center overflow-visible lg:overflow-hidden border-t-2 border-white/30 gpu-layer"
                     data-section="services"
                 >
                     <Services />
                 </div>
             </div>
 
-            <div className="w-full min-h-screen relative z-30 bg-[#f0f4f9]" data-section="projects"><Projects /></div>
-            <div className="w-full min-h-screen relative z-30 bg-[#f0f4f9]" data-section="work"><Work /></div>
-            <div className="w-full min-h-screen relative z-30 bg-[#f0f4f9]" data-section="about"><AboutUs /></div>
-            <div className="w-full min-h-screen relative z-30 bg-[#f0f4f9]" data-section="team"><OurTeam /></div>
-            <div className="w-full min-h-screen relative z-30 bg-[#f0f4f9]" data-section="footer"><Footer /></div>
+            {/* Projects Section */}
+            <div className="w-full min-h-screen relative z-30 bg-[#f0f4f9]" data-section="projects">
+                <Projects />
+            </div>
+
+            {/* How We Work + About Us Track (Height increased to 250vh for smoother/slower sliding) */}
+            <div
+                ref={workAboutTrackRef}
+                className="w-full relative z-40 isolate h-auto lg:h-[250vh] bg-[#f0f4f9]"
+            >
+                <div className="w-full h-auto lg:h-screen lg:sticky lg:top-0 lg:overflow-hidden bg-[#f0f4f9] flex flex-col lg:block">
+                    {/* Base Layer: How We Work */}
+                    <div
+                        ref={workRef}
+                        className="w-full relative lg:absolute lg:inset-0 z-10 lg:overflow-hidden no-scrollbar bg-[#f0f4f9] gpu-layer flex items-center justify-center min-h-screen lg:min-h-0"
+                        style={{ transformOrigin: 'center center' }}
+                        data-section="work"
+                    >
+                        <Work />
+                    </div>
+
+                    {/* Overlay Layer: About Us */}
+                    <div
+                        ref={aboutSlideRef}
+                        className="w-full relative lg:absolute lg:inset-0 z-20 bg-[#f0f4f9] gpu-layer lg:shadow-[-20px_0_50px_rgba(0,0,0,0.15)] lg:overflow-hidden no-scrollbar flex items-center justify-center min-h-screen lg:min-h-0"
+                        data-section="about"
+                    >
+                        <AboutUs />
+                    </div>
+                </div>
+            </div>
+
+            {/* Remaining Sections */}
+            <div className="w-full min-h-screen relative z-50 bg-[#f0f4f9]" data-section="team">
+                <OurTeam />
+            </div>
+
+            <div className="w-full min-h-screen relative z-50 bg-[#f0f4f9]" data-section="footer">
+                <Footer />
+            </div>
         </div>
     );
 });

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { memo, useState, useEffect, useRef } from 'react';
+import React, { memo, useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import rawSteps from '../data/howWeWork.json';
 
@@ -47,7 +47,7 @@ const workStyles = `
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translate3d(0, 15px, 0); }
+  from { opacity: 0; transform: translate3d(0, 20px, 0); }
   to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
@@ -57,8 +57,14 @@ const workStyles = `
 }
 
 @keyframes ropeDraw {
-  from { stroke-dashoffset: 1500; opacity: 0; }
-  to { stroke-dashoffset: 0; opacity: 1; }
+  0% { stroke-dashoffset: 1500; opacity: 0; }
+  10% { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
+}
+
+@keyframes mascotFloat {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-7px) rotate(1.5deg); }
 }
 
 .work-header {
@@ -71,7 +77,7 @@ const workStyles = `
 }
 
 .work-section.header-animated .work-header {
-  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .work-title {
@@ -125,7 +131,7 @@ const workStyles = `
 .gradient-rope-path {
   fill: none;
   stroke: url(#ropeGradient);
-  stroke-width: 3;
+  stroke-width: 3.5;
   stroke-linecap: round;
   stroke-dasharray: 1500;
   stroke-dashoffset: 1500;
@@ -134,7 +140,7 @@ const workStyles = `
 }
 
 .work-section.content-animated .gradient-rope-path {
-  animation: ropeDraw 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: ropeDraw 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
 .arrow-head {
@@ -143,7 +149,7 @@ const workStyles = `
 }
 
 .work-section.content-animated .arrow-head {
-  animation: fadeIn 0.4s ease 0.9s both;
+  animation: fadeIn 0.4s ease 1.8s forwards;
 }
 
 .work-grid {
@@ -152,6 +158,7 @@ const workStyles = `
   z-index: 2;
   min-height: 600px;
   contain: paint style;
+  perspective: 1000px;
 }
 
 .work-card {
@@ -165,12 +172,13 @@ const workStyles = `
   box-sizing: border-box;
   opacity: 0;
   will-change: opacity, transform;
-  backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
+  transform-style: preserve-3d;
+  transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1);
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate3d(0, 0, 0);
 }
 
 .work-section.content-animated .work-card {
-  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @media (min-width: 1000px) {
@@ -197,6 +205,12 @@ const workStyles = `
   top: -10px;
   right: 10px;
   user-select: none;
+  transition: transform 0.3s ease;
+}
+
+.work-card:hover .step-number {
+  transform: translate3d(0, -4px, 20px) scale(1.05);
+  color: rgba(37, 99, 235, 0.22);
 }
 
 .robot-wrapper {
@@ -207,6 +221,7 @@ const workStyles = `
   display: flex;
   align-items: center;
   justify-content: center;
+  transform-style: preserve-3d;
 }
 
 .robot-img {
@@ -215,12 +230,14 @@ const workStyles = `
   object-fit: contain;
   position: relative;
   z-index: 2;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
+  animation: mascotFloat 4s ease-in-out infinite;
+  transform: translateZ(25px);
+  transition: filter 0.3s ease;
 }
 
 .work-card:hover .robot-img {
-  transform: translate3d(0, -6px, 0) scale(1.06);
+  filter: drop-shadow(0 10px 20px rgba(37, 99, 235, 0.3));
 }
 
 .shadow-img {
@@ -231,6 +248,12 @@ const workStyles = `
   width: 85%;
   z-index: 1;
   opacity: 0.4;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.work-card:hover .shadow-img {
+  transform: translate3d(-50%, 4px, 0) scale(0.9);
+  opacity: 0.25;
 }
 
 .step-tag {
@@ -272,13 +295,13 @@ const workStyles = `
   align-items: center;
   gap: 8px;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
   will-change: transform;
-  transform: translate3d(0, 0, 0);
+  transform: translateZ(15px);
 }
 
-.small-floating-card:hover {
-  transform: translate3d(0, -3px, 0);
+.work-card:hover .small-floating-card {
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.18);
 }
 
 .card-svg-icon {
@@ -328,10 +351,35 @@ const steps = rawSteps.map((s) => ({
 }));
 
 const StepCard = memo(function StepCard({ step }) {
+    const cardRef = useRef(null);
+
+    const handleMouseMove = useCallback((e) => {
+        const card = cardRef.current;
+        if (!card) return;
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        const rotateX = (-y / (rect.height / 2)) * 10;
+        const rotateY = (x / (rect.width / 2)) * 10;
+
+        card.style.setProperty('--rx', `${rotateX}deg`);
+        card.style.setProperty('--ry', `${rotateY}deg`);
+    }, []);
+
+    const handleMouseLeave = useCallback(() => {
+        const card = cardRef.current;
+        if (!card) return;
+        card.style.setProperty('--rx', '0deg');
+        card.style.setProperty('--ry', '0deg');
+    }, []);
+
     return (
         <div
+            ref={cardRef}
             className={`work-card ${step.posClass}`}
             style={{ animationDelay: step.delay }}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
         >
             <div className="small-floating-card">
                 <svg className="card-svg-icon" viewBox="0 0 24 24" fill="none" stroke={step.stroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -364,27 +412,24 @@ function Work() {
         const headerEl = headerRef.current;
         const contentEl = contentRef.current;
 
-        const headerThreshold = isDesktop ? 0.2 : 0.5;
-        const contentThreshold = isDesktop ? 0.5 : 0.2;
-
         const headerObserver = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
                     setHeaderAnimated(true);
-                    if (headerEl) headerObserver.unobserve(headerEl);
+                    headerObserver.unobserve(entry.target); // Unobserve so it triggers ONCE only
                 }
             },
-            { threshold: headerThreshold }
+            { threshold: isDesktop ? 0.2 : 0.4 }
         );
 
         const contentObserver = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
                     setContentAnimated(true);
-                    if (contentEl) contentObserver.unobserve(contentEl);
+                    contentObserver.unobserve(entry.target); // Unobserve so it triggers ONCE only
                 }
             },
-            { threshold: contentThreshold }
+            { threshold: isDesktop ? 0.25 : 0.1 }
         );
 
         if (headerEl) headerObserver.observe(headerEl);
@@ -399,7 +444,7 @@ function Work() {
     return (
         <section
             id="how-we-work"
-            className={`work-section ${headerAnimated ? 'header-animated' : ''} ${contentAnimated ? 'content-animated' : ''}`}
+            className={`work-section  ${headerAnimated ? 'header-animated' : ''} ${contentAnimated ? 'content-animated' : ''}`}
         >
             <style>{workStyles}</style>
 
@@ -429,6 +474,7 @@ function Work() {
                         d="M 140 180 C 270 180, 350 435, 435 435 C 610 480, 680 180, 810 180 C 940 180, 1030 440, 1160 440"
                     />
 
+                    {/* Static SVG Nodes */}
                     <circle cx="140" cy="180" r="5" fill="#2563eb" />
                     <circle cx="480" cy="440" r="5" fill="#f7c368" />
                     <circle cx="810" cy="180" r="5" fill="#f7c368" />
