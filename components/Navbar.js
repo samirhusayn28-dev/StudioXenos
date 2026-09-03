@@ -95,7 +95,7 @@ const navbarStyles = `
   .nav-logo {
     height: 32px;
     width: auto;
-    background: var(--btn-bg, #2563eb); 
+    // background: var(--btn-bg, #2563eb); 
     padding: 4px 16px;
     border-radius: 999px;
     object-fit: contain;
@@ -276,7 +276,7 @@ function Navbar() {
 
             <nav className="hero-nav-inner" aria-label="Main Navigation">
                 <Image
-                    src="/assets/StudioX.png"
+                    src="/assets/studioX.svg"
                     alt="StudioX Logo"
                     className="nav-logo"
                     width={120}

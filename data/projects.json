@@ -1,25 +1,102 @@
 [
     {
-        "img": "https://images.unsplash.com/photo-1551650975-87deedd944c3?q=80&w=600&auto=format&fit=crop",
-        "title": "FitPulse Mobile",
+        "img": "https://play-lh.googleusercontent.com/rbb6aZPgNLWNZLRECruBOfZ5wh1lBMKqKX6oXb-YUc6h9LIWczdH881w_KqMYRdGiVqf4ykQywomjr4CYgc7b8k=w240-h480-rw",
+        "title": "Uni-School Career Guidance App",
         "tag": "Mobile App",
         "year": "2025",
         "accent": "#10b981",
-        "desc": "Cross-platform mobile application for tracking workouts, meal planning, and health metrics with offline-first local database synchronization.",
-        "url": "https://github.com/Mukhtar-816",
-        "github": "https://github.com/Mukhtar-816/FitPulse-Mobile.git",
-        "stack": "React Native"
+        "desc": "Zambian career orientation platform featuring 400+ career paths, direct university portal links, and financial aid guidance (CDF bursaries & HELSB). Recognized on MIT Solve (#67779).",
+        "url": "https://play.google.com/store/apps/details?id=com.amotech.unischool",
+        "github": "https://solve.mit.edu/solutions/67779",
+        "stack": "React Native | Firebase | Google Cloud Functions"
     },
     {
-        "img": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2o0xu16VrwtwjQs08M4zJrzD5p4QjTJL3nowEwyzilZJuXBdDVYcGdf8v&s=10",
-        "title": "MarketMetrics Scraper",
+        "img": "https://raw.githubusercontent.com/studioxenosdevs-cloud/Google-Scraper/main/Workflow",
+        "title": "Google Maps Lead Scraper",
         "tag": "Web Scraping",
-        "year": "2025",
+        "year": "2026",
         "accent": "#f59e0b",
-        "desc": "High-performance automated web scraper capable of extracting, parsing, and cleaning thousands of e-commerce product listings per minute.",
+        "desc": "Automated B2B lead extraction tool engineered to capture business contact info, phone numbers, addresses, and site links from Google Maps with server-side sorting and custom CSV export formatting.",
+        "url": "https://github.com/studioxenosdevs-cloud/Google-Scraper",
+        "github": "https://github.com/studioxenosdevs-cloud/Google-Scraper.git",
+        "stack": "Node.js | JavaScript | Playwright"
+    },
+    {
+        "img": "https://private-user-images.githubusercontent.com/115702231/643264886-2e5905be-a13a-474b-b576-9ee2fd8d9ad5.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3ODg0NTAzOTksIm5iZiI6MTc4ODQ1MDA5OSwicGF0aCI6Ii8xMTU3MDIyMzEvNjQzMjY0ODg2LTJlNTkwNWJlLWExM2EtNDc0Yi1iNTc2LTllZTJmZDhkOWFkNS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjYwOTAzJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI2MDkwM1QxNTQxMzlaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT00NWM0ZDg4MTQwZDc1NzE0ZTJiMTEyZDg4NTdhZWIyOWMxYzgwZTIyNDk4YjZlNjYwM2MzZGNlOTE0ZjhiMDRmJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCZyZXNwb25zZS1jb250ZW50LXR5cGU9aW1hZ2UlMkZwbmcifQ.a54ROX0ScxbBmpUtKVgEZ9AgzxoOSBX8gTSmRhL1wXk",
+        "title": "Automated Outreach Engine",
+        "tag": "Automation",
+        "year": "2026",
+        "accent": "#2B68F6",
+        "desc": "Automated lead generation and outreach pipeline built on n8n. Dispatches targeted email sequences, updates lead statuses in real time, and persists activity to cloud spreadsheets.",
+        "url": "https://github.com/mukhtar-x/Automatin-Outreach-Engine-N8N",
+        "github": "https://github.com/Mukhtar-816/Automatin-Outreach-Engine-N8N.git",
+        "stack": "n8n | Node.js | OAuth2 | REST API"
+    },
+    {
+        "img": "/assets/MP3.png",
+        "title": "Bid&Go Auction Platform",
+        "tag": "Web App",
+        "year": "2025",
+        "accent": "#e63946",
+        "desc": "A real-time online bidding and auction platform where users can list items, place live bids with websockets, and track ongoing auctions with secure payment processing.",
+        "url": "https://join.bidandgo.it",
+        "github": "https://join.bidandgo.it",
+        "stack": "React | Node.js | Socket.io | Stripe API | Firebase"
+    },
+    {
+        "img": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=600&auto=format&fit=crop",
+        "title": "InsightAI Engine",
+        "tag": "AI Tool",
+        "year": "2025",
+        "accent": "#6366f1",
+        "desc": "An AI-powered document summarizer and query engine built to parse massive PDF contracts, perform semantic search, and extract core legal clauses instantly.",
         "url": "https://github.com/Mukhtar-816",
-        "github": "https://github.com/Mukhtar-816/MarketMetrics-Scraper.git",
-        "stack": "Python / BeautifulSoup"
+        "github": "https://github.com/Mukhtar-816/InsightAI-Engine.git",
+        "stack": "Python | OpenAI API | LangChain"
+    },
+    {
+        "img": "/assets/MP2.png",
+        "title": "Hospital Management System",
+        "tag": "Enterprise App",
+        "year": "2025",
+        "accent": "#22c97a",
+        "desc": "Full-featured clinical portal supporting electronic health records, automated doctor appointments, inventory tracking, and administrative analytics.",
+        "url": "https://hospital-managment-system-rosy.vercel.app/",
+        "github": "https://github.com/Mukhtar-816/Hospital-Management-System-Nextjs.git",
+        "stack": "Next.js | PostgreSQL | Node.js | TypeScript"
+    },
+    {
+        "img": "/assets/PHTS.png",
+        "title": "Patient Health Tracking System",
+        "tag": "Healthcare",
+        "year": "2025",
+        "accent": "#c47a30",
+        "desc": "Comprehensive healthcare monitoring platform enabling patients and medical personnel to log diagnostics, track recovery milestones, and visualize vital trends.",
+        "url": "https://phts.vercel.app/",
+        "github": "https://github.com/samirhusayn28-dev/PHTS.git",
+        "stack": "React | MongoDB | Node.js | Express"
+    },
+    {
+        "img": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=600&auto=format&fit=crop",
+        "title": "DevCollab Platform",
+        "tag": "Developer Tool",
+        "year": "2025",
+        "accent": "#3b82f6",
+        "desc": "Real-time collaborative workspace for development teams, facilitating shared code snippets, task management, and team communication in a single dashboard.",
+        "url": "https://github.com/mukhtar-x/DevCollab",
+        "github": "https://github.com/mukhtar-x/DevCollab",
+        "stack": "TypeScript | Node.js | Express | React"
+    },
+    {
+        "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600&auto=format&fit=crop",
+        "title": "Flask Enterprise RBAC Portal",
+        "tag": "Backend / API",
+        "year": "2025",
+        "accent": "#06b6d4",
+        "desc": "Secure web application architecture implementing session authentication, role-based access control (RBAC), community post management, and RESTful API endpoints.",
+        "url": "https://github.com/Mukhtar-816/SimpleWebApplicationFLASK.git",
+        "github": "https://github.com/Mukhtar-816/SimpleWebApplicationFLASK.git",
+        "stack": "Python | Flask | Jinja2 | SQLite / PostgreSQL"
     },
     {
         "img": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=600&auto=format&fit=crop",
@@ -30,73 +107,18 @@
         "desc": "Automated task management pipeline and notification bot that synchronizes GitHub pull requests, Jira tickets, and team Slack channels in real time.",
         "url": "https://github.com/Mukhtar-816",
         "github": "https://github.com/Mukhtar-816/WorkflowSync-Bot.git",
-        "stack": "Node.js / Express"
-    },
-    {
-        "img": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=600&auto=format&fit=crop",
-        "title": "InsightAI Engine",
-        "tag": "AI Tool",
-        "year": "2025",
-        "accent": "#6366f1",
-        "desc": "An AI-powered document summarizer and query engine built to parse massive PDF contracts and extract core legal clauses instantly.",
-        "url": "https://github.com/Mukhtar-816",
-        "github": "https://github.com/Mukhtar-816/InsightAI-Engine.git",
-        "stack": "Python / OpenAI"
-    },
-    {
-        "img": "/assets/PHTS.png",
-        "title": "PATIENT HEALTH TRACKING SYSTEM",
-        "tag": "Web App",
-        "year": "2025",
-        "accent": "#c47a30",
-        "desc": "A full-featured web application built with modern technologies. Clean UI, smooth interactions, and a seamless user experience from end to end.",
-        "url": "https://phts.vercel.app/",
-        "github": "https://github.com/samirhusayn28-dev/PHTS.git",
-        "stack": "React"
-    },
-    {
-        "img": "/assets/MP1.png",
-        "title": "Personal Portfolio",
-        "tag": "Portfolio",
-        "year": "2025",
-        "accent": "#315cfd",
-        "desc": "A sleek personal portfolio showcasing projects, skills, and experience with a clean, modern design and smooth animations.",
-        "url": "https://personal-portfolio-lemon-ten.vercel.app/",
-        "github": "https://github.com/Mukhtar-816/Personal_Portfolio.git",
-        "stack": "React"
-    },
-    {
-        "img": "/assets/MP2.png",
-        "title": "Hospital MANAGEMENT SYSTEM",
-        "tag": "Web App",
-        "year": "2025",
-        "accent": "#22c97a",
-        "desc": "A full-featured hospital management system with patient records, appointment scheduling, and an admin dashboard built with Next.js.",
-        "url": "https://hospital-managment-system-rosy.vercel.app/",
-        "github": "https://github.com/Mukhtar-816/Hospital-Management-System-Nextjs.git",
-        "stack": "Next.js"
-    },
-    {
-        "img": "/assets/MP3.png",
-        "title": "Bid&Go",
-        "tag": "Web App",
-        "year": "2025",
-        "accent": "#e63946",
-        "desc": "A real-time online bidding and auction platform where users can list items, place live bids, and track auctions as they unfold.",
-        "url": "https://mukhtar-dev.vercel.app",
-        "github": "https://github.com/Mukhtar-816",
-        "stack": "React"
+        "stack": "Node.js | Express | GitHub Webhooks"
     },
     {
         "img": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&fit=crop",
-        "title": "FinTech Dashboard",
+        "title": "FinTech Analytics Dashboard",
         "tag": "Web App",
         "year": "2024",
         "accent": "#3b82f6",
-        "desc": "Real-time analytics engine and financial management dashboard engineered for institutional investors with sub-second chart rendering.",
+        "desc": "Real-time analytics engine and financial management dashboard engineered for institutional investors with sub-second chart rendering and data aggregation.",
         "url": "https://studioxenos.com",
         "github": "https://github.com/samirhusayn28-dev",
-        "stack": "Next.js / TypeScript"
+        "stack": "Next.js | TypeScript | Tailwind CSS"
     },
     {
         "img": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=600&auto=format&fit=crop",
@@ -104,9 +126,9 @@
         "tag": "E-Commerce",
         "year": "2024",
         "accent": "#8b5cf6",
-        "desc": "Headless enterprise e-commerce platform with automated inventory routing, AI product search, and 99.9% uptime checkout infrastructure.",
+        "desc": "Headless enterprise e-commerce platform with automated inventory routing, AI-assisted product search, and reliable checkout infrastructure.",
         "url": "https://studioxenos.com",
         "github": "https://github.com/samirhusayn28-dev",
-        "stack": "React / Node.js"
+        "stack": "React | Node.js | Express | MongoDB"
     }
 ]

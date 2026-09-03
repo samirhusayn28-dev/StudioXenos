@@ -23,9 +23,9 @@
 // export default assetManifest;
 // Minimal list of critical above-the-fold assets.
 const images = [
-    '/assets/X Logo.png',
+    '/assets/X.svg',
     '/assets/Shadow.png',
-    '/robot-optimized.glb',
+    '/assets/robot-optimized.glb',
 ];
 
 const fetchables = [];

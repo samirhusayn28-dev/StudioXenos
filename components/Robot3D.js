@@ -99,7 +99,7 @@ const robotStyles = `
 `;
 
 const Model = memo(function Model({ mouseX, mouseY, isMobile, isHovered, onLoaded }) {
-    const { scene } = useGLTF("/robot-optimized.glb");
+    const { scene } = useGLTF("/assets/robot-optimized.glb");
     const groupRef = useRef();
 
     const smoothX = useRef(0);
@@ -156,7 +156,7 @@ const Model = memo(function Model({ mouseX, mouseY, isMobile, isHovered, onLoade
     );
 });
 
-useGLTF.preload("/robot-optimized.glb");
+useGLTF.preload("/assets/robot-optimized.glb");
 
 export default function Robot3D({ isHeroVisible = true }) {
     const mouseX = useRef(0);

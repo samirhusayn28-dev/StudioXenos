@@ -288,7 +288,7 @@ html {
 .pj-count { font-size: 12px; font-weight: 500; color: #94a3b8; }
 
 .pj-nav-arrows {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 8px;
 }
@@ -574,6 +574,11 @@ html {
     height: auto;
     min-height: 440px;
   }
+  .pj-nav-arrows {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
   .pj-card-more {
     width: 85vw;
     height: 440px;
@@ -756,14 +761,21 @@ function Projects() {
 
     const applyStage = useCallback((progress, virtualIndex) => {
         if (progressFillRef.current) {
-            progressFillRef.current.style.transform = `scaleX(${progress})`;
+            const newTransform = `scaleX(${progress})`;
+            if (progressFillRef.current.style.transform !== newTransform) {
+                progressFillRef.current.style.transform = newTransform;
+            }
         }
 
         if (!isFlat && trackRef.current) {
             const { firstLeft, spacing, cardWidth } = layoutRef.current;
             const localCenter = firstLeft + virtualIndex * spacing + cardWidth / 2;
             const tx = localCenter - window.innerWidth / 2;
-            trackRef.current.style.transform = `translate3d(${-tx}px, 0, 0)`;
+            const newTransform = `translate3d(${-tx.toFixed(2)}px, 0px, 0px)`;
+
+            if (trackRef.current.style.transform !== newTransform) {
+                trackRef.current.style.transform = newTransform;
+            }
         }
 
         stageRefs.current.forEach((el, i) => {
@@ -772,18 +784,22 @@ function Projects() {
             const absDelta = Math.abs(delta);
 
             if (absDelta > 2.2) {
-                el.style.visibility = 'hidden';
+                if (el.style.visibility !== 'hidden') el.style.visibility = 'hidden';
                 return;
             }
-            el.style.visibility = 'visible';
+            if (el.style.visibility !== 'visible') el.style.visibility = 'visible';
 
             const scale = Math.max(0.78, 1.08 - absDelta * 0.32);
             const opacity = Math.max(0.2, 1 - absDelta * 0.55);
             const lift = absDelta < 0.5 ? -8 : 0;
             const zIndex = String(Math.round(20 - absDelta * 3));
 
-            el.style.transform = `translate3d(0, ${lift}px, 0) scale(${scale.toFixed(3)})`;
-            el.style.opacity = opacity.toFixed(3);
+            const transformStr = `translate3d(0px, ${lift}px, 0px) scale(${scale.toFixed(3)})`;
+            if (el.style.transform !== transformStr) el.style.transform = transformStr;
+
+            const opacityStr = opacity.toFixed(3);
+            if (el.style.opacity !== opacityStr) el.style.opacity = opacityStr;
+
             if (el.style.zIndex !== zIndex) el.style.zIndex = zIndex;
         });
 
@@ -802,6 +818,7 @@ function Projects() {
         let animationFrameId;
         let lastTime = performance.now();
         let isFirstFrame = true;
+        let lastAppliedProgress = -1;
         const decaySpeed = reduceMotion ? 60 : 6;
 
         const updateScroll = (now) => {
@@ -826,8 +843,12 @@ function Projects() {
                 currentProgressRef.current = targetProgress;
             }
 
-            const virtualIndex = totalTrackItems > 1 ? currentProgressRef.current * (totalTrackItems - 1) : 0;
-            applyStage(currentProgressRef.current, virtualIndex);
+            // Only apply DOM updates if the progress has actually changed to prevent loop lag
+            if (Math.abs(currentProgressRef.current - lastAppliedProgress) > 0.00001) {
+                const virtualIndex = totalTrackItems > 1 ? currentProgressRef.current * (totalTrackItems - 1) : 0;
+                applyStage(currentProgressRef.current, virtualIndex);
+                lastAppliedProgress = currentProgressRef.current;
+            }
 
             animationFrameId = requestAnimationFrame(updateScroll);
         };
@@ -961,10 +982,10 @@ function Projects() {
                 <div className="pj-header-container">
                     <div className="pj-header">
                         <div className="pj-heading-block">
-                            <span className="pj-pill-label">
+                            {/* <span className="pj-pill-label">
                                 <span className="pj-pill-dot" />
                                 Selected Work
-                            </span>
+                            </span> */}
                             <h2 className="pj-heading">
                                 Our <span className="pj-heading-blue">Projects</span>
                             </h2>

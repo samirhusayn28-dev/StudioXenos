@@ -7,7 +7,7 @@ import Services from './services';
 import Projects from './Projects';
 import Work from './Work';
 import AboutUs from './About';
-import OurTeam from './OurTeam';
+import OurTeam from './Testimonials';
 import Footer from './Footer';
 
 const SectionSlider = memo(function SectionSlider({ isLoaded }) {

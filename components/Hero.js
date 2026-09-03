@@ -6,7 +6,6 @@ import Robot3D from "./Robot3D";
 import { useContactModal } from "./ContactModal";
 
 const heroStyles = `
-/* ... (Keep all your existing heroStyles exactly as they were) ... */
 .hero-h1, .hero-h3 {
   font-family: var(--font-outfit), sans-serif;  
   font-size: clamp(2.5rem, 5vw, 4.2rem);
@@ -34,7 +33,7 @@ const heroStyles = `
 @keyframes robotSync {
   0% { transform: translate3d(var(--mover-start-x), var(--mover-start-y), 0) scale(var(--mover-start-scale)); }
   68% { transform: translate3d(var(--mover-start-x), var(--mover-start-y), 0) scale(var(--mover-start-scale)); }
-  100% { transform: translate3d(0, 10%, 0) scale(1); }
+  100% { transform: translate3d(var(--mover-end-x), var(--mover-end-y), 0) scale(var(--mover-end-scale)); }
 }
 
 .is-loaded .hero-h1  { animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 2.55s both; }
@@ -105,7 +104,7 @@ const heroStyles = `
   border: 1px solid var(--card-border);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   border-radius: 10px; padding: 10px 14px;
-  max-width: 210px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+  max-width: 230px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
 }
 
 .robot-name-badge { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
@@ -163,19 +162,59 @@ const heroStyles = `
 }
 
 @media (max-width: 900px) {
-  .hero-inner { padding: 80px 5% 30px; flex-direction: column; justify-content: center; text-align: center; }
+  .hero-inner { 
+    padding: 70px 5% 20px; 
+    flex-direction: column; 
+    justify-content: flex-start; 
+    text-align: left; 
+  }
+    @keyframes robotSync {
+  0% { transform: translate3d(var(--mover-start-x), var(--mover-start-y), 0) scale(var(--mover-start-scale)); }
+  15% { transform: translate3d(var(--mover-start-x), var(--mover-start-y), 0) scale(var(--mover-start-scale)); }
+  100% { transform: translate3d(var(--mover-end-x), var(--mover-end-y), 0) scale(var(--mover-end-scale)); }
+}
+
+.is-loaded .hero-h1  { animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 1.55s both; }
+.is-loaded .hero-h2  { animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 1.65s both; }
+.is-loaded .hero-h3  { animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 1.75s both; }
+.is-loaded .hero-hr  { animation: lineGrow   0.7s cubic-bezier(0.22, 1, 0.36, 1) 1.85s both; }
+.is-loaded .hero-sub { animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 1.95s both; }
+.is-loaded .hero-btn { animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 2.05s both; }
+.is-loaded .hero-scroll-arrow { animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 2.15s both; }
+.is-loaded .robot-bubble-wrap { animation: bubblePop 0.8s cubic-bezier(0.22, 1, 0.36, 1) 2.25s both; }
+
+.is-loaded .hero-robot-mover {
+  animation: robotSync 2s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
   .hero-text-wrap {
-    width: 100%; top: 18%; max-width: 100%;
-    align-items: flex-start; justify-content: flex-end;
-    text-align: left; z-index: 10; margin-bottom: 10px;
+    width: 100%; 
+    max-width: 100%;
+    align-items: flex-start; 
+    justify-content: flex-start;
+    text-align: left; 
+    z-index: 10; 
+    margin-top: 290px;
   }
   .hero-robot-wrap {
-    position: absolute; top: 5%; left: 50%;
+    position: absolute; 
+    top: 65px; 
+    left: 50%;
     transform: translate3d(-50%, 0, 0);
-    width: 100%; height: 65vh; z-index: 1;
+    width: 100%; 
+    max-width: 100%;
+    height: 500px; 
+    z-index: 5;
   }
-  .hero-hr-line { margin: 14px auto !important; }
-  .robot-bubble-desktop { position: absolute; top: 18%; left: 4%; }
+  .hero-hr-line { margin: 14px 0 !important; }
+  .robot-bubble-desktop { 
+    position: absolute; 
+    top: 10px; 
+    left: 30%; 
+    transform: translate3d(-50%, 0, 0);
+    width: 90%;
+    max-width: 240px;
+    z-index: 25;
+  }
 }
 `;
 
@@ -217,15 +256,12 @@ function Hero({ isLoaded }) {
     const [isHeroVisible, setIsHeroVisible] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
     const [isCoveredByDome, setIsCoveredByDome] = useState(false);
-
-    // NEW: State to track if the user is hovering over or touching the robot
     const [isHovered, setIsHovered] = useState(false);
 
     useEffect(() => {
         const mql = window.matchMedia('(max-width: 900px)');
         setIsMobile(mql.matches);
         const onChange = (e) => setIsMobile(e.matches);
-        // Ensure event listeners are passive where supported
         mql.addEventListener('change', onChange, { passive: true });
         return () => mql.removeEventListener('change', onChange);
     }, []);
@@ -307,11 +343,13 @@ function Hero({ isLoaded }) {
                         className="hero-robot-mover"
                         style={{
                             '--mover-start-x': isMobile ? '0%' : '-53%',
-                            '--mover-start-y': isMobile ? '5%' : '18%',
-                            '--mover-start-scale': isMobile ? 0.5 : 0.7,
-                            transform: `translate3d(${isMobile ? '0%' : '-53%'}, ${isMobile ? '5%' : '18%'}, 0) scale(${isMobile ? 0.5 : 1})`
+                            '--mover-start-y': isMobile ? '320px' : '18%',
+                            '--mover-start-scale': isMobile ? 1 : 0.7,
+                            '--mover-end-x': isMobile ? '-20%' : '0%',
+                            '--mover-end-y': isMobile ? '-50px' : '10%',
+                            '--mover-end-scale': isMobile ? 1 : 1,
+                            transform: `translate3d(${isMobile ? '0%' : '0%'}, ${isMobile ? '0px' : '10%'}, 0) scale(1)`
                         }}
-                        // Trigger hover states for desktop & mobile
                         onMouseEnter={() => setIsHovered(true)}
                         onMouseLeave={() => setIsHovered(false)}
                         onTouchStart={() => setIsHovered(true)}

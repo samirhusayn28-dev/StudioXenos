@@ -37,10 +37,10 @@ const barlowCondensed = Barlow_Condensed({
 });
 
 export const metadata = {
-    title: 'Studio Xenos | Creative Studio Experience',
+    title: 'Studio Xenos',
     description: 'Creative studio portfolio experience built with Next.js App Router.',
     icons: {
-        icon: '/assets/X Logo.png',
+        icon: '/assets/X.svg',
     },
 };
 

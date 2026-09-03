@@ -436,7 +436,7 @@ export default function ChatBot() {
                         display: "flex", alignItems: "center", gap: 12,
                     }}>
                         <Image
-                            src="/assets/X Logo.png"
+                            src="/assets/X.svg"
                             alt="StudioXenos Logo"
                             width={34}
                             height={34}

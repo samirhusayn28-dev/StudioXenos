@@ -11,7 +11,7 @@ const workStyles = `
   background-color: transparent;
   width: 100%;
   min-height: 100vh;
-  padding: clamp(30px, 8vh, 60px) 5%;
+  padding: 200px 20px 80px 20px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

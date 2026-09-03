@@ -1,0 +1,17 @@
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1600">
+  <defs>
+    <style>
+      .cls-1{fill:#ffffff;}
+      .cls-2{fill:#2563EB;}
+    </style>
+  </defs>
+  <!-- Circle Base -->
+  <circle class="cls-1" cx="800" cy="800" r="800"/>
+  
+  <!-- Scaled X Icon -->
+  <g transform="scale(1.2)" transform-origin="800px 800px">
+    <polygon class="cls-2" points="424.64 322.02 573.83 322.02 917.94 800.96 578.76 1277.97 424.64 1277.97 763.92 800.99 424.64 322.02"/>
+    <polygon class="cls-2" points="1175.36 459.91 1069.12 459.91 924.89 661.77 977.78 735.22 1175.36 459.91"/>
+    <polygon class="cls-2" points="1175.36 1141.84 1069.12 1141.84 924.89 939.98 977.78 866.53 1175.36 1141.84"/>
+  </g>
+</svg>

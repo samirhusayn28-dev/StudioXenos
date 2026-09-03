@@ -11,7 +11,7 @@ import { useContactModal } from './ContactModal';
 import faqData from '../data/faq.json';
 
 const robot = '/assets/Footer Robot.png';
-const xLogo = '/assets/X Logo.png';
+const xLogo = '/assets/X.svg';
 
 const footerStyles = `
   @keyframes arrowFloat {
